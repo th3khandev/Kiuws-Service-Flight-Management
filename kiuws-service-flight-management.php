@@ -53,10 +53,37 @@ function flight_management_configuration_page() {
         wp_die('Permission Denied');
     }
 
+    $error_messages = [];
+
+    if (isset($_POST['submit'])) {
+        // Process and save data
+        $result = save_flight_configuration();
+        
+        if (is_wp_error($result)) {
+            // Si hubo un error, agrega un mensaje de error
+            $error_messages[] = $result->get_error_message();
+        } else {
+            // Si todo fue exitoso, agrega un mensaje de éxito
+            add_settings_error('flight-management-messages', 'success', 'Configuration saved successfully', 'updated');
+        }
+    }
+
     // Show form configuration
     ?>
     <div class="wrap">
         <h2>Flight Management Configuration</h2>
+        <!-- Show error o success messages -->
+        <?php
+        if (!empty($error_messages)) {
+            // Show error messages
+            foreach ($error_messages as $error_message) {
+                echo '<div class="error"><p>' . esc_html($error_message) . '</p></div>';
+            }
+        } else {
+            // Show success messages
+            settings_errors('flight-management-messages');
+        }
+        ?>
         <form method="post" action="">
             <table class="form-table">
                 <tr>
@@ -89,7 +116,7 @@ function flight_management_configuration_page() {
                     <td><input type="text" name="<?php echo FLIGHT_MANAGEMENT_PREFIX . 'base_url' ?>" value="<?php echo esc_attr(get_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url')); ?>" /></td>
                 </tr>
             </table>
-            <?php submit_button(); ?>
+            <?php submit_button('Save Configuration'); ?>
         </form>
     </div>
     <?php
