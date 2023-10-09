@@ -1,3 +1,12 @@
+
+.v-select{
+    padding: 5px;
+}
+.vs__dropdown-toggle {
+    width: 100%;
+    height: 100%;
+    padding-bottom: 0px;
+}
 .vs__search {
     margin: 0px;
     padding: 0px;
@@ -7,4 +16,17 @@
 }
 .vs__dropdown-toggle {
     border: none;
+}
+.vs__clear {
+    padding: 0px 6px;
+}
+.vs__actions svg {
+    margin-bottom: 0px;
+}
+.vs__selected {
+    margin: 0px;
+    padding: 0px;
+}
+.vs__selected img, .vs__selected label {
+    margin: 0px;
 }
