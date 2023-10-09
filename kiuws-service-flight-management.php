@@ -13,6 +13,8 @@ define('FLIGHT_MANAGEMENT_URL', plugin_dir_url(__FILE__));
 define('FLIGHT_MANAGEMENT_FILE', __FILE__);
 define('FLIGHT_MANAGEMENT_PREFIX', 'flight_management_');
 
+require_once(plugin_dir_path(__FILE__) . 'api/OpenFlightOrg.php');
+
 // This function adds a page to the WordPress admin menu
 function add_admin_menu_page() {
     add_menu_page(
@@ -153,7 +155,7 @@ function generate_flight_search_form() {
     wp_enqueue_style('custom-flight-search', plugin_dir_url(__FILE__) . 'assets/css/main.css', [], FLIGHT_MANAGEMENT_VERSION, 'all');
 
     ob_start();
-    include plugin_dir_path(__FILE__) . 'templates/search-form.php';
+    include plugin_dir_path(__FILE__) . 'templates/public/search-form.php';
 
     wp_enqueue_script('custom-flight-search-vue', 'https://cdn.jsdelivr.net/npm/vue@2');
     wp_enqueue_script('custom-flight-search-vue-select', 'https://unpkg.com/vue-select@3.0.0');
@@ -167,3 +169,22 @@ function flight_search_form_shortcode() {
 }
 add_shortcode('flight_search', 'flight_search_form_shortcode');
 
+// Register function get airport codes endpoint
+function register_get_airport_codes_endpoint() {
+    add_rewrite_rule('^api/get-airport-codes/?', 'index.php?flight_management_api=get_airport_codes', 'top');
+    add_rewrite_tag('%flight_management_api%', '1');
+}
+add_action('init', 'register_get_airport_codes_endpoint');
+
+// Register function get airport codes handler
+function get_airport_codes_handler() {
+    if (get_query_var('flight_management_api') === 'get_airport_codes') {
+        $search = $_GET['search'] ?? '';
+        $open_flight_org = new OpenFlightsOrg();
+        $response = $open_flight_org->getAirports($search);
+        wp_send_json($response);
+        exit;
+    }
+}
+add_action('template_redirect', 'get_airport_codes_handler');
+flush_rewrite_rules();
