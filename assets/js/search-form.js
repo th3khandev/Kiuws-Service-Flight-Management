@@ -1,94 +1,48 @@
-const { createApp, ref } = Vue;
+import flightSearchFormComponent from "./components/flightSearchFormComponent.js";
 
-console.log("Hello from Vue!");
-
-Vue.component('v-select', VueSelect.VueSelect);
+Vue.component("v-select", VueSelect.VueSelect);
 
 const app = new Vue({
-  el: "#flight-search-form",
+  el: "#flight-search-form-app",
   data: {
     message: "Hello Vue!",
-    originAirports: [],
-    destinationAirports: [],
-    originAirport: null,
-    destinationAirport: null,
-    departureDate: null,
-    returnDate: null,
-    adults: 1,
-    children: 0,
     loading: false,
-    error: false,
-    errorMessage: null,
+    step: 1,
   },
-  created() {
+  components: {
+    "flight-search-form": flightSearchFormComponent,
   },
   methods: {
-    onSearchOriginAirports (search, loading) {
-      if (search.length > 3) {
-        loading(true);
-        this.search(search, loading, this, 'origin');
-      }
-    },
-    onSearchDestinationAirports (search, loading) {
-      if (search.length > 3) {
-        loading(true);
-        this.search(search, loading, this, 'destination');
-      }
-    },
-    search: _.debounce((search, loading, vm, type) => {
+    searhFlights(
+      originAirport,
+      destinationAirport,
+      departureDate,
+      returnDate,
+      adults,
+      children
+    ) {
+      console.log("Send form >>> ");
+      this.loading = true;
       fetch(
-        `/api/get-airport-codes?search=${search}`,
+        `/api/get-flight-available?origin=${originAirport}&destination=${destinationAirport}&depurate_date=${departureDate}&return_date=${returnDate}&adults=${adults}&children=${children}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
-          }
+          },
         }
       )
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           console.log(data);
-          if (type == 'origin') {
-            vm.originAirports = data.airports;
-          } else {
-            vm.destinationAirports = data.airports;
-          }
-          loading(false);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
         })
-    }),
-    validForm () {
-      if (!this.originAirport) {
-        this.error = true;
-        this.errorMessage = 'Debe seleccionar una ciudad destino';
-        return false;
-      }
-      if (!this.destinationAirport) {
-        this.error = true;
-        this.errorMessage = 'Debe seleccionar una ciudad destino';
-        return false;
-      }
-      if (!this.departureDate) {
-        this.error = true;
-        this.errorMessage = 'Debe seleccionar una fecha de salida';
-        return false;
-      }
-      return true;
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    searhFlights () {
-      console.log("Search flights >>> ");
-      console.log("origin airport >>> ", this.originAirport);
-      console.log("destination airport >>> ", this.destinationAirport);
-      console.log("departure date >>> ", this.departureDate);
-      console.log("return date >>> ", this.returnDate);
-      console.log("adults >>> ", this.adults);
-      console.log("children >>> ", this.children);
-      if (this.validForm()) {
-        console.log("Send form >>> ");
-      }
-    }
   },
 });

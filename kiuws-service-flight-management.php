@@ -163,6 +163,15 @@ function generate_flight_search_form() {
     return ob_get_clean();
 }
 
+function add_module_type_to_script($tag, $handle, $src) {
+    if ($handle === 'custom-flight-search') {
+        $tag = str_replace(' src', ' type="module" src', $tag);
+    }
+    return $tag;
+}
+
+add_filter('script_loader_tag', 'add_module_type_to_script', 10, 3);
+
 // Register the shortcode
 function flight_search_form_shortcode() {
     return generate_flight_search_form();
