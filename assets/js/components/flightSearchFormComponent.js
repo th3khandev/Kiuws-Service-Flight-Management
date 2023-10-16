@@ -64,7 +64,7 @@ const flightSearchFormComponent = {
             <div class="col-12" v-if="error">
                 <div class="alert alert-danger">
                     <strong>-</strong> {{ errorMessage }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="error = false">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -126,32 +126,25 @@ const flightSearchFormComponent = {
     }),
     validForm() {
       if (!this.originAirport) {
-        this.error = true;
-        this.errorMessage = "Debe seleccionar una ciudad destino";
+        this.setError("Debe seleccionar una ciudad destino");
         return false;
       }
       if (!this.destinationAirport) {
-        this.error = true;
-        this.errorMessage = "Debe seleccionar una ciudad destino";
+        this.setError("Debe seleccionar una ciudad destino");
         return false;
       }
       if (!this.departureDate) {
-        this.error = true;
-        this.errorMessage = "Debe seleccionar una fecha de salida";
+        this.setError("Debe seleccionar una fecha de salida");
         return false;
       }
       return true;
     },
+    setError (message) {
+      this.error = true;
+      this.errorMessage = message;
+    },
     searhFlights() {
-      console.log("Search flights >>> ");
-      console.log("origin airport >>> ", this.originAirport);
-      console.log("destination airport >>> ", this.destinationAirport);
-      console.log("departure date >>> ", this.departureDate);
-      console.log("return date >>> ", this.returnDate);
-      console.log("adults >>> ", this.adults);
-      console.log("children >>> ", this.children);
       if (this.validForm()) {
-        console.log("submit form >>> ");
         this.$emit(
           "submit",
           this.originAirport.code,
