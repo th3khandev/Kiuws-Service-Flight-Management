@@ -3,6 +3,7 @@
         v-show="!loading && step == 1"
         :loading="loading"
         @submit="searhFlights"
+        ref="flightSearchForm"
     ></flight-search-form>
     <div class="row" v-if="loading">
         <!-- Show spinner -->
