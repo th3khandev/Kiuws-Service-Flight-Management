@@ -14,6 +14,7 @@ define('FLIGHT_MANAGEMENT_FILE', __FILE__);
 define('FLIGHT_MANAGEMENT_PREFIX', 'flight_management_');
 
 require_once(plugin_dir_path(__FILE__) . 'api/OpenFlightOrg.php');
+require_once(plugin_dir_path(__FILE__) . 'api/KiuwsService.php');
 
 // This function adds a page to the WordPress admin menu
 function add_admin_menu_page() {
@@ -131,6 +132,7 @@ function save_flight_configuration() {
     if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user'])) {
         update_option(FLIGHT_MANAGEMENT_PREFIX . 'user', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user']));
     }
+    var_dump($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password']);
     if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password'])) {
         update_option(FLIGHT_MANAGEMENT_PREFIX . 'password', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password']));
     }
@@ -196,4 +198,43 @@ function get_airport_codes_handler() {
     }
 }
 add_action('template_redirect', 'get_airport_codes_handler');
+
+// Register function get flight available endpoint
+function register_get_flight_available_endpoint() {
+    add_rewrite_rule('^api/get-flight-available/?', 'index.php?flight_management_api=get_flight_available', 'top');
+    add_rewrite_tag('%get_flight_available%', '1');
+}
+add_action('init', 'register_get_flight_available_endpoint');
+
+// Register function get airport codes handler
+function get_flights_available_handler() {
+    if (get_query_var('flight_management_api') === 'get_flight_available') {
+        $origin = $_GET['origin'];
+        $destination = $_GET['destination'];
+        $departure_date = $_GET['depurate_date'];
+        $adults = $_GET['adults'];
+        $children = $_GET['children'];
+
+        // Get configuration from options
+        $base_url = get_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url');
+        $agent_sine = get_option(FLIGHT_MANAGEMENT_PREFIX . 'agent_sine');
+        $terminal_id = get_option(FLIGHT_MANAGEMENT_PREFIX . 'terminal_id');
+        $user = html_entity_decode(get_option(FLIGHT_MANAGEMENT_PREFIX . 'user'));
+        $password = html_entity_decode(get_option(FLIGHT_MANAGEMENT_PREFIX . 'password'));
+        $mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'mode');
+
+        // create object KiuwsService
+        $kiuws_service = new KiuwsService($base_url, $agent_sine, $terminal_id, $user, $password, $mode);
+        $response = $kiuws_service->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children);
+
+
+        wp_send_json([
+            'status'    => $response['status'],
+            'message'   => $response['message'],
+            'flights'   => $response['flights'],
+        ]);
+        exit;
+    }
+}
+add_action('template_redirect', 'get_flights_available_handler');
 flush_rewrite_rules();

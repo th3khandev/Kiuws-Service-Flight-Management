@@ -36,6 +36,9 @@ const app = new Vue({
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
+          if (data.status == 'error') {
+            this.$refs.flightSearchForm.setError(data.message);
+          }
         })
         .catch((error) => {
           console.error(error);
