@@ -132,7 +132,6 @@ function save_flight_configuration() {
     if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user'])) {
         update_option(FLIGHT_MANAGEMENT_PREFIX . 'user', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user']));
     }
-    var_dump($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password']);
     if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password'])) {
         update_option(FLIGHT_MANAGEMENT_PREFIX . 'password', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password']));
     }
