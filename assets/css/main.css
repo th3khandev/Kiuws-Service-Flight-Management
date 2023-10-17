@@ -108,4 +108,38 @@
       opacity: 0;
     }
   }
+
+
+  /* Flight Itinerary component */
+  .itinerary-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px; /* Espacio entre las columnas */
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--e-global-color-primary);
+    border-radius: 50px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Add hover to div, a efecct elevation */
+  .itinerary-container:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .itinerary-container > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .itinerary-airline img {
+    width: 100px;
+    margin: 0px;
+  }
+
+  .itinerary-airline h3 {
+    margin: 0px;
+  }
   
