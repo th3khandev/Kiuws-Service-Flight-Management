@@ -1,14 +1,17 @@
 <?php
 
-$dirAirlineLogos = plugin_dir_url(__FILE__) . '/../assets/images/airlines/';
+$dirAirlineLogos = plugin_dir_url(__FILE__) . '../assets/images/airlines/';
 $logoDefault = $dirAirlineLogos . 'default.png';
 
 $airlinesLogoDefault = [
-    '9R' => $dirAirlineLogos . '9R.png',
-    'AA' => $dirAirlineLogos . 'AA.png',
-    '9V' => $dirAirlineLogos . '9V.webp',
-    'KN' => $dirAirlineLogos . 'KN.webp',
-    'L5' => $dirAirlineLogos . 'L5.png',
+    '9R'    => $dirAirlineLogos . '9R.png',
+    'AA'    => $dirAirlineLogos . 'AA.png',
+    '9V'    => $dirAirlineLogos . '9V.webp',
+    'KN'    => $dirAirlineLogos . 'KN.webp',
+    'L5'    => $dirAirlineLogos . 'L5.png',
+    'AV'    => $dirAirlineLogos . 'AV.png',
+    'LA'    => $dirAirlineLogos . 'LA.png',
+    'UA'    => $dirAirlineLogos . 'UA.png',
 ];
 
 function getAirlineByCode ($code) {
