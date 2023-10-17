@@ -228,11 +228,7 @@ function get_flights_available_handler() {
         $response = $kiuws_service->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children);
 
 
-        wp_send_json([
-            'status'    => $response['status'],
-            'message'   => $response['message'],
-            'flights'   => $response['flights'],
-        ]);
+        wp_send_json($response);
         exit;
     }
 }

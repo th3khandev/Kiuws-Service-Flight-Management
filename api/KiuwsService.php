@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../constants/Kiws.php';
+require_once __DIR__ . '/../utils/airlines.php';
 
 class KiuwsService {
     private $baseUrl;
@@ -96,7 +97,11 @@ class KiuwsService {
 
         // Validate the response
         if (is_wp_error($response)) {
-            return array(); // TODO: Handle error
+            return [
+                'status'    => 'error',
+                'message'   => $response->get_error_message(),
+                'flights'   => [],
+            ];
         }
 
         // load xml response
@@ -125,6 +130,95 @@ class KiuwsService {
         ];
     }
 
+    private function formatFlights ($apiResponse) {
+        $flights = [];
+        $depurateDate = $apiResponse['flights']['DepartureDateTime'];
+        $originLocation = $apiResponse['flights']['OriginLocation'];
+        $destinationLocation = $apiResponse['flights']['DestinationLocation'];
+
+        $originDestinationOptions = $apiResponse['flights']['OriginDestinationOptions']['OriginDestinationOption'];
+        if (isset($originDestinationOptions['FlightSegment'])) {
+            $originDestinationOptions = [$originDestinationOptions];
+        }
+
+        // Forearch flights
+        foreach ($originDestinationOptions as $originDestinationOption) {
+            $flight = [
+                'flightSegment' => [],
+                'depurateDate'  => '',
+                'arrivalDate'   => '',
+                'duration'      => '',
+                'stops'         => 0,
+            ];
+
+            $flightSegments = $originDestinationOption['FlightSegment'];
+            if (isset($flightSegments['@attributes'])) {
+                $flightSegments = [$flightSegments];
+            }
+            // Forearch flightSegment
+            foreach ($flightSegments as $key => $flightSegment) {
+                $airlineCode = $flightSegment['MarketingAirline']['@attributes']['CompanyShortName'];
+                $_flightSegment = [
+                    'departureDateTime'     => $flightSegment['@attributes']['DepartureDateTime'],
+                    'arrivalDateTime'       => $flightSegment['@attributes']['ArrivalDateTime'],
+                    'flightNumber'          => $flightSegment['@attributes']['FlightNumber'],
+                    'stopQuantity'          => $flightSegment['@attributes']['StopQuantity'],
+                    'journeyDuration'       => $flightSegment['@attributes']['JourneyDuration'],
+                    'departureAirport'      => $flightSegment['DepartureAirport']['@attributes']['LocationCode'],
+                    'arrivalAirport'        => $flightSegment['ArrivalAirport']['@attributes']['LocationCode'],
+                    'marketingAirline'      => $airlineCode,
+                    'marketingAirlineName'  => '',
+                    'marketingAirlineLogo'  => '',
+                    'equipment'             => $flightSegment['Equipment']['@attributes']['AirEquipType'],
+                    'meal'                  => $flightSegment['Meal']['@attributes']['MealCode'],
+                    'marketingCabin'        => [
+                        'cabinType' => $flightSegment['MarketingCabin']['@attributes']['CabinType'],
+                        'rph'       => $flightSegment['MarketingCabin']['@attributes']['RPH'],
+                    ],
+                    'bookingClassAvail' => [],
+                ];
+
+                if ($key > 0 && $key < count($flightSegments) - 1) {
+                    $flight['stops']++;
+                }
+
+                // Get airline info
+                $airline = getAirlineByCode($airlineCode);
+                if (is_null($airline)) {
+                    $airline = addAirlineToFile($airlineCode);
+                }
+                $_flightSegment['marketingAirlineName'] = $airline['name'];
+                $_flightSegment['marketingAirlineLogo'] = $airline['logo'];
+
+                // Forearch bookingClassAvail
+                foreach ($flightSegment['BookingClassAvail'] as $bookingClassAvail) {
+                    $_bookingClassAvail = [
+                        'resBookDesigCode'      => $bookingClassAvail['@attributes']['ResBookDesigCode'],
+                        'resBookDesigQuantity'  => $bookingClassAvail['@attributes']['ResBookDesigQuantity'],
+                        'rph'                   => $bookingClassAvail['@attributes']['RPH'],
+                    ];
+                    array_push($_flightSegment['bookingClassAvail'], $_bookingClassAvail);
+                }
+
+                array_push($flight['flightSegment'], $_flightSegment);
+            }
+            // get depurate time flight
+            $flight['depurateDate'] = $flight['flightSegment'][0]['departureDateTime'];
+            // get arrival time flight
+            $flight['arrivalDate'] = $flight['flightSegment'][count($flight['flightSegment']) - 1]['arrivalDateTime'];
+            // get duration time flight (ArrivalDateTime - DepartureDateTime)
+            $flight['duration'] = date('H:i', strtotime($flight['arrivalDate']) - strtotime($flight['depurateDate']));
+            array_push($flights, $flight);
+        }
+
+        return [
+            'depurateDate'          => $depurateDate,
+            'originLocation'        => $originLocation,
+            'destinationLocation'   => $destinationLocation,
+            'flights'               => $flights
+        ];
+    }
+
     public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 1, $maxStopQuantity = 4) {
         // Create the xml object
         $this->createKIU_AirAvailRQXmlObject();
@@ -136,6 +230,19 @@ class KiuwsService {
         $this->createTravelerInfoSummary($adults, $children);
         // POST
         $response = $this->POST();
-        return $response;
+        if ($response['status'] === 'error') {
+            return $response;
+        }
+        // Format response
+        $result = $this->formatFlights($response);
+        return [
+            'status'                => $response['status'],
+            'message'               => $response['message'],
+            'flights'               => $result['flights'],
+            'depurateDate'          => $result['depurateDate'],
+            'originLocation'        => $result['originLocation'],
+            'destinationLocation'   => $result['destinationLocation'],
+            'response'              => $response,
+        ];
     }
 }
