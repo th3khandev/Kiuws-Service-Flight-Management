@@ -38,6 +38,8 @@ const app = new Vue({
           console.log(data);
           if (data.status == 'error') {
             this.$refs.flightSearchForm.setError(data.message);
+          } else if (!data.status) {
+            this.$refs.flightSearchForm.setError("Se ha presentado un error, por favor intente más tarde");
           }
         })
         .catch((error) => {

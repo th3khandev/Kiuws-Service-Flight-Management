@@ -41,12 +41,12 @@ const flightSearchFormComponent = {
             <!-- Departure date -->
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
                 <label for="departure_date" class="form-label">Fecha de salida: </label>
-                <input type="date" name="departure_date" placeholder="Fecha de salida" class="form-control" v-model="departureDate" />
+                <input type="date" name="departure_date" placeholder="Fecha de salida" class="form-control" v-model="departureDate" :min="currentDate" @change="depurateDate = null" />
             </div>
             <!-- Return date -->
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
                 <label for="return_date" class="form-label">Fecha de regreso: </label>
-                <input type="date" name="return_date" placeholder="Fecha de salida" class="form-control" v-model="returnDate" />
+                <input type="date" name="return_date" placeholder="Fecha de salida" class="form-control" v-model="returnDate" :min="departureDate" />
             </div>
             <!-- Amount Adults and children -->
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
@@ -84,6 +84,7 @@ const flightSearchFormComponent = {
     children: 0,
     error: false,
     errorMessage: null,
+    currentDate: new Date().toISOString().slice(0, 10),
   }),
   props: {
     loading: Boolean,
