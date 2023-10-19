@@ -109,6 +109,32 @@
     }
   }
 
+  .details-selected-section {
+    padding: 0px 30px;
+  }
+
+  .details-selected {
+    padding: 10px;
+    border: 1px solid var(--e-global-color-primary);
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: var(--e-global-color-primary);
+  }
+
+  .deatil-selected-cities {
+    font-weight: 700;
+  }
+
+  .deatil-selected-cities span {
+    text-transform: uppercase;
+  }
+
+  .deatil-selected-button {
+    text-align: right;
+    align-self: center;
+  }
+
 
   /* Flight Itinerary component */
   .itinerary-container {
@@ -118,7 +144,7 @@
     align-items: center;
     padding: 10px;
     border: 1px solid var(--e-global-color-primary);
-    border-radius: 50px;
+    border-radius: 30px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
@@ -141,5 +167,18 @@
 
   .itinerary-airline h3 {
     margin: 0px;
+  }
+
+
+  @media (max-width: 768px) {
+    .itinerary-container {
+      overflow-x: auto; 
+      white-space: nowrap;
+    }
+  
+    .itinerary-item {
+      min-width: 200px;
+      display: inline-block;
+    }
   }
   

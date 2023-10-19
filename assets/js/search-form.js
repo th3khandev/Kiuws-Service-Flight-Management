@@ -1,35 +1,51 @@
 import flightSearchFormComponent from "./components/flightSearchFormComponent.js";
 import flightItineraryComponent from "./components/flightItineraryComponent.js";
 import flightSidebarComponent from "./components/flightSidebarComponent.js";
+import flightDetailsSelectedComponent from "./components/flightDetailsSelectedComponent.js";
+
+Vue.config.devtools = true;
+Vue.config.productionTip = false;
 
 Vue.component("v-select", VueSelect.VueSelect);
 
 const app = new Vue({
   el: "#flight-search-form-app",
-  data: {
-    message: "Hello Vue!",
-    loading: false,
-    step: 1,
-    flights: [],
+  data () {
+    return {
+      message: "Hello Vue!",
+      loading: false,
+      step: 1,
+      flights: [],
+      originAirport: null,
+      destinationAirport: null,
+      adults: 1,
+      children: 0,
+      depurateDate: ""
+    }
   },
   components: {
     "flight-search-form": flightSearchFormComponent,
     "flight-itinerary": flightItineraryComponent,
     "flight-sidebar": flightSidebarComponent,
+    "flight-details-selected": flightDetailsSelectedComponent,
   },
   methods: {
     searhFlights(
       originAirport,
       destinationAirport,
-      departureDate,
+      depurateDate,
       returnDate,
       adults,
       children
     ) {
-      console.log("Send form >>> ");
+      this.originAirport = originAirport;
+      this.destinationAirport = destinationAirport;
+      this.adults = adults;
+      this.children = children;
+      this.depurateDate = depurateDate;
       this.loading = true;
       fetch(
-        `/api/get-flight-available?origin=${originAirport}&destination=${destinationAirport}&depurate_date=${departureDate}&return_date=${returnDate}&adults=${adults}&children=${children}`,
+        `/api/get-flight-available?origin=${originAirport.code}&destination=${destinationAirport.code}&depurate_date=${depurateDate}&return_date=${returnDate}&adults=${adults}&children=${children}`,
         {
           method: "GET",
           headers: {
@@ -40,7 +56,6 @@ const app = new Vue({
       )
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           if (data.status == 'error') {
             this.$refs.flightSearchForm.setError(data.message);
           } else if (!data.status) {
@@ -62,5 +77,8 @@ const app = new Vue({
           this.loading = false;
         });
     },
+    refreshSearh () {
+      this.step = 1;
+    }
   },
 });
