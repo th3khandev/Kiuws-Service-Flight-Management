@@ -13,5 +13,3 @@ const flightSidebarComponent = {
   methods: {
   },
 };
-
-export default flightSidebarComponent;

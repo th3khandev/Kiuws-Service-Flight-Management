@@ -1,8 +1,3 @@
-import flightSearchFormComponent from "./components/flightSearchFormComponent.js";
-import flightItineraryComponent from "./components/flightItineraryComponent.js";
-import flightSidebarComponent from "./components/flightSidebarComponent.js";
-import flightDetailsSelectedComponent from "./components/flightDetailsSelectedComponent.js";
-
 Vue.config.devtools = true;
 Vue.config.productionTip = false;
 

@@ -160,7 +160,14 @@ function generate_flight_search_form() {
 
     wp_enqueue_script('custom-flight-search-vue', 'https://cdn.jsdelivr.net/npm/vue@2');
     wp_enqueue_script('custom-flight-search-vue-select', 'https://unpkg.com/vue-select@3.0.0');
-    wp_enqueue_script('custom-flight-search', plugin_dir_url(__FILE__) . 'assets/js/search-form.js', ['custom-flight-search-vue', 'custom-flight-search-vue-select'], FLIGHT_MANAGEMENT_VERSION, true);
+
+    // add vue components
+    wp_enqueue_script('flight-search-form-component', plugin_dir_url(__FILE__) . 'assets/js/components/flightSearchFormComponent.js', ['custom-flight-search-vue', 'custom-flight-search-vue-select'], FLIGHT_MANAGEMENT_VERSION, true);
+    wp_enqueue_script('flight-itinerary-component', plugin_dir_url(__FILE__) . 'assets/js/components/flightItineraryComponent.js', ['custom-flight-search-vue', 'custom-flight-search-vue-select'], FLIGHT_MANAGEMENT_VERSION, true);
+    wp_enqueue_script('flight-sidebar-component', plugin_dir_url(__FILE__) . 'assets/js/components/flightSidebarComponent.js', ['custom-flight-search-vue', 'custom-flight-search-vue-select'], FLIGHT_MANAGEMENT_VERSION, true);
+    wp_enqueue_script('flight-detail-selected-component', plugin_dir_url(__FILE__) . 'assets/js/components/flightDetailsSelectedComponent.js', ['custom-flight-search-vue', 'custom-flight-search-vue-select'], FLIGHT_MANAGEMENT_VERSION, true);
+
+    wp_enqueue_script('custom-flight-search', plugin_dir_url(__FILE__) . 'assets/js/search-form.js', ['custom-flight-search-vue', 'custom-flight-search-vue-select', 'flight-search-form-component', 'flight-itinerary-component', 'flight-sidebar-component', 'flight-detail-selected-component'], FLIGHT_MANAGEMENT_VERSION, true);
     return ob_get_clean();
 }
 

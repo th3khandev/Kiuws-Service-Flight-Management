@@ -156,5 +156,3 @@ const flightSearchFormComponent = {
     },
   },
 };
-
-export default flightSearchFormComponent;
