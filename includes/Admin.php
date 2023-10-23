@@ -13,7 +13,6 @@ class Admin
 
     public function admin_menu()
     {
-        global $submenu;
         $capability = 'manage_options';
         $slug = 'flight-management';
 
@@ -29,16 +28,6 @@ class Admin
 
         if (!current_user_can($capability)) {
             wp_die('Permission denied');
-            /* $submenu[$slug][] = [
-                __('Flights', 'flight-management'),
-                $capability,
-                'admin.php?page=flight-management&tab=flights'
-            ];
-            $submenu[$slug][] = [
-                __('Settings', 'flight-management'),
-                $capability,
-                'admin.php?page=flight-management&tab=settings'
-            ]; */
         }
 
         add_submenu_page(
@@ -62,11 +51,10 @@ class Admin
     {
         if (isset($_POST['submit'])) {
             // Process and save data
-            $result = $this->save_flight_configuration();
 
-            if (is_wp_error($result)) {
+            if (is_wp_error($this->save_flight_configuration())) {
                 // Si hubo un error, agrega un mensaje de error
-                $error_messages[] = $result ? $result->get_error_message() : '';
+                $error_messages[] = 'Se produjo un error al guardar la configuración';
             } else {
                 // Si todo fue exitoso, agrega un mensaje de éxito
                 add_settings_error('flight-management-messages', 'success', 'Configuration saved successfully', 'updated');
@@ -78,38 +66,23 @@ class Admin
 
     public function save_flight_configuration()
     {
-        $error = null;
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user'])) {
-            if (!update_option(FLIGHT_MANAGEMENT_PREFIX . 'user', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user']))) {
-                $error = new WP_Error('error_saving_user', 'Error saving user');
-            }
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'user', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'user']));
         }
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password'])) {
-            if (!update_option(FLIGHT_MANAGEMENT_PREFIX . 'password', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password']))) {
-                $error = new WP_Error('error_saving_password', 'Error saving password');
-            }
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'password', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'password']));
         }
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'mode'])) {
-            if (!update_option(FLIGHT_MANAGEMENT_PREFIX . 'mode', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'mode']))) {
-                $error = new WP_Error('error_saving_mode', 'Error saving mode');
-            }
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'mode', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'mode']));
         }
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'agent_sine'])) {
-            if (!update_option(FLIGHT_MANAGEMENT_PREFIX . 'agent_sine', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'agent_sine']))) {
-                $error = new WP_Error('error_saving_agent_sine', 'Error saving agent sine');
-            }
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'agent_sine', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'agent_sine']));
         }
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'terminal_id'])) {
-            if (!update_option(FLIGHT_MANAGEMENT_PREFIX . 'terminal_id', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'terminal_id']))) {
-                $error = new WP_Error('error_saving_terminal_id', 'Error saving terminal id');
-            }
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'terminal_id', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'terminal_id']));
         }
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'base_url'])) {
-            if (!update_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url', esc_url($_POST[FLIGHT_MANAGEMENT_PREFIX . 'base_url']))) {
-                $error = new WP_Error('error_saving_base_url', 'Error saving base url');
-            }
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url', esc_url($_POST[FLIGHT_MANAGEMENT_PREFIX . 'base_url']));
         }
-        // return wp_erorr 
-        return $error;
     }
 }

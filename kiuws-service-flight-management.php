@@ -14,6 +14,7 @@
  */
 
 use Kiuws_Service_Flight_Management\Includes\Admin;
+use Kiuws_Service_Flight_Management\Includes\Frontend;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -97,6 +98,7 @@ final class Kiuws_Service_Flight_Management {
     public function init_plugin() {
         // init plugin
         new Admin();
+        new Frontend();
     }
 }
 

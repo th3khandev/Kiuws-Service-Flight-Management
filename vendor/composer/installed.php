@@ -3,7 +3,7 @@
         'name' => 'th3khandev/kiuws-service-flight-management',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '6e719139e0dc2b86b2ea3e7a7707efed2c4e0616',
+        'reference' => '14372bdf8f34e6df80819d0e28d57c8ba374c410',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'th3khandev/kiuws-service-flight-management' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '6e719139e0dc2b86b2ea3e7a7707efed2c4e0616',
+            'reference' => '14372bdf8f34e6df80819d0e28d57c8ba374c410',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
