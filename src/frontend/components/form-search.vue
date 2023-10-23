@@ -191,7 +191,7 @@ export default {
       }
     },
     onSearchDestinationAirports(search, loading) {
-      if (search.length > 3) {
+      if (search.length >= 3) {
         this.search(search, loading, this, "destination");
       }
     },
