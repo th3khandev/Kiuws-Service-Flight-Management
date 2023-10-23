@@ -277,14 +277,6 @@
     grid-column: 1;
   }
   
-  #flight-modal .flight-detail-modal {
-    display: flex;
-    padding: 1rem 1.5rem;
-    flex-direction: column;
-    border-radius: 0 0 0.5rem 0.5rem;
-    box-shadow: inset 0 0 0 1px #e0e3e5;
-  }
-  
   @media (max-width: 480px) {
     .itinerary-airline {
       grid-column: 1 / 7;

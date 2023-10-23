@@ -68,13 +68,9 @@
 
           <!-- Flight details -->
           <h6>Detalle: </h6>
-          <div class="flight-detail-modal">
-            <div class="flight-detail-modal-airline">
-              <div class=""></div>
-            </div>
-            <div></div>
-            <div></div>
-          </div>
+          <template v-if="flight">
+            <FligthSegment v-for="segment in flight.flightSegment" :key="segment.flightNumber" :segment="segment" />
+          </template>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -87,8 +83,14 @@
   </div>
 </template>
 <script>
+// components
+import FligthSegment from './fligth-segment.vue';
+
 export default {
   name: "ModalFlightDetail",
+  components: {
+    FligthSegment
+  },
   props: ["flight"],
 }
 </script>

@@ -87,7 +87,7 @@
       />
     </div>
     <!-- Return date -->
-    <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
+    <!-- <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
       <label for="return_date" class="form-label">Fecha de regreso: </label>
       <input
         type="date"
@@ -97,7 +97,7 @@
         v-model="returnDate"
         :min="departureDate"
       />
-    </div>
+    </div> -->
     <!-- Amount Adults and children -->
     <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
       <div class="row">
