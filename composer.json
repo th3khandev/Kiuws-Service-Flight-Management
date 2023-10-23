@@ -1,0 +1,18 @@
+{
+    "name": "th3khandev/kiuws-service-flight-management",
+    "description": "An WordPress plugin for manage flight, starter with Vue Js.",
+    "authors": [
+        {
+            "name": "Anthony Garcia",
+            "email": "anthonydeyvis32@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Kiuws_Service_Flight_Management\\Includes\\": "includes/"
+        }
+    },
+    "require-dev": {
+    }
+}
