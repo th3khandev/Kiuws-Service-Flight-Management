@@ -160,6 +160,9 @@
 // components
 import vSelect from "vue-select";
 
+// services
+import { getAirportCodes } from '../../services/openFlightOrgService'
+
 export default {
   name: 'FormSearchComponent',
   components: {
@@ -177,6 +180,7 @@ export default {
     error: false,
     errorMessage: null,
     currentDate: new Date().toISOString().slice(0, 10),
+    gettingAirports: false,
   }),
   props: ["loading", "step"],
   methods: {
@@ -188,18 +192,12 @@ export default {
     },
     onSearchDestinationAirports(search, loading) {
       if (search.length > 3) {
-        loading(true);
         this.search(search, loading, this, "destination");
       }
     },
-    search: _.debounce((search, loading, vm, type) => {
-      fetch(`/api/get-airport-codes?search=${search}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      })
+    search: _.debounce( async (search, loading, vm, type) => {
+      loading(true);
+      await getAirportCodes(search)
         .then((response) => response.json())
         .then((data) => {
           if (type == "origin") {
@@ -214,7 +212,7 @@ export default {
         .finally(() => {
           loading(false);
         });
-    }),
+    }, 1000),
     validForm() {
       if (!this.originAirport) {
         this.setError("Debe seleccionar una ciudad destino");
