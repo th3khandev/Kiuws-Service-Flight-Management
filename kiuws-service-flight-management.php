@@ -13,6 +13,7 @@
  * Author URI: https://key-core.com
  */
 
+use Kiuws_Service_Flight_Management\Api\Api;
 use Kiuws_Service_Flight_Management\Includes\Admin;
 use Kiuws_Service_Flight_Management\Includes\Frontend;
 
@@ -99,6 +100,7 @@ final class Kiuws_Service_Flight_Management {
         // init plugin
         new Admin();
         new Frontend();
+        new Api();
     }
 }
 
