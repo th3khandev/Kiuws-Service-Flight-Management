@@ -219,6 +219,7 @@ class Kiuws {
                 'arrivalDate'   => '',
                 'duration'      => '',
                 'stops'         => 0,
+                'id'            => '',
             ];
 
             $flightSegments = $originDestinationOption['FlightSegment'];
@@ -248,6 +249,7 @@ class Kiuws {
                     'bookingClassAvail' => [],
                 ];
 
+                // Get stops
                 if ($key > 0 && $key < count($flightSegments) - 1) {
                     $flight['stops']++;
                 }
@@ -271,6 +273,9 @@ class Kiuws {
                 }
 
                 array_push($flight['flightSegment'], $_flightSegment);
+
+                // modify id flight
+                $flight['id'] .= $flightSegment['@attributes']['FlightNumber'];
             }
             // get depurate time flight
             $flight['depurateDate'] = $flight['flightSegment'][0]['departureDateTime'];
