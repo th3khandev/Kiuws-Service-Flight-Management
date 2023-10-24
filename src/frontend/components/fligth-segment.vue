@@ -13,7 +13,20 @@
       </div>
       <div class="flight-segment-price">
         <div class="flight-segment-price-amount">
-          USD <span>{{ 50 }}</span>
+          <template v-if="!loadingPrices && segment.price">
+            <template v-if="!segment.price.error">
+              {{  segment.price.currencyCode }} <span>{{ segment.price.totalFare }}</span>
+            </template>
+            <template v-else>
+              <span class="text-danger">
+                Error al obtener el precio
+              </span>
+              <button type="button" class="btn btn-info btn-sm" @click="$emit('tryGetPrice')">Reintentar</button>
+            </template>
+          </template>
+          <template v-else>
+            <Loading v-if="loadingPrices" />
+          </template>
         </div>
       </div>
     </div>
@@ -57,9 +70,15 @@
 // helpers
 import { getDurationText, getDateTimeText } from "../../helpers/flight";
 
+// components
+import Loading from "./loading.vue";
+
 export default {
   name: "FlightSegment",
-  props: ["segment"],
+  components: {
+    Loading
+  },
+  props: ["segment", "loadingPrices"],
   methods: {
     getDurationText,
     getDateTimeText,

@@ -122,7 +122,17 @@ class Route extends WP_REST_Controller
         $flight_number = $params['flightNumber'];
         $resBookDesig = $params['resBookDesig'];
         $airlineCode = $params['airlineCode'];
-        $response = $this->kiuwsService->getFlightPrice($departure_date_time, $arrival_date_time, $flight_number, $resBookDesig, $origin, $destination, $airlineCode, $adults, $children);
+
+        // list resBookingsDesigCode
+        $listResBookDesig = explode(',', $resBookDesig);
+        foreach ($listResBookDesig as $key => $value) {
+            $response = $this->kiuwsService->getFlightPrice($departure_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children);
+            if ($response['status'] == 'success') {
+                // add booking code to response
+                $response['price']['resBookDesig'] = trim($value);
+                break;
+            }
+        }
         return rest_ensure_response($response);
     }
 }

@@ -73,9 +73,11 @@
               v-for="segment in flight.flightSegment"
               :key="segment.flightNumber"
               :segment="segment"
+              :loading-prices="isLoadingPrices(segment.flightNumber)"
+              @tryGetPrice="getSegmentPrice(segment)"
             />
             <div class="flight-resume">
-              <div class="flight-resume-depurate-date ">
+              <div class="flight-resume-depurate-date">
                 <label class="flight-resume-text">Salida: </label>
                 {{ flight.depurateDate }}
                 <label class="separator">|</label>
@@ -87,7 +89,8 @@
               </div>
               <div class="flight-resume-duration">
                 <label class="flight-resume-text">Duración: </label>
-                {{ getDurationText(flight.duration) }} <label class="separator">|</label>
+                {{ getDurationText(flight.duration) }}
+                <label class="separator">|</label>
               </div>
               <div class="flight-resume-adults">
                 <label class="flight-resume-text">Adultos: </label>
@@ -111,6 +114,9 @@
   </div>
 </template>
 <script>
+// service
+import { getFlightPrice } from "../../services/kiuwService";
+
 // helpers
 import { getDurationText } from "../../helpers/flight";
 
@@ -123,9 +129,83 @@ export default {
     FligthSegment,
   },
   props: ["flight", "adults", "children"],
-  methods:{
+  data: () => ({
+    loadingPrices: [],
+  }),
+  methods: {
     getDurationText,
-  }
+    async getSegmentPrice(segment) {
+      const {
+        departureDateTime,
+        arrivalDateTime,
+        departureAirport,
+        arrivalAirport,
+        flightNumber,
+        bookingClassAvail,
+        marketingAirline,
+      } = segment;
+      this.loadingPrices.push(flightNumber)
+      segment.price = null;
+      // create string with resBookDesig with , separate
+      const resBookDesig = bookingClassAvail.map(book => book.resBookDesigCode).join(',');
+      await getFlightPrice(
+        departureDateTime,
+        arrivalDateTime,
+        departureAirport,
+        arrivalAirport,
+        this.$props.adults,
+        this.$props.children,
+        flightNumber,
+        resBookDesig,
+        marketingAirline
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data >>> ", data);
+          if (data.status == "success") {
+            segment.price = {
+              ...data.price,
+              error: false,
+            };
+          } else {
+            segment.price = {
+              totalFare: "No disponible",
+              currency: "USD",
+              error: true,
+            };
+          }
+        })
+        .catch(() => {
+          segment.price = {
+            totalFare: "No disponible",
+            currency: "USD",
+            error: true,
+          };
+        }).finally(() => {
+          // remove flight numbre from loadingPrices
+          this.loadingPrices = this.loadingPrices.filter(flight => flight != flightNumber)
+        });
+    },
+    async getFlightPrices() {
+      const { flightSegment } = this.$props.flight;
+      console.log("getFlightPrices >>> ");
+      if (flightSegment.length > 0) {
+        for (let i = 0; i < flightSegment.length; i++) {
+          const segment = flightSegment[i];
+          await this.getSegmentPrice(segment);
+        }
+      }
+    },
+    isLoadingPrices (flightNumber) {
+      return this.loadingPrices.includes(flightNumber)
+    }
+  },
+  watch: {
+    flight(newValue, oldValue) {
+      console.log("change flight >>> ", newValue, oldValue);
+      this.getFlightPrices();
+    },
+  },
 };
 </script>
 <style scope>

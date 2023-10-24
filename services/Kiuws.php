@@ -15,7 +15,8 @@ class Kiuws {
     private $errors = [
         '10035'     => 'La fecha de salida no debe ser pasada ni superior a 330 días.',
         '10026'     => 'The TerminalID is not an authorized device',
-        '11005'     => 'Error at parameter DepartureDateTime.'
+        '11005'     => 'Error at parameter DepartureDateTime.',
+        '22030'     => 'ERROR EN COTIZACION'
     ];
     private $iataServices;
 
@@ -188,7 +189,7 @@ class Kiuws {
             return [
                 'status'    => 'error',
                 'message'   => $this->getErrorMessage($response['Error']['ErrorCode']),
-                'response'  => [],
+                'response'  => $response,
             ];
         }
 
@@ -313,7 +314,7 @@ class Kiuws {
                 $irinTotalFare = $airItineraryPricingInfo['ItinTotalFare'];
                 // get baseFare
                 if (isset($irinTotalFare['BaseFare'])) {
-                    $price['baseFare'] = $irinTotalFare['BaseFare']['@attributes']['Amount'];
+                    $price['baseFare'] = (float) $irinTotalFare['BaseFare']['@attributes']['Amount'];
                     $price['currencyCode'] = $irinTotalFare['BaseFare']['@attributes']['CurrencyCode'];
                 }
 
@@ -329,13 +330,13 @@ class Kiuws {
                             'amount'        => $tax['@attributes']['Amount'],
                             'currencyCode'  => $tax['@attributes']['CurrencyCode'],
                         ];
-                        $price['totalTaxes'] += $tax['@attributes']['Amount'];
+                        $price['totalTaxes'] += (float) $tax['@attributes']['Amount'];
                     }
                 }
 
                 // get totalFare
                 if (isset($irinTotalFare['TotalFare'])) {
-                    $price['totalFare'] = $irinTotalFare['TotalFare']['@attributes']['Amount'];
+                    $price['totalFare'] = (float) $irinTotalFare['TotalFare']['@attributes']['Amount'];
                 }
 
             }
@@ -380,13 +381,17 @@ class Kiuws {
         $this->createTravelerInfoSummaryXmlObject($adults, $children);
         // POST
         $response = $this->POST();
+        if ($response['status'] === 'error') {
+            return $response;
+        }
         // format price data
         $result = $this->formatFlightPrice($response['response']);
 
         return [
             'status'                => $response['status'],
             'message'               => $response['message'],
-            'price'                 => $result
+            'price'                 => $result,
+            'response'              => $response['response']
         ];
     }
 }
