@@ -27,7 +27,7 @@
         <Itinerary v-for="(flight, index) in flights" :flight="flight" :key="index" @flight-selected="handleFlightSelected" />
       </div>
     </div>
-    <ModalFlightDetail :flight="flightSelected" />
+    <ModalFlightDetail :flight="flightSelected" :children="children" :adults="adults" />
   </div>
 </template>
 <script>
