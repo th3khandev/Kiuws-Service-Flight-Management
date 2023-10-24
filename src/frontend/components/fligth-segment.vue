@@ -11,24 +11,6 @@
       <div class="flight-segment-airline-name">
         {{ segment.marketingAirlineName }}
       </div>
-      <div class="flight-segment-price">
-        <div class="flight-segment-price-amount">
-          <template v-if="!loadingPrices && segment.price">
-            <template v-if="!segment.price.error">
-              {{  segment.price.currencyCode }} <span>{{ segment.price.totalFare }}</span>
-            </template>
-            <template v-else>
-              <span class="text-danger">
-                Error al obtener el precio
-              </span>
-              <button type="button" class="btn btn-info btn-sm" @click="$emit('tryGetPrice')">Reintentar</button>
-            </template>
-          </template>
-          <template v-else>
-            <Loading v-if="loadingPrices" />
-          </template>
-        </div>
-      </div>
     </div>
     <div class="segment-detail">
       <span>
@@ -70,15 +52,9 @@
 // helpers
 import { getDurationText, getDateTimeText } from "../../helpers/flight";
 
-// components
-import Loading from "./loading.vue";
-
 export default {
   name: "FlightSegment",
-  components: {
-    Loading
-  },
-  props: ["segment", "loadingPrices"],
+  props: ["segment"],
   methods: {
     getDurationText,
     getDateTimeText,
@@ -91,6 +67,7 @@ export default {
   padding: 1rem 1.5rem;
   flex-direction: column;
   background-color: #e0e3e5b0;
+  align-items: center;
 }
 
 .flight-segment-airline {

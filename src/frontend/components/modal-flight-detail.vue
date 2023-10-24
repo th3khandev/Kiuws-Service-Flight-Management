@@ -73,8 +73,7 @@
               v-for="segment in flight.flightSegment"
               :key="segment.flightNumber"
               :segment="segment"
-              :loading-prices="isLoadingPrices(segment.flightNumber)"
-              @tryGetPrice="getSegmentPrice(segment)"
+              :loading-prices="loadingPrices"
             />
             <div class="flight-resume">
               <div class="flight-resume-depurate-date">
@@ -102,10 +101,10 @@
               </div>
             </div>
             <div class="row text-center">
-              <div class="col-12" v-if="hasSegmentWithErrorPrice && !anySegmentGettingPrice">
+              <div class="col-12" v-if="error">
                 <div class="alert alert-danger">
                   <strong>-</strong> No se pudo obtener el precio de uno o
-                  varios segmentos de vuelo, por favor intente nuevamente.                  
+                  varios segmentos de vuelo, por favor intente nuevamente.
                   <button
                     type="button"
                     class="close"
@@ -117,16 +116,27 @@
                   </button>
                 </div>
               </div>
-              <div class="col-12" v-if="!anySegmentGettingPrice && !hasSegmentWithErrorPrice">
+              <div class="col-12" v-if="!loadingPrices">
                 <h6 class="price-total">
-                  {{  totalPrice > 0 ? `Total: USD ${totalPrice.toFixed(2)}` : "No disponible" }}
+                  {{
+                    totalPrice > 0
+                      ? `Total: USD ${totalPrice.toFixed(2)}`
+                      : "No disponible"
+                  }}
                 </h6>
                 <button
                   type="button"
                   class="btn btn-primary"
+                  target="modal"
+                  data-dismiss="modal"
+                  @click="createReservation"
+                  v-if="!error"
                 >
                   Crear reservación
                 </button>
+              </div>
+              <div class="col-12 text-center" v-else>
+                <Loading />
               </div>
             </div>
           </template>
@@ -144,106 +154,156 @@ import { getDurationText } from "../../helpers/flight";
 
 // components
 import FligthSegment from "./fligth-segment.vue";
+import Loading from "./loading.vue";
 
 export default {
   name: "ModalFlightDetail",
   components: {
     FligthSegment,
+    Loading,
   },
-  props: ["flight", "adults", "children"],
+  props: ["flight", "adults", "children", "userIsLoggedIn"],
   data: () => ({
-    loadingPrices: [],
+    loadingPrices: false,
     totalPrice: 0,
+    error: false,
   }),
   methods: {
     getDurationText,
-    getSegmentPrice(segment) {
-      const {
-        departureDateTime,
-        arrivalDateTime,
-        departureAirport,
-        arrivalAirport,
-        flightNumber,
-        bookingClassAvail,
-        marketingAirline,
-      } = segment;
-      this.loadingPrices.push(flightNumber);
-      segment.price = null;
-      // create string with resBookDesig with , separate
-      const resBookDesig = bookingClassAvail
-        .map((book) => book.resBookDesigCode)
-        .join(",");
-      getFlightPrice(
-        departureDateTime,
-        arrivalDateTime,
-        departureAirport,
-        arrivalAirport,
-        this.$props.adults,
-        this.$props.children,
-        flightNumber,
-        resBookDesig,
-        marketingAirline
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("data >>> ", data);
-          if (data.status == "success") {
-            segment.price = {
-              ...data.price,
-              error: false,
-            };
-            this.totalPrice += data.price.totalFare;
-          } else {
-            segment.price = {
-              totalFare: "No disponible",
-              currency: "USD",
-              error: true,
-            };
-          }
-        })
-        .catch(() => {
-          segment.price = {
-            totalFare: "No disponible",
-            currency: "USD",
-            error: true,
-          };
-        })
-        .finally(() => {
-          // remove flight numbre from loadingPrices
-          this.loadingPrices = this.loadingPrices.filter(
-            (flight) => flight != flightNumber
-          );
-        });
-    },
     async getFlightPrices() {
+      this.loadingPrices = true;
       const { flightSegment } = this.$props.flight;
       console.log("getFlightPrices >>> ");
       if (flightSegment.length > 0) {
+        const flightSegmentsBody = [];
         for (let i = 0; i < flightSegment.length; i++) {
           const segment = flightSegment[i];
-          await this.getSegmentPrice(segment);
+          const {
+            departureDateTime,
+            arrivalDateTime,
+            departureAirport,
+            arrivalAirport,
+            flightNumber,
+            bookingClassAvail,
+            marketingAirline,
+          } = segment;
+          // create string with resBookDesig with , separate
+          const resBookDesig = bookingClassAvail
+            .map((book) => book.resBookDesigCode)
+            .join(",");
+
+          flightSegmentsBody.push({
+            depurateDateTime: departureDateTime,
+            arrivalDateTime,
+            origin: departureAirport,
+            destination: arrivalAirport,
+            adults: this.$props.adults,
+            children: this.$props.children,
+            flightNumber,
+            resBookDesig,
+            airlineCode: marketingAirline,
+          });
         }
+        console.log("flightSegmentsBody >>> ", flightSegmentsBody);
+        getFlightPrice(flightSegmentsBody)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("data >>> ", data);
+            if (data.status == "success") {
+              this.$props.flight.price = {
+                ...data.price,
+              };
+              this.totalPrice += data.price.totalFare;
+              // set res book desig validate by segment
+              for (let i = 0; i < data.flight_segments.length; i++) {
+                const segment_validate = data.flight_segments[i];
+                const _flightSegment = this.$props.flight.flightSegment.find(
+                  (segment) =>
+                    segment.flightNumber == segment_validate.flightNumber
+                );
+                console.log("_flightSegment >> ", _flightSegment);
+                _flightSegment.resBookDesig = segment_validate.resBookDesig;
+              }
+            } else {
+              this.error = true;
+            }
+          })
+          .catch((err) => {
+            this.error = true;
+            console.log("err >>> ", err);
+          })
+          .finally(() => {
+            // remove flight numbre from loadingPrices
+            this.loadingPrices = false;
+          });
       }
     },
-    isLoadingPrices(flightNumber) {
-      return this.loadingPrices.includes(flightNumber);
-    },
-  },
-  computed: {
-    hasSegmentWithErrorPrice() {
-      const { flightSegment } = this.$props.flight;
-      return flightSegment.some(
-        (segment) => segment.price && segment.price.error
-      );
-    },
-    anySegmentGettingPrice() {
-      return this.loadingPrices.length > 0;
+    createReservation() {
+      const {
+        depurateDate,
+        arrivalDate,
+        duration,
+        id,
+        stops,
+        flightSegment,
+        price,
+      } = this.$props.flight;
+      const { totalFare, totalTaxes, baseFare, taxes, currencyCode } = price;
+      const { totalPrice } = this;
+
+      // get origin and destination
+      const origin = flightSegment[0].departureAirport;
+      const destination =
+        flightSegment[flightSegment.length - 1].arrivalAirport;
+
+      this.$emit("createReservation", {
+        depurateDate,
+        arrivalDate,
+        duration,
+        id,
+        stops,
+        adults: this.$props.adults,
+        children: this.$props.children,
+        total: totalPrice,
+        origin,
+        destination,
+        currencyCode,
+        total: totalFare,
+        totalTaxes,
+        baseFare,
+        taxes,
+        segment: flightSegment.map((segment) => {
+          const {
+            arrivalAirport,
+            arrivalDateTime,
+            departureAirport,
+            departureDateTime,
+            journeyDuration,
+            marketingAirline,
+            marketingAirlineName,
+            flightNumber,
+            resBookDesig,
+          } = segment;
+          return {
+            arrivalAirport,
+            arrivalDateTime,
+            departureAirport,
+            departureDateTime,
+            duration: journeyDuration,
+            airlineCode: marketingAirline,
+            airlineName: marketingAirlineName,
+            flightNumber,
+            resBookDesig,
+          };
+        }),
+      });
     },
   },
   watch: {
     flight(newValue, oldValue) {
       console.log("change flight >>> ", newValue, oldValue);
       this.totalPrice = 0;
+      this.error = false;
       this.getFlightPrices();
     },
   },

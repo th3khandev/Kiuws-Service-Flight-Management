@@ -8,3 +8,13 @@ export const get = (path) => {
     },
   });
 };
+
+export const post = (path, body) => {
+  return fetch(`${BASE_URL_PLUGIN_API}/${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}

@@ -62,7 +62,7 @@ class Route extends WP_REST_Controller
             'get-flight-price',
             [
                 [
-                    'methods' => WP_REST_Server::READABLE,
+                    'methods' => WP_REST_Server::CREATABLE,
                     'callback' => [$this, 'get_flight_price'],
                     'permission_callback' => [$this, 'get_route_access'],
                 ]
@@ -113,26 +113,54 @@ class Route extends WP_REST_Controller
      */
     public function get_flight_price ($request) {
         $params = $request->get_params();
-        $departure_date_time = $params['departureDateTime'];
-        $arrival_date_time = $params['arrivalDateTime'];
-        $origin = $params['origin'];
-        $destination = $params['destination'];
-        $adults = $params['adults'];
-        $children = $params['children'];
-        $flight_number = $params['flightNumber'];
-        $resBookDesig = $params['resBookDesig'];
-        $airlineCode = $params['airlineCode'];
 
-        // list resBookingsDesigCode
-        $listResBookDesig = explode(',', $resBookDesig);
-        foreach ($listResBookDesig as $key => $value) {
-            $response = $this->kiuwsService->getFlightPrice($departure_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children);
-            if ($response['status'] == 'success') {
-                // add booking code to response
-                $response['price']['resBookDesig'] = trim($value);
-                break;
+        $flight_segments = $params['flight_segments'];
+        $flight_segments_validate = [];
+        $adults = 1;
+        $children = 0;
+
+        foreach($flight_segments as $flight_segment) {
+            $depurate_date_time = $flight_segment['depurateDateTime'];
+            $arrival_date_time = $flight_segment['arrivalDateTime'];
+            $origin = $flight_segment['origin'];
+            $destination = $flight_segment['destination'];
+            $adults = $flight_segment['adults'];
+            $children = $flight_segment['children'];
+            $flight_number = $flight_segment['flightNumber'];
+            $resBookDesig = $flight_segment['resBookDesig'];
+            $airlineCode = $flight_segment['airlineCode'];
+
+            $listResBookDesig = explode(',', $resBookDesig);
+            foreach ($listResBookDesig as $value) {
+                $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children);
+                if ($response['status'] == 'success') {
+                    // add booking code to response
+                    $flight_segments_validate[] = [
+                        'depurateDateTime' => $depurate_date_time,
+                        'arrivalDateTime' => $arrival_date_time,
+                        'origin' => $origin,
+                        'destination' => $destination,
+                        'adults' => $adults,
+                        'children' => $children,
+                        'flightNumber' => $flight_number,
+                        'resBookDesig' => trim($value),
+                        'airlineCode' => $airlineCode,
+                    ];
+                    break;
+                }
             }
         }
+
+        if (count($flight_segments) != count($flight_segments_validate)) {
+            return rest_ensure_response([
+                'status' => 'error',
+                'message' => 'No se completo la cotización de todos los vuelos.'
+            ]);
+        }
+
+
+        $response = $this->kiuwsService->getFlightPriceMultipleSegments($flight_segments_validate, $adults, $children);
+        $response['flight_segments'] = $flight_segments_validate;
         return rest_ensure_response($response);
     }
 }

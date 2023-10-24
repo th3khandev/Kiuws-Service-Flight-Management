@@ -1,4 +1,4 @@
-import { get } from "./api";
+import { get, post } from "./api";
 
 export const getFlightsAvailable = (
   origin,
@@ -13,18 +13,8 @@ export const getFlightsAvailable = (
   );
 };
 
-export const getFlightPrice = (
-  departureDateTime,
-  arrivalDateTime,
-  origin,
-  destination,
-  adults,
-  children,
-  flightNumber,
-  resBookDesig,
-  airlineCode
-) => {
-  return get(
-    `get-flight-price?departureDateTime=${departureDateTime}&arrivalDateTime=${arrivalDateTime}&origin=${origin}&destination=${destination}&adults=${adults}&children=${children}&flightNumber=${flightNumber}&resBookDesig=${resBookDesig}&airlineCode=${airlineCode}`
-  );
+export const getFlightPrice = (flightSegments) => {
+  return post("get-flight-price", {
+    flight_segments: flightSegments,
+  });
 };

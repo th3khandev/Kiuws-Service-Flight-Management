@@ -20,14 +20,32 @@
           @refresh="step = 1"
         />
       </div>
-      <div class="col-12 col-md-3">
-        <SidebarFilters />
+      <div class="col-12 col-md-1">
+        <!-- <SidebarFilters /> -->
       </div>
       <div class="col-12 col-md-9">
-        <Itinerary v-for="(flight, index) in flights" :flight="flight" :key="index" @flight-selected="handleFlightSelected" />
+        <Itinerary
+          v-for="(flight, index) in flights"
+          :flight="flight"
+          :key="index"
+          @flight-selected="handleFlightSelected"
+        />
+      </div>
+      <div class="col-12 col-md-1">
+        <!-- <SidebarFilters /> -->
       </div>
     </div>
-    <ModalFlightDetail :flight="flightSelected" :children="children" :adults="adults" />
+    <div class="row" v-if="!loading && step == 3">
+      <div class="col-12 col-md-12">
+        <DetailFlightReservation :flightReservation="flightReservation" @goBack="step = 2" />
+      </div>
+    </div>
+    <ModalFlightDetail
+      :flight="flightSelected"
+      :children="children"
+      :adults="adults"
+      @createReservation="createReservation"
+    />
   </div>
 </template>
 <script>
@@ -40,7 +58,8 @@ import Loading from "./components/loading.vue";
 import SidebarFilters from "./components/sidebar-filters.vue";
 import Itinerary from "./components/itinerary.vue";
 import DetailFiltersSelected from "./components/detail-filters-selected.vue";
-import ModalFlightDetail from "./components/modal-flight-detail.vue"
+import ModalFlightDetail from "./components/modal-flight-detail.vue";
+import DetailFlightReservation from "./components/detail-flight-reservation.vue";
 
 export default {
   name: "App",
@@ -50,7 +69,8 @@ export default {
     SidebarFilters,
     Itinerary,
     DetailFiltersSelected,
-    ModalFlightDetail
+    ModalFlightDetail,
+    DetailFlightReservation,
   },
   data() {
     return {
@@ -64,6 +84,7 @@ export default {
       adults: 1,
       children: 0,
       flightSelected: null,
+      flightReservation: null,
     };
   },
   methods: {
@@ -82,7 +103,7 @@ export default {
       this.depurateDate = depurateDate;
       this.loading = true;
       this.flights = [];
-      console.log("handleSearchFlights");
+      this.flightReservation = null;
       getFlightsAvailable(
         originAirport.code,
         destinationAirport.code,
@@ -117,6 +138,15 @@ export default {
     },
     handleFlightSelected(flight) {
       this.flightSelected = flight;
+    },
+    createReservation(reservationFlightData) {
+      console.log("create reservation >> ", reservationFlightData);
+      this.flightReservation = {
+        ...reservationFlightData,
+        destinationAirport: `${this.destinationAirport.country} ${this.destinationAirport.city} (${this.destinationAirport.code}), ${this.destinationAirport.name}`,
+        originAirport: `${this.originAirport.country} ${this.originAirport.city} (${this.originAirport.code}), ${this.originAirport.name}`,
+      };
+      this.step = 3;
     },
   },
 };
