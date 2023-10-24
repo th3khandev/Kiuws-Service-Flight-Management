@@ -101,13 +101,35 @@
                 {{ children }}
               </div>
             </div>
+            <div class="row text-center">
+              <div class="col-12" v-if="hasSegmentWithErrorPrice && !anySegmentGettingPrice">
+                <div class="alert alert-danger">
+                  <strong>-</strong> No se pudo obtener el precio de uno o
+                  varios segmentos de vuelo, por favor intente nuevamente.                  
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Close"
+                    @click="error = false"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              </div>
+              <div class="col-12" v-if="!anySegmentGettingPrice && !hasSegmentWithErrorPrice">
+                <h6 class="price-total">
+                  {{  totalPrice > 0 ? `Total: USD ${totalPrice.toFixed(2)}` : "No disponible" }}
+                </h6>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                >
+                  Crear reservación
+                </button>
+              </div>
+            </div>
           </template>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Cerrar
-          </button>
-          <button type="button" class="btn btn-primary">Reservar</button>
         </div>
       </div>
     </div>
@@ -131,10 +153,11 @@ export default {
   props: ["flight", "adults", "children"],
   data: () => ({
     loadingPrices: [],
+    totalPrice: 0,
   }),
   methods: {
     getDurationText,
-    async getSegmentPrice(segment) {
+    getSegmentPrice(segment) {
       const {
         departureDateTime,
         arrivalDateTime,
@@ -144,11 +167,13 @@ export default {
         bookingClassAvail,
         marketingAirline,
       } = segment;
-      this.loadingPrices.push(flightNumber)
+      this.loadingPrices.push(flightNumber);
       segment.price = null;
       // create string with resBookDesig with , separate
-      const resBookDesig = bookingClassAvail.map(book => book.resBookDesigCode).join(',');
-      await getFlightPrice(
+      const resBookDesig = bookingClassAvail
+        .map((book) => book.resBookDesigCode)
+        .join(",");
+      getFlightPrice(
         departureDateTime,
         arrivalDateTime,
         departureAirport,
@@ -167,6 +192,7 @@ export default {
               ...data.price,
               error: false,
             };
+            this.totalPrice += data.price.totalFare;
           } else {
             segment.price = {
               totalFare: "No disponible",
@@ -181,9 +207,12 @@ export default {
             currency: "USD",
             error: true,
           };
-        }).finally(() => {
+        })
+        .finally(() => {
           // remove flight numbre from loadingPrices
-          this.loadingPrices = this.loadingPrices.filter(flight => flight != flightNumber)
+          this.loadingPrices = this.loadingPrices.filter(
+            (flight) => flight != flightNumber
+          );
         });
     },
     async getFlightPrices() {
@@ -196,13 +225,25 @@ export default {
         }
       }
     },
-    isLoadingPrices (flightNumber) {
-      return this.loadingPrices.includes(flightNumber)
-    }
+    isLoadingPrices(flightNumber) {
+      return this.loadingPrices.includes(flightNumber);
+    },
+  },
+  computed: {
+    hasSegmentWithErrorPrice() {
+      const { flightSegment } = this.$props.flight;
+      return flightSegment.some(
+        (segment) => segment.price && segment.price.error
+      );
+    },
+    anySegmentGettingPrice() {
+      return this.loadingPrices.length > 0;
+    },
   },
   watch: {
     flight(newValue, oldValue) {
       console.log("change flight >>> ", newValue, oldValue);
+      this.totalPrice = 0;
       this.getFlightPrices();
     },
   },
