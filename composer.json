@@ -12,7 +12,8 @@
         "psr-4": {
             "Kiuws_Service_Flight_Management\\Includes\\": "includes/",
             "Kiuws_Service_Flight_Management\\Api\\": "api/",
-            "Kiuws_Service_Flight_Management\\Services\\": "services/"
+            "Kiuws_Service_Flight_Management\\Services\\": "services/",
+            "Kiuws_Service_Flight_Management\\DB\\": "db/"
         }
     },
     "require-dev": {

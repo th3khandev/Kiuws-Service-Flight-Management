@@ -14,6 +14,7 @@
  */
 
 use Kiuws_Service_Flight_Management\Api\Api;
+use Kiuws_Service_Flight_Management\DB\FlightManagementDB;
 use Kiuws_Service_Flight_Management\Includes\Admin;
 use Kiuws_Service_Flight_Management\Includes\Frontend;
 
@@ -80,6 +81,10 @@ final class Kiuws_Service_Flight_Management {
             update_option(FLIGHT_MANAGEMENT_PREFIX . 'installed', time());
         }
         update_option(FLIGHT_MANAGEMENT_PREFIX . 'version', FLIGHT_MANAGEMENT_VERSION);
+
+        // create tables in database
+        $flightManagementDB = new FlightManagementDB();
+        $flightManagementDB->initDB();
     }
 
     /**

@@ -11,6 +11,7 @@ class ComposerStaticIniteadadb76bf80a62b87809f94c454c0dc
         array (
             'Kiuws_Service_Flight_Management\\Services\\' => 41,
             'Kiuws_Service_Flight_Management\\Includes\\' => 41,
+            'Kiuws_Service_Flight_Management\\DB\\' => 35,
             'Kiuws_Service_Flight_Management\\Api\\' => 36,
         ),
     );
@@ -23,6 +24,10 @@ class ComposerStaticIniteadadb76bf80a62b87809f94c454c0dc
         'Kiuws_Service_Flight_Management\\Includes\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
+        ),
+        'Kiuws_Service_Flight_Management\\DB\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/db',
         ),
         'Kiuws_Service_Flight_Management\\Api\\' => 
         array (
