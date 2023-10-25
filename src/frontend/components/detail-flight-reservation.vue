@@ -606,7 +606,6 @@ export default {
         cardExpirationYear.value == currentYear &&
         cardExpirationMonthValue < currentMonth
       ) {
-        formReservation.classList.add("was-validated");
         // add class is-invalid to fields
         cardExpirationMonth.classList.add("is-invalid");
         cardExpirationYear.classList.add("is-invalid");
@@ -615,7 +614,6 @@ export default {
 
       // validate card number
       if (cardNumber.value.length < 16) {
-        formReservation.classList.add("was-validated");
         // add class is-invalid to fields
         cardNumber.classList.add("is-invalid");
         return false;
@@ -623,7 +621,12 @@ export default {
 
       // validate card security code
       if (cardSecurityCode.value.length < 3 || cardSecurityCode.value.length >= 4) {
-        formReservation.classList.add("was-validated");
+        // validate if value is only numeric
+        if (!/^\d+$/.test(cardSecurityCode.value)) {
+          // add class is-invalid to fields
+          cardSecurityCode.classList.add("is-invalid");
+          return false;
+        }
         // add class is-invalid to fields
         cardSecurityCode.classList.add("is-invalid");
         return false;
