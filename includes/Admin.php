@@ -2,6 +2,9 @@
 
 namespace Kiuws_Service_Flight_Management\Includes;
 
+use Kiuws_Service_Flight_Management\DB\FlightManagementModel;
+use Kiuws_Service_Flight_Management\Services\Kiuws;
+
 class Admin
 {
     public function __construct()
@@ -40,6 +43,31 @@ class Admin
 
     public function flight_management_page()
     {
+        if (isset($_POST['action']) && $_POST['action'] === 'cancel_reservation') {
+            // Delete reservation
+            $id = $_POST['booking_id'];
+            $flight_management = new FlightManagementModel();
+            $reservation = $flight_management->getFlightByBookingId($id);
+
+            // get options
+            $base_url = get_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url');
+            $agent_sine = get_option(FLIGHT_MANAGEMENT_PREFIX . 'agent_sine');
+            $terminal_id = get_option(FLIGHT_MANAGEMENT_PREFIX . 'terminal_id');
+            $user = html_entity_decode(get_option(FLIGHT_MANAGEMENT_PREFIX . 'user'));
+            $password = html_entity_decode(get_option(FLIGHT_MANAGEMENT_PREFIX . 'password'));
+            $mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'mode');
+
+            $kiuws_service = new Kiuws($base_url, $agent_sine, $terminal_id, $user, $password, $mode);
+            $result = $kiuws_service->cancelReservation($reservation->booking_id);
+            if ($result['status'] == 'success') {
+                add_settings_error('flight-management-messages', 'success', 'Reservación cancelada con éxito', 'updated');
+                $reservation->status = FlightManagementModel::STATUS_CANCELLED;
+                $reservation->update();
+            } else {
+                add_settings_error('flight-management-messages', 'error', $result['message'], 'error');
+                add_settings_error('flight-management-messages', 'error', 'Response: ' . json_encode($result['response']), 'error');
+            }
+        }
         include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/reservations.php';
     }
 

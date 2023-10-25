@@ -41,9 +41,127 @@ $reservationTable->prepare_items();
         background-color: #53ffb2;
         color: #ffffff;
     }
+
+    /* Estilo para el modal de confirmación */
+    .modal {
+        display: none;
+        /* Inicialmente oculto */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        /* Fondo oscuro */
+    }
+
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        text-align: center;
+    }
+
+    /* Botón de cerrar (X) en la esquina superior derecha del modal */
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    /* Estilo para el botón de confirmación dentro del modal */
+    .button-primary {
+        background-color: #0073e6;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Estilo para el botón de cancelación */
+    .cancel-button {
+        background-color: #f44336 !important;
+        color: #ffffff !important;
+    }
+
+    /* Estilo para el botón de confirmación */
+    .confirm-button {
+        background-color: #4CAF50;
+    }
 </style>
 
 <div class="wrap">
     <h2>Listado de reservaciones</h2>
+    
+    <!-- Mensajes de éxito o error -->
+    <?php settings_errors('flight-management-messages'); ?>
+
+
     <?php $reservationTable->display(); ?>
 </div>
+
+<form id="cancel-reservation-form" method="post" action="">
+    <input type="hidden" name="action" value="cancel_reservation">
+    <input type="hidden" name="booking_id" value="">
+</form>
+
+<div id="cancel-confirmation-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>¿Estás seguro de que deseas cancelar esta reservación?</h2>
+        <button id="confirm-cancel" class="button-primary">Confirmar Cancelación</button>
+        <button id="button-cancel" class="button cancel-button">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    // Mostrar el modal cuando se hace clic en el botón "Cancelar"
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('cancel-booking')) {
+            e.preventDefault();
+            const bookingId = e.target.getAttribute('data-id');
+            showConfirmationModal(bookingId);
+        }
+    });
+
+    // Mostrar el modal de confirmación
+    function showConfirmationModal(bookingId) {
+        const modal = document.getElementById('cancel-confirmation-modal');
+        modal.style.display = 'block';
+
+        // Escuchar el clic en el botón de confirmación
+        const confirmButton = document.getElementById('confirm-cancel');
+        confirmButton.addEventListener('click', function() {
+            const form = document.getElementById('cancel-reservation-form');
+            const input = form.querySelector('input[name="booking_id"]');
+            input.value = bookingId;
+            form.submit();
+        });
+
+        // Escuchar el clic en el botón "X" (cerrar)
+        const closeButton = modal.querySelector('.close');
+        closeButton.addEventListener('click', function() {
+            hideConfirmationModal();
+        });
+
+        // Escuchar el clic en el botón "Cerrar"
+        const cancelButton = document.getElementById('button-cancel');
+        cancelButton.addEventListener('click', function() {
+            hideConfirmationModal();
+        });
+    }
+
+    // Ocultar el modal de confirmación
+    function hideConfirmationModal() {
+        const modal = document.getElementById('cancel-confirmation-modal');
+        modal.style.display = 'none';
+    }
+</script>

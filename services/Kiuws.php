@@ -67,6 +67,13 @@ class Kiuws {
         $this->createPOS_XmlObject();
     }
 
+    private function createKIU_CancelRQ_XmlObject() {
+        // Create the xml object
+        $this->xml = new SimpleXMLElement('<KIU_CancelRQ EchoToken="1" TimeStamp="2021-06-24T11:54:36Z" Target="'. trim(ucfirst(strtolower($this->mode))) .'" Version="3.0" SequenceNmbr="1" PrimaryLangID="en-us"></KIU_CancelRQ>');
+        // Create the POS xml object
+        $this->createPOS_XmlObject();
+    }
+
     private function createKIU_AirPriceRQObject() {
         // Create the xml object
         $this->xml = new SimpleXMLElement('<KIU_AirPriceRQ EchoToken="1" TimeStamp="2013-01-24T19:20:43+00:00" Target="'. trim(ucfirst(strtolower($this->mode))) .'" Version="3.0"
@@ -537,13 +544,13 @@ class Kiuws {
             $ptc = $passenger['type'] == 'adult' ? 'ADT' : 'CHD';
             $this->addAirTravelerToTravelerInfoXmlObject($travelerInfo, $ptc, $passenger['name'], $passenger['lastName'], $passenger['documentType'], $passenger['documentNumber'], $passenger['phoneCountryCode'], $passenger['phoneCountryCode'], $passenger['phoneNumber'], $passenger['email'], $passenger['birthDate'], $key + 1);
         }
-        // create date ticket limit ($request['depurateDate] - 2 hours)
-        $ticketLimit = date('Y-m-d H:i:s', strtotime($request['depurateDate']) - 7200);
+        // create date ticket limit (current date + 1 day)
+        $ticketLimit = date('Y-m-d H:i:s', strtotime('+1 day'));
         $ticketLimit = str_replace(' ', 'T', $ticketLimit);
         // add Ticketing xml object to xml
         $this->xml->addChild('Ticketing');
         // add attributes to Ticketing
-        $this->xml->Ticketing->addAttribute('CancelOnExpiryInd', 'true');
+        $this->xml->Ticketing->addAttribute('CancelOnExpiryInd', 'false');
         $this->xml->Ticketing->addAttribute('TicketTimeLimit', $ticketLimit);
         $this->xml->Ticketing->addAttribute('TimeLimitCity', 'SDQ');
 
@@ -551,6 +558,7 @@ class Kiuws {
         $response = $this->POST();
 
         if ($response['status'] === 'error') {
+            $response['xml'] = $this->xml->asXML();
             return $response;
         }
 
@@ -562,6 +570,51 @@ class Kiuws {
             'ticketTimeLimit'       => $result['ticketTimeLimit'],
             'priceInfoResponse'     => $result['priceInfoResponse'],
             'response'              => $response['response']
+        ];
+    }
+
+    public function cancelReservation ($booking_id) {
+        // create xml object
+        $this->createKIU_CancelRQ_XmlObject();
+        // add UniqueID xml object to xml
+        $uniqueID = $this->xml->addChild('UniqueID');
+        // add attributes to UniqueID
+        $uniqueID->addAttribute('ID', $booking_id);
+        $uniqueID->addAttribute('Type', '14');
+        // POST
+        $attemp = 1;
+        $max_attemp = 3;
+
+        $response = [];
+
+        while ($attemp <= $max_attemp) {
+            $response = $this->POST();
+            if ($response['status'] == 'success') {
+                break;
+            }
+            // validate if error cotain "URL error 28" text
+            if ($response['status'] == 'error' && strpos($response['message'], 'URL error 28') === false) {
+                $attemp++;
+                continue;
+            }
+            break;
+        }
+        if ($response['status'] === 'error') {
+            return $response;
+        }
+        // validate if response has key 'success'
+        if (!isset($response['response']['Success'])) {
+            return [
+                'status'    => 'error',
+                'message'   => 'Error al cancelar la reservación',
+                'response'  => $response['response']
+            ];
+        }
+
+        return [
+            'status'    => 'success',
+            'message'   => 'Cancelado con éxito',
+            'response'  => $response['response']
         ];
     }
 }

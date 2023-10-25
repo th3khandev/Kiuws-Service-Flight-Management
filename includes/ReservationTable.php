@@ -107,8 +107,11 @@ class ReservationTable extends WP_List_Table {
     public function column_actions($item) {
         $actions = [
             'view' => sprintf('<a href="%s" target="_blank">Ver</a>', $item->booking_id),
-            'delete' => sprintf('<a href="%s">Cancelar</a>', $item->booking_id),
         ];
+
+        if ($item->status == FlightManagementModel::STATUS_PENDING || $item->status == FlightManagementModel::STATUS_BOOKED) {
+            $actions['delete'] = sprintf('<a href="javascript:void(0)" data-id="%s" class="cancel-booking">Cancelar</a>', $item->booking_id);
+        }
         return $this->row_actions($actions);
     }
 
