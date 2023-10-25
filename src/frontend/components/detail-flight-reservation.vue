@@ -573,6 +573,62 @@ export default {
         }
       });
 
+      // validate card fields
+      const cardNumber = document.querySelector("input[name=card_number]");
+      const cardSecurityCode = document.querySelector(
+        "input[name=card_security_code]"
+      );
+      const cardExpirationMonth = document.querySelector(
+        "select[name=card_expiration_month]"
+      );
+      const cardExpirationYear = document.querySelector(
+        "select[name=card_expiration_year]"
+      );
+
+      if (
+        !cardNumber.checkValidity() ||
+        !cardSecurityCode.checkValidity() ||
+        !cardExpirationMonth.checkValidity() ||
+        !cardExpirationYear.checkValidity()
+      ) {
+        formReservation.classList.add("was-validated");
+        return false;
+      }
+
+      // validate card expiration date
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+      const cardExpirationMonthValue = parseInt(
+        cardExpirationMonth.value
+      );
+
+      if (
+        cardExpirationYear.value == currentYear &&
+        cardExpirationMonthValue < currentMonth
+      ) {
+        formReservation.classList.add("was-validated");
+        // add class is-invalid to fields
+        cardExpirationMonth.classList.add("is-invalid");
+        cardExpirationYear.classList.add("is-invalid");
+        return false;
+      }
+
+      // validate card number
+      if (cardNumber.value.length < 16) {
+        formReservation.classList.add("was-validated");
+        // add class is-invalid to fields
+        cardNumber.classList.add("is-invalid");
+        return false;
+      }
+
+      // validate card security code
+      if (cardSecurityCode.value.length < 3 || cardSecurityCode.value.length >= 4) {
+        formReservation.classList.add("was-validated");
+        // add class is-invalid to fields
+        cardSecurityCode.classList.add("is-invalid");
+        return false;
+      }
+
       formReservation.classList.add("was-validated");
       return true;
     },
