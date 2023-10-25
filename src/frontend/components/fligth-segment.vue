@@ -67,7 +67,6 @@ export default {
   padding: 1rem 1.5rem;
   flex-direction: column;
   background-color: #e0e3e5b0;
-  align-items: center;
 }
 
 .flight-segment-airline {

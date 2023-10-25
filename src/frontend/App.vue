@@ -37,7 +37,7 @@
     </div>
     <div class="row" v-if="!loading && step == 3">
       <div class="col-12 col-md-12">
-        <DetailFlightReservation :flightReservation="flightReservation" @goBack="step = 2" />
+        <DetailFlightReservation :flightReservation="flightReservation" @goBack="step = 2" @saveReservation="saveReservation" />
       </div>
     </div>
     <ModalFlightDetail
@@ -139,15 +139,63 @@ export default {
     handleFlightSelected(flight) {
       this.flightSelected = flight;
     },
+    createPassengerData (type="adult") {
+      return {
+        name: '',
+        lastName: '',
+        type,
+        gender: '',
+        birthDate: '',
+        documentType: '',
+        documentNumber: '',
+        email: '',
+        phoneCountryCode: '',
+        phoneNumber: '',
+      }
+    },
     createReservation(reservationFlightData) {
       console.log("create reservation >> ", reservationFlightData);
       this.flightReservation = {
         ...reservationFlightData,
         destinationAirport: `${this.destinationAirport.country} ${this.destinationAirport.city} (${this.destinationAirport.code}), ${this.destinationAirport.name}`,
         originAirport: `${this.originAirport.country} ${this.originAirport.city} (${this.originAirport.code}), ${this.originAirport.name}`,
+        passengers: [],
       };
+
+      // create passengers by adults amount
+      for (let i = 0; i < this.flightReservation.adults; i++) {
+        this.flightReservation.passengers.push(this.createPassengerData());
+      }
+
+      // create passengers by children amount
+      for (let i = 0; i < this.flightReservation.children; i++) {
+        this.flightReservation.passengers.push(this.createPassengerData('child'));
+      }
+
+      // create contact info 
+      this.flightReservation.contactInfo = {
+        name: '',
+        lastName: '',
+        email: '',
+        phoneCountryCode: '',
+        phoneNumber: '',
+      }
+
+      // create payment info
+      this.flightReservation.paymentInfo = {
+        cardNumber: '',
+        cardExpirationMonth: '',
+        cardExpirationYear: '',
+        cardSecurityCode: '',
+        cardName: '',
+        cardDocumentNumber: '',
+      }
+
       this.step = 3;
     },
+    saveReservation (reservationData) {
+      console.log("save reservation to API >> ", reservationData);
+    }
   },
 };
 </script>

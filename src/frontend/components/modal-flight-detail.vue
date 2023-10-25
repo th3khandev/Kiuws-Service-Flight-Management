@@ -103,8 +103,6 @@
             <div class="row text-center">
               <div class="col-12" v-if="error">
                 <div class="alert alert-danger">
-                  <strong>-</strong> No se pudo obtener el precio de uno o
-                  varios segmentos de vuelo, por favor intente nuevamente.
                   <button
                     type="button"
                     class="close"
@@ -114,6 +112,8 @@
                   >
                     <span aria-hidden="true">&times;</span>
                   </button>
+                  <strong>-</strong> No se pudo obtener el precio de uno o
+                  varios segmentos de vuelo, por favor intente nuevamente.
                 </div>
               </div>
               <div class="col-12" v-if="!loadingPrices">
@@ -130,9 +130,19 @@
                   target="modal"
                   data-dismiss="modal"
                   @click="createReservation"
-                  v-if="!error"
+                  v-if="!reservationError"
                 >
                   Crear reservación
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  target="modal"
+                  data-dismiss="modal"
+                  @click="tryGetPrice"
+                  v-else
+                >
+                  Reintentar
                 </button>
               </div>
               <div class="col-12 text-center" v-else>
@@ -162,11 +172,12 @@ export default {
     FligthSegment,
     Loading,
   },
-  props: ["flight", "adults", "children", "userIsLoggedIn"],
+  props: ["flight", "adults", "children"],
   data: () => ({
     loadingPrices: false,
     totalPrice: 0,
     error: false,
+    reservationError: false,
   }),
   methods: {
     getDurationText,
@@ -226,6 +237,7 @@ export default {
               }
             } else {
               this.error = true;
+              this.reservationError = true;
             }
           })
           .catch((err) => {
@@ -298,40 +310,18 @@ export default {
         }),
       });
     },
+    tryGetPrice () {
+      this.totalPrice = 0;
+      this.error = false;
+      this.reservationError = false;
+      this.getFlightPrices();
+    }
   },
   watch: {
     flight(newValue, oldValue) {
       console.log("change flight >>> ", newValue, oldValue);
-      this.totalPrice = 0;
-      this.error = false;
-      this.getFlightPrices();
+      this.tryGetPrice();
     },
   },
 };
 </script>
-<style scope>
-.flight-resume {
-  display: flex;
-  padding: 1rem 1.5rem;
-  color: #545860;
-  font-size: 12px;
-}
-
-.flight-resume-text {
-  font-weight: 600;
-}
-
-.separator {
-  margin: 0 0.5rem;
-  font-weight: 700;
-}
-
-@media (max-width: 768px) {
-  .flight-resume {
-    flex-direction: column;
-  }
-  .separator {
-    display: none;
-  }
-}
-</style>
