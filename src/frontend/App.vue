@@ -39,8 +39,16 @@
       <div class="col-12 col-md-12">
         <DetailFlightReservation
           :flightReservation="flightReservation"
+          :creatingReservation="creatingReservation"
+          :reservationCreated="reservationCreated"
+          :errorReservation="errorReservation"
+          :processingPayment="processingPayment"
+          :errorPayment="errorPayment"
+          :paymentSuccess="paymentSuccess"
+          :bookingCode="bookingCode"
           @goBack="step = 2"
           @saveReservation="saveReservation"
+          @proccessPayment="processPayment"
         />
       </div>
     </div>
@@ -93,6 +101,12 @@ export default {
       flightSelected: null,
       flightReservation: null,
       creatingReservation: false,
+      reservationCreated: false,
+      processingPayment: false,
+      errorReservation: false,
+      errorPayment: false,
+      paymentSuccess: false,
+      bookingCode: null,
     };
   },
   methods: {
@@ -163,6 +177,7 @@ export default {
     },
     createReservation(reservationFlightData) {
       console.log("create reservation >> ", reservationFlightData);
+      this.reservationCreated = false;
       this.flightReservation = {
         ...reservationFlightData,
         destinationAirport: `${this.destinationAirport.country} ${this.destinationAirport.city} (${this.destinationAirport.code}), ${this.destinationAirport.name}`,
@@ -203,13 +218,37 @@ export default {
 
       this.step = 3;
     },
+    processPayment () {
+      this.processingPayment = true;
+      this.errorPayment = false;
+      setTimeout(() => {
+        this.processingPayment = false;
+        this.paymentSuccess = true;
+      }, 3000);
+    },
     saveReservation(reservationData) {
       console.log("save reservation to API >> ", reservationData);
       this.creatingReservation = true;
+      this.reservationCreated = false;
+      this.errorReservation = false;
+      this.errorPayment = false;
+      this.paymentSuccess = false;
+      this.bookingCode = null;
       createReservation(reservationData)
         .then((response) => response.json())
         .then((data) => {
           console.log("data >> ", data);
+          if (data.status == 'success') {
+            this.reservationCreated = true;
+            this.bookingCode = data.bookingId;
+            this.processPayment();
+          } else {
+            this.errorReservation = true;
+          }
+        }).catch(() => {
+          this.errorReservation = true;
+        }).finally(() => {
+          this.creatingReservation = false;
         });
     },
   },

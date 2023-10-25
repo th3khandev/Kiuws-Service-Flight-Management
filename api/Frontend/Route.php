@@ -120,7 +120,21 @@ class Route extends WP_REST_Controller
         $adults = $params['adults'];
         $children = $params['children'];
 
-        $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children);
+        $attemp = 1;
+        $max_attemp = 3;
+
+        while ($attemp <= $max_attemp) {
+            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children);
+            if ($response['status'] == 'success') {
+                break;
+            }
+            // validate if error cotain "URL error 28" text
+            if ($response['status'] == 'error' && strpos($response['message'], 'URL error 28') === false) {
+                $attemp++;
+                continue;
+            }
+            break;
+        }        
 
         return rest_ensure_response($response);
     }
@@ -284,7 +298,7 @@ class Route extends WP_REST_Controller
         }
 
         $response['flight_id'] = $flight->id;
-        $response['status'] = $flight->status;
+        $response['reservation_status'] = $flight->status;
         $response['message'] = 'Reserva creada correctamente.';
         return rest_ensure_response($response);
     }

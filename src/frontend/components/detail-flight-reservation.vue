@@ -459,14 +459,114 @@
           </div>
         </div>
 
+        <!-- Alert info creating reservation -->
+        <div class="row" v-if="creatingReservation">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-info">
+              <strong>Espere un momento!</strong> estamos creando su reservación...
+              <div class="spinner-border text-info" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert success, reservation created -->
+        <div class="row" v-if="reservationCreated">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-success">
+              <strong>Reservación creada!</strong> su reservación ha sido creada
+              con éxito.
+              <div>
+                <strong>Número de reservacion: </strong>{{ bookingCode }}<br/>
+                <strong>Importante: </strong> por favor guarde este número de reservación para futuras consultas.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert error creating reservation -->
+        <div class="row" v-if="errorReservation">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-danger">
+              <strong>Error!</strong> ha ocurrido un error al intentar reservar,
+              por favor intente nuevamente.
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert info creating reservation -->
+        <div class="row" v-if="processingPayment">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-info">
+              <strong>Procesando pago!</strong> estamos procesando su pago...
+              <div class="spinner-border text-info" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert success, payment success -->
+        <div class="row" v-if="paymentSuccess">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-success">
+              <strong>Pago completado!</strong> su pago ha sido completado con
+              éxito.
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert error processing payment -->
+        <div class="row" v-if="errorPayment">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-danger">
+              <strong>Error!</strong> ha ocurrido un error al intentar procesar
+              el pago, por favor verifique los datos e intente nuevamente.
+            </div>
+          </div>
+        </div>
+
         <!-- Button submit -->
-        <div class="row">
+        <div class="row" v-if="!reservationCreated">
           <div class="col-12 col-md-12 text-center">
-            <button type="submit" class="btn btn-primary">
-              Enviar
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="creatingReservation || processingPayment"
+            >
+              Guargar reservación
             </button>
           </div>
         </div>
+
+        <div class="row" v-if="reservationCreated && !paymentSuccess && errorPayment">
+          <div class="col-12 col-md-12 text-center">
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="$emit('proccessPayment')"
+              :disabled="creatingReservation || processingPayment"
+            >
+              Procesar pago
+            </button>
+          </div>
+        </div>
+
+        <div class="row" v-if="reservationCreated && paymentSuccess && bookingCode">
+          <div class="col-12 col-md-12 text-center">
+            <a href="/">
+              <button
+                type="button"
+                class="btn btn-primary"
+              >
+                Ir al home
+              </button>
+            </a>
+          </div>
+        </div>
+
+
       </form>
     </div>
   </div>
@@ -478,7 +578,16 @@ import { isEmailValid } from "../../helpers/functions";
 
 export default {
   name: "DetailFlightReservation",
-  props: ["flightReservation"],
+  props: [
+    "flightReservation",
+    "creatingReservation",
+    "reservationCreated",
+    "errorReservation",
+    "processingPayment",
+    "errorPayment",
+    "paymentSuccess",
+    "bookingCode",
+  ],
   data: () => ({
     error: false,
     errorMessage: "",
@@ -512,17 +621,19 @@ export default {
         this.phoneInputs.push({ id, iti });
       });
     },
-    getMinDate (passengerType) {
+    getMinDate(passengerType) {
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth() + 1;
       const currentDay = currentDate.getDate();
-      const minDate = `${currentYear - (passengerType == 'adult' ? 18 : 2)}-${currentMonth}-${currentDay}`;
+      const minDate = `${
+        currentYear - (passengerType == "adult" ? 18 : 2)
+      }-${currentMonth}-${currentDay}`;
       return minDate;
     },
-    formIsValid () {
+    formIsValid() {
       const formReservation = document.getElementById("form-reservation");
-      
+
       // remove class was-validated for form
       formReservation.classList.remove("was-validated");
 
@@ -530,8 +641,6 @@ export default {
         formReservation.classList.add("was-validated");
         return false;
       }
-
-      
 
       // validate all email inputs
       const emailInputs = document.querySelectorAll("input[type=email]");
@@ -598,9 +707,7 @@ export default {
       // validate card expiration date
       const currentMonth = new Date().getMonth() + 1;
       const currentYear = new Date().getFullYear();
-      const cardExpirationMonthValue = parseInt(
-        cardExpirationMonth.value
-      );
+      const cardExpirationMonthValue = parseInt(cardExpirationMonth.value);
 
       if (
         cardExpirationYear.value == currentYear &&
@@ -620,7 +727,10 @@ export default {
       }
 
       // validate card security code
-      if (cardSecurityCode.value.length < 3 || cardSecurityCode.value.length >= 4) {
+      if (
+        cardSecurityCode.value.length < 3 ||
+        cardSecurityCode.value.length >= 4
+      ) {
         // validate if value is only numeric
         if (!/^\d+$/.test(cardSecurityCode.value)) {
           // add class is-invalid to fields
@@ -639,13 +749,14 @@ export default {
       console.log("send form reservation >> ", this.flightReservation);
       // validate form
       if (!this.formIsValid()) {
-        console.log('form invalid');
+        console.log("form invalid");
         return;
       }
 
       // set area country code to users
       this.flightReservation.passengers.forEach((passenger) => {
-        passenger.phoneCountryCode = this.phoneInputs[0].iti.getSelectedCountryData().dialCode;
+        passenger.phoneCountryCode =
+          this.phoneInputs[0].iti.getSelectedCountryData().dialCode;
       });
 
       // send data to backend
