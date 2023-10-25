@@ -2,6 +2,11 @@
 
 namespace Kiuws_Service_Flight_Management\Api\Frontend;
 
+use Kiuws_Service_Flight_Management\DB\FlightContactModel;
+use Kiuws_Service_Flight_Management\DB\FlightManagementModel;
+use Kiuws_Service_Flight_Management\DB\FlightPassengerModel;
+use Kiuws_Service_Flight_Management\DB\FlightSegmentModel;
+use Kiuws_Service_Flight_Management\DB\FlightTaxModel;
 use Kiuws_Service_Flight_Management\Services\Kiuws;
 use Kiuws_Service_Flight_Management\Services\OpenFlightsOrg;
 use WP_REST_Controller;
@@ -204,9 +209,83 @@ class Route extends WP_REST_Controller
         }
 
         // save reservation in database
+        $flight = new FlightManagementModel();
+        $flight->departure_date_time = $params['depurateDate'];
+        $flight->arrival_date_time = $params['arrivalDate'];
+        $flight->origin_airport_code = $params['origin'];
+        $flight->origin = $params['originAirport'];
+        $flight->destination_airport_code = $params['destination'];
+        $flight->destination = $params['destinationAirport'];
+        $flight->duration = $params['duration'];
+        $flight->stops = $params['stops'];
+        $flight->adults = $params['adults'];
+        $flight->children = $params['children'];
+        $flight->base_fare = $params['baseFare'];
+        $flight->total_taxes = $params['totalTaxes'];
+        $flight->total = $params['total'];
+        $flight->currency_code = $params['currencyCode'];
+        $flight->status = FlightManagementModel::STATUS_BOOKED;
+        $flight->booking_id = $response['bookingId'];
+        $flight->ticket_time_limit = $response['ticketTimeLimit'];
+        $flight->price_info_response = json_encode($response['priceInfoResponse'], JSON_UNESCAPED_UNICODE);
+        $flight->save();
 
-        return rest_ensure_response([
-            'response'  => $response
-        ]);
+        // save taxes in database
+        foreach ($params['taxes'] as $tax) {
+            $flight_tax = new FlightTaxModel();
+            $flight_tax->flight_id = $flight->id;
+            $flight_tax->tax_code = $tax['taxCode'];
+            $flight_tax->amount = $tax['amount'];
+            $flight_tax->currency_code = $tax['currencyCode'];
+            $flight_tax->save();
+        }
+
+        // save segments in database
+        foreach ($params['segment'] as $segment) {
+            $flight_segment = new FlightSegmentModel();
+            $flight_segment->flight_id = $flight->id;
+            $flight_segment->departure_date_time = $segment['departureDateTime'];
+            $flight_segment->arrival_date_time = $segment['arrivalDateTime'];
+            $flight_segment->origin_airport_code = $segment['departureAirport'];
+            $flight_segment->destination_airport_code = $segment['arrivalAirport'];
+            $flight_segment->duration = $segment['duration'];
+            $flight_segment->airline_code = $segment['airlineCode'];
+            $flight_segment->airline_name = $segment['airlineName'];
+            $flight_segment->flight_number = $segment['flightNumber'];
+            $flight_segment->res_book_desig = $segment['resBookDesig'];
+            $flight_segment->save();
+        }
+
+        // save contacts in database
+        $flight_contact = new FlightContactModel();
+        $flight_contact->flight_id = $flight->id;
+        $flight_contact->name = $params['contactInfo']['name'];
+        $flight_contact->last_name = $params['contactInfo']['lastName'];
+        $flight_contact->email = $params['contactInfo']['email'];
+        $flight_contact->phone_country_code = $params['contactInfo']['phoneCountryCode'];
+        $flight_contact->phone_number = $params['contactInfo']['phoneNumber'];
+        $flight_contact->save();
+
+        // save passengers in database
+        foreach ($params['passengers'] as $passenger) {
+            $flight_passenger = new FlightPassengerModel();
+            $flight_passenger->flight_id = $flight->id;
+            $flight_passenger->type = $passenger['type'];
+            $flight_passenger->name = $passenger['name'];
+            $flight_passenger->last_name = $passenger['lastName'];
+            $flight_passenger->email = $passenger['email'];
+            $flight_passenger->gender = $passenger['gender'];
+            $flight_passenger->birth_date = $passenger['birthDate'];
+            $flight_passenger->document_type = $passenger['documentType'];
+            $flight_passenger->document_number = $passenger['documentNumber'];
+            $flight_passenger->phone_country_code = $passenger['phoneCountryCode'];
+            $flight_passenger->phone_number = $passenger['phoneNumber'];
+            $flight_passenger->save();
+        }
+
+        $response['flight_id'] = $flight->id;
+        $response['status'] = $flight->status;
+        $response['message'] = 'Reserva creada correctamente.';
+        return rest_ensure_response($response);
     }
 }

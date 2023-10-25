@@ -554,6 +554,14 @@ class Kiuws {
             return $response;
         }
 
-        return $this->formatReservationResponse($response['response']);
+        $result = $this->formatReservationResponse($response['response']);
+        return [
+            'status'                => $response['status'],
+            'message'               => $response['message'],
+            'bookingId'             => $result['bookingId'],
+            'ticketTimeLimit'       => $result['ticketTimeLimit'],
+            'priceInfoResponse'     => $result['priceInfoResponse'],
+            'response'              => $response['response']
+        ];
     }
 }

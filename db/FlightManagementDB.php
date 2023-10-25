@@ -3,13 +3,13 @@
 namespace Kiuws_Service_Flight_Management\DB;
 
 class FlightManagementDB {
-    private $wpdb;
-    private $flight_management_table;
-    private $charset_collate;
-    private $flight_management_taxes_table;
-    private $flight_management_segments_table;
-    private $flight_management_passengers_table;
-    private $flight_management_contacts_table;
+    public $wpdb;
+    public $flight_management_table;
+    public $charset_collate;
+    public $flight_management_taxes_table;
+    public $flight_management_segments_table;
+    public $flight_management_passengers_table;
+    public $flight_management_contacts_table;
 
     public function __construct()
     {
@@ -24,7 +24,7 @@ class FlightManagementDB {
     }
 
     private function createFlightManagementTable () {
-        $sql = "CREATE TABLE `$this->flight_management_table` (`id` INT(11) NULL AUTO_INCREMENT, `departure_date_time` DATETIME NOT NULL , `arrival_date_time` DATETIME NOT NULL , `origin_airport_code` VARCHAR(5) NOT NULL, `origin` VARCHAR(255) NOT NULL , `destination_airport_code` VARCHAR(5) NOT NULL , `destination` VARCHAR(255) NOT NULL , `duration` VARCHAR(100) NOT NULL , `stops` INT NOT NULL , `adults` INT NOT NULL , `children` INT NOT NULL , `base_fare` DECIMAL NOT NULL , `total_taxes` DECIMAL NOT NULL , `total` DECIMAL NOT NULL, `currency_code` VARCHAR(5) NOT NULL, `status` INT(1) NOT NULL DEFAULT(1), PRIMARY KEY (`id`)) $this->charset_collate;";
+        $sql = "CREATE TABLE `$this->flight_management_table` (`id` INT(11) NULL AUTO_INCREMENT, `departure_date_time` DATETIME NOT NULL , `arrival_date_time` DATETIME NOT NULL , `origin_airport_code` VARCHAR(5) NOT NULL, `origin` VARCHAR(255) NOT NULL , `destination_airport_code` VARCHAR(5) NOT NULL , `destination` VARCHAR(255) NOT NULL , `duration` VARCHAR(100) NOT NULL , `stops` INT NOT NULL , `adults` INT NOT NULL , `children` INT NOT NULL , `base_fare` DECIMAL NOT NULL , `total_taxes` DECIMAL NOT NULL , `total` DECIMAL NOT NULL, `currency_code` VARCHAR(5) NOT NULL, `status` INT(1) NOT NULL DEFAULT(1), `booking_id` VARCHAR(200) NOT NULL, `ticket_time_limit` VARCHAR(200) NOT NULL, `price_info_response` TEXT NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
         dbDelta($sql);
     }
 
