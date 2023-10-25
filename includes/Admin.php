@@ -2,8 +2,6 @@
 
 namespace Kiuws_Service_Flight_Management\Includes;
 
-use WP_Error;
-
 class Admin
 {
     public function __construct()
@@ -42,9 +40,7 @@ class Admin
 
     public function flight_management_page()
     {
-        echo '<div class="wrap">';
-        echo '<h2>Kiuws Flight Management</h2>';
-        echo '</div>';
+        include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/reservations.php';
     }
 
     public function flight_management_configuration_page()

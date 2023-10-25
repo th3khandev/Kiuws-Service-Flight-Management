@@ -159,4 +159,17 @@ class FlightManagementModel extends FlightManagementDB {
         $this->id = $this->wpdb->insert_id;
         return $this->id;
     }
+
+    /**
+     * Get all flights
+     * @return self[]
+     */
+    public function getAllFlights($orderBy = 'id', $order = 'DESC') {
+        $sql = "SELECT * FROM $this->table_name";
+        if ($orderBy) {
+            $sql .= " ORDER BY $orderBy $order";
+        }
+        $result = $this->wpdb->get_results($sql);
+        return $result;
+    }
 }
