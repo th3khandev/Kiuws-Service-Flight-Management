@@ -37,7 +37,11 @@
     </div>
     <div class="row" v-if="!loading && step == 3">
       <div class="col-12 col-md-12">
-        <DetailFlightReservation :flightReservation="flightReservation" @goBack="step = 2" @saveReservation="saveReservation" />
+        <DetailFlightReservation
+          :flightReservation="flightReservation"
+          @goBack="step = 2"
+          @saveReservation="saveReservation"
+        />
       </div>
     </div>
     <ModalFlightDetail
@@ -50,7 +54,10 @@
 </template>
 <script>
 // services
-import { getFlightsAvailable } from "../services/kiuwService";
+import {
+  getFlightsAvailable,
+  createReservation,
+} from "../services/kiuwService";
 
 // components
 import FormSearchComponent from "./components/form-search.vue";
@@ -85,6 +92,7 @@ export default {
       children: 0,
       flightSelected: null,
       flightReservation: null,
+      creatingReservation: false,
     };
   },
   methods: {
@@ -139,19 +147,19 @@ export default {
     handleFlightSelected(flight) {
       this.flightSelected = flight;
     },
-    createPassengerData (type="adult") {
+    createPassengerData(type = "adult") {
       return {
-        name: '',
-        lastName: '',
+        name: "",
+        lastName: "",
         type,
-        gender: '',
-        birthDate: '',
-        documentType: '',
-        documentNumber: '',
-        email: '',
-        phoneCountryCode: '',
-        phoneNumber: '',
-      }
+        gender: "",
+        birthDate: "",
+        documentType: "",
+        documentNumber: "",
+        email: "",
+        phoneCountryCode: "",
+        phoneNumber: "",
+      };
     },
     createReservation(reservationFlightData) {
       console.log("create reservation >> ", reservationFlightData);
@@ -169,33 +177,41 @@ export default {
 
       // create passengers by children amount
       for (let i = 0; i < this.flightReservation.children; i++) {
-        this.flightReservation.passengers.push(this.createPassengerData('child'));
+        this.flightReservation.passengers.push(
+          this.createPassengerData("child")
+        );
       }
 
-      // create contact info 
+      // create contact info
       this.flightReservation.contactInfo = {
-        name: '',
-        lastName: '',
-        email: '',
-        phoneCountryCode: '',
-        phoneNumber: '',
-      }
+        name: "",
+        lastName: "",
+        email: "",
+        phoneCountryCode: "",
+        phoneNumber: "",
+      };
 
       // create payment info
       this.flightReservation.paymentInfo = {
-        cardNumber: '',
-        cardExpirationMonth: '',
-        cardExpirationYear: '',
-        cardSecurityCode: '',
-        cardName: '',
-        cardDocumentNumber: '',
-      }
+        cardNumber: "",
+        cardExpirationMonth: "",
+        cardExpirationYear: "",
+        cardSecurityCode: "",
+        cardName: "",
+        cardDocumentNumber: "",
+      };
 
       this.step = 3;
     },
-    saveReservation (reservationData) {
+    saveReservation(reservationData) {
       console.log("save reservation to API >> ", reservationData);
-    }
+      this.creatingReservation = true;
+      createReservation(reservationData)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("data >> ", data);
+        });
+    },
   },
 };
 </script>

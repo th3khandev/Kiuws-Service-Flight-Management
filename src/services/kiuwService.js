@@ -18,3 +18,7 @@ export const getFlightPrice = (flightSegments) => {
     flight_segments: flightSegments,
   });
 };
+
+export const createReservation = (reservationData) => {
+  return post("create-reservation", reservationData);
+}

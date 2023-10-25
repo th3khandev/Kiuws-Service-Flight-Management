@@ -41,14 +41,20 @@ class Kiuws {
         // add POS xml object to xml
         $pos = $this->xml->addChild('POS');
         // add Source xml object to POS
-        $pos->addChild('Source AgentSine="'. $this->agentSine .'" TerminalID="'. $this->termialID .'" ISOCountry="US" ISOCurrency="USD"');
+        $source = $pos->addChild('Source');
+        // add attributes to source
+        $source->addAttribute('AgentSine', $this->agentSine);
+        $source->addAttribute('TerminalID', $this->termialID);
+        $source->addAttribute('ISOCountry', 'US');
+        $source->addAttribute('ISOCurrency', 'USD');
+
         // add RequestorID xml object to POS
         if (!is_null($requestorID)) {
-            $pos->addChild('RequestorID Type="'. $requestorID .'"');
+            $source->addChild('RequestorID Type="'. $requestorID .'"');
         }
         // add BookingChannel xml object to POS
         if (!is_null($bookingChannel)) {
-            $pos->addChild('BookingChannel Type="'. $bookingChannel .'"');
+            $source->addChild('BookingChannel Type="'. $bookingChannel .'"');
         }
     }
 
@@ -65,6 +71,13 @@ class Kiuws {
         // Create the xml object
         $this->xml = new SimpleXMLElement('<KIU_AirPriceRQ EchoToken="1" TimeStamp="2013-01-24T19:20:43+00:00" Target="'. trim(ucfirst(strtolower($this->mode))) .'" Version="3.0"
         SequenceNmbr="1" PrimaryLangID="en-us"></KIU_AirPriceRQ>');
+        // Create the POS xml object
+        $this->createPOS_XmlObject(5, 1);
+    }
+
+    private function createKIU_AirBookV2RQ_XmlObject () {
+        // Create the xml object
+        $this->xml = new SimpleXMLElement('<KIU_AirBookV2RQ xmlns:ns="http://www.opentravel.org/OTA/2003/05/common" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" xmlns:sch="http://purl.oclc.org/dsdl/schematron" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns="http://www.opentravel.org/OTA/2003/05" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" EchoToken="PUNCANA'. date('Y') .'" TimeStamp="2021-08-10T12:00:00.0Z" Target="'. trim(ucfirst(strtolower($this->mode))) .'" Version="3.0" SequenceNmbr="1" PriceInd="true"></KIU_AirBookV2RQ>');
         // Create the POS xml object
         $this->createPOS_XmlObject(5, 1);
     }
@@ -114,7 +127,59 @@ class Kiuws {
             // add MarketingAirline xml object to FlightSegment
             $flightSegment->addChild('MarketingAirline Code="'. $segment['airlineCode'] .'"');
         }
+    }
 
+    private function createAirItineraryXmlToReservation () {
+        // add AirItinerary xml object to xml
+        $airItinerary = $this->xml->addChild('AirItinerary');
+        // add OriginDestinationOptions xml object to AirItinerary
+        $originDestinationOptions = $airItinerary->addChild('OriginDestinationOptions');
+        // add OriginDestinationOption xml object to OriginDestinationOptions
+        $originDestinationOption = $originDestinationOptions->addChild('OriginDestinationOption');
+
+        return $originDestinationOption;
+    }
+
+    private function addSegmentToOriginDestinationOptionXmlObject ($originDestinationOption, $depurateDateTime, $flightNumber, $resBookDesigCode, $departureAirport, $arrivalAirport, $airlineCode, $arrivalDateTime = null, $segmentRPH = 1) {
+        // add FlightSegment xml object to OriginDestinationOption
+        $flightSegment = $originDestinationOption->addChild('FlightSegment');
+        // add DepurateDateTime, ArrivalDateTime, FlightNumber, ResBookDesigCode attributtes to FlightSegment
+        $flightSegment->addAttribute('DepartureDateTime', $depurateDateTime);
+        $flightSegment->addAttribute('FlightNumber', $flightNumber);
+        $flightSegment->addAttribute('ResBookDesigCode', $resBookDesigCode);
+        $flightSegment->addAttribute('SegmentRPH', $segmentRPH);
+        // add DepartureAirport xml object to FlightSegment
+        $flightSegment->addChild('DepartureAirport LocationCode="'. $departureAirport .'"');
+        // add ArrivalAirport xml object to FlightSegment
+        $flightSegment->addChild('ArrivalAirport LocationCode="'. $arrivalAirport .'"');
+        // add MarketingAirline xml object to FlightSegment
+        $flightSegment->addChild('MarketingAirline Code="'. $airlineCode .'"');
+        // add ArrivalDateTime xml object to FlightSegment
+        if (!is_null($arrivalDateTime)) {
+            $flightSegment->addAttribute('ArrivalDateTime', $arrivalDateTime);
+        }
+    }
+
+    private function addAirTravelerToTravelerInfoXmlObject ($travelerInfoXml, $ptc, $name, $lastName, $documentType, $documentNumber, $phoneContryCode, $phoneAreaCode, $phoneNumber, $email, $birthDate, $refNumber) {
+        // add AirTraveler xml object to TravelerInfo
+        $airTraveler = $travelerInfoXml->addChild('AirTraveler');
+        // add PersonName xml object to AirTraveler
+        $personName = $airTraveler->addChild('PersonName');
+        // add attributes to personName 
+        $personName->addAttribute('PTC', $ptc);
+        $personName->addAttribute('BirthDate', $birthDate);
+        // add GivenName xml object to PersonName
+        $personName->addChild('GivenName', strtoupper($name));
+        // add Surname xml object to PersonName
+        $personName->addChild('Surname', strtoupper($lastName));
+        // add Document xml object to AirTraveler
+        $airTraveler->addChild('Document DocType="'. $documentType .'" DocID="'. $documentNumber .'"');
+        // add Telephone xml object to AirTraveler
+        $airTraveler->addChild('Telephone CountryAccessCode="'. $phoneContryCode .'" AreaCityCode="'. $phoneAreaCode .'" PhoneNumber="'. $phoneNumber .'"');
+        // add Email xml object to AirTraveler
+        $airTraveler->addChild('Email', $email);
+        // add TravelerRefNumber xml object to AirTraveler
+        $airTraveler->addChild('TravelerRefNumber RPH="'. $refNumber .'"');
     }
 
     private function createTravelerInfoSummaryXmlObject($adults = 1, $children = 0) {
@@ -442,5 +507,53 @@ class Kiuws {
             'price'                 => $result,
             'response'              => $response['response']
         ];
+    }
+
+    private function formatReservationResponse($responseApi) {
+        $bookingId = $responseApi['BookingReferenceID']['@attributes']['ID'];
+        $ticketTimeLimit = $responseApi['BookingReferenceID']['@attributes']['TicketTimeLimit'];
+        $priceInfoResponse = $responseApi['PricingInfo'];
+        return [
+            'bookingId'         => $bookingId,
+            'ticketTimeLimit'   => $ticketTimeLimit,
+            'priceInfoResponse' => $priceInfoResponse,
+        ];
+    }
+
+    public function createReservation ($request) {
+        // create xml object
+        $this->createKIU_AirBookV2RQ_XmlObject();
+        // add AirItinerary xml object to xml
+        $originDestinationOption = $this->createAirItineraryXmlToReservation();
+        // add flight segments
+        foreach ($request['segment'] as $segment) {
+            $departureDateTime = str_replace(' ', 'T', $segment['departureDateTime']);
+            $this->addSegmentToOriginDestinationOptionXmlObject($originDestinationOption, $departureDateTime, $segment['flightNumber'], $segment['resBookDesig'], $segment['departureAirport'], $segment['arrivalAirport'], $segment['airlineCode']);
+        }
+        // add TravelerInfo to xml
+        $travelerInfo = $this->xml->addChild('TravelerInfo');
+        // add passenger info to TravelerInfo
+        foreach ($request['passengers'] as $key => $passenger) {
+            $ptc = $passenger['type'] == 'adult' ? 'ADT' : 'CHD';
+            $this->addAirTravelerToTravelerInfoXmlObject($travelerInfo, $ptc, $passenger['name'], $passenger['lastName'], $passenger['documentType'], $passenger['documentNumber'], $passenger['phoneCountryCode'], $passenger['phoneCountryCode'], $passenger['phoneNumber'], $passenger['email'], $passenger['birthDate'], $key + 1);
+        }
+        // create date ticket limit ($request['depurateDate] - 2 hours)
+        $ticketLimit = date('Y-m-d H:i:s', strtotime($request['depurateDate']) - 7200);
+        $ticketLimit = str_replace(' ', 'T', $ticketLimit);
+        // add Ticketing xml object to xml
+        $this->xml->addChild('Ticketing');
+        // add attributes to Ticketing
+        $this->xml->Ticketing->addAttribute('CancelOnExpiryInd', 'true');
+        $this->xml->Ticketing->addAttribute('TicketTimeLimit', $ticketLimit);
+        $this->xml->Ticketing->addAttribute('TimeLimitCity', 'SDQ');
+
+        // POST
+        $response = $this->POST();
+
+        if ($response['status'] === 'error') {
+            return $response;
+        }
+
+        return $this->formatReservationResponse($response['response']);
     }
 }

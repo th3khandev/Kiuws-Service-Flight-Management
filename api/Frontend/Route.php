@@ -68,6 +68,18 @@ class Route extends WP_REST_Controller
                 ]
             ]
         );
+
+        register_rest_route(
+            $this->namespace,
+            'create-reservation',
+            [
+                [
+                    'methods' => WP_REST_Server::CREATABLE,
+                    'callback' => [$this, 'create_reservation'],
+                    'permission_callback' => [$this, 'get_route_access'],
+                ]
+            ]
+        );
     }
 
     /**
@@ -162,5 +174,39 @@ class Route extends WP_REST_Controller
         $response = $this->kiuwsService->getFlightPriceMultipleSegments($flight_segments_validate, $adults, $children);
         $response['flight_segments'] = $flight_segments_validate;
         return rest_ensure_response($response);
+    }
+
+    public function create_reservation($request) {
+        $params = $request->get_params();
+
+        $attemp = 1;
+        $max_attemp = 3;
+
+        while ($attemp <= $max_attemp) {
+            $response = $this->kiuwsService->createReservation($params);
+            if ($response['status'] == 'success') {
+                break;
+            }
+            // validate if error cotain "URL error 28" text
+            if ($response['status'] == 'error' && strpos($response['message'], 'URL error 28') === false) {
+                $attemp++;
+                continue;
+            }
+            break;
+        }
+
+        if ($response['status'] == 'error') {
+            return rest_ensure_response([
+                'status' => 'error',
+                'message' => 'No se pudo crear la reserva.',
+                'response' => $response
+            ]);
+        }
+
+        // save reservation in database
+
+        return rest_ensure_response([
+            'response'  => $response
+        ]);
     }
 }
