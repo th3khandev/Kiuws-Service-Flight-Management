@@ -22,3 +22,17 @@ export const getFlightPrice = (flightSegments) => {
 export const createReservation = (reservationData) => {
   return post("create-reservation", reservationData);
 }
+
+
+export const processPayment = (cardName, cardDocumentNumber, cardNumber, cardEmail, amount, currencyCode, flightBookingId, cardToken) => {
+  return post("process-payment", {
+    card_name: cardName,
+    card_document_number: cardDocumentNumber,
+    card_number: cardNumber,
+    card_email: cardEmail,
+    amount: amount,
+    currency_code: currencyCode,
+    flight_booking_id: flightBookingId,
+    card_token: cardToken
+  });
+}

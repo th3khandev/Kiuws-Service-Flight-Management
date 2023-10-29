@@ -86,7 +86,7 @@ class FlightManagementModel extends FlightManagementDB {
     const STATUS_PENDING = 1;
     const STATUS_BOOKED = 2;
     const STATUS_CANCELLED = 3;
-    const STATUS_PAYED = 4;
+    const STATUS_PAID = 4;
     const STATUS_COMPLETED = 5;
 
     /**

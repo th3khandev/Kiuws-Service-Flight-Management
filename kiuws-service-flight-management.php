@@ -40,6 +40,7 @@ final class Kiuws_Service_Flight_Management {
         $this->plugin_constants();
         register_activation_hook(__FILE__, [$this, 'activate']);
         register_deactivation_hook(__FILE__, [$this, 'deactivate']);
+        add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'add_settings_link']);
         add_action('plugins_loaded', [$this, 'init_plugin']);
     }
 
@@ -94,6 +95,12 @@ final class Kiuws_Service_Flight_Management {
      */
     public function deactivate() {
         // Do something
+    }
+
+    public function add_settings_link($links) {
+        $settings_link = '<a href="admin.php?page=flight-management-configuration">Settings</a>';
+        array_push($links, $settings_link);
+        return $links;
     }
 
     /**

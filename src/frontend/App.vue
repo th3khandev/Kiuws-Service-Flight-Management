@@ -46,9 +46,12 @@
           :errorPayment="errorPayment"
           :paymentSuccess="paymentSuccess"
           :bookingCode="bookingCode"
+          :errorPaymentMessage="errorPaymentMessage"
+          ref="detailFlightReservationForm"
           @goBack="step = 2"
           @saveReservation="saveReservation"
           @proccessPayment="processPayment"
+          @tryAgainPayment="tryAgainPayment"
         />
       </div>
     </div>
@@ -65,6 +68,7 @@
 import {
   getFlightsAvailable,
   createReservation,
+  processPayment,
 } from "../services/kiuwService";
 
 // components
@@ -107,6 +111,7 @@ export default {
       errorPayment: false,
       paymentSuccess: false,
       bookingCode: null,
+      errorPaymentMessage: null,
     };
   },
   methods: {
@@ -178,6 +183,7 @@ export default {
     createReservation(reservationFlightData) {
       console.log("create reservation >> ", reservationFlightData);
       this.reservationCreated = false;
+      this.errorPaymentMessage = null;
       this.flightReservation = {
         ...reservationFlightData,
         destinationAirport: `${this.destinationAirport.country} ${this.destinationAirport.city} (${this.destinationAirport.code}), ${this.destinationAirport.name}`,
@@ -209,22 +215,48 @@ export default {
       // create payment info
       this.flightReservation.paymentInfo = {
         cardNumber: "",
-        cardExpirationMonth: "",
-        cardExpirationYear: "",
-        cardSecurityCode: "",
-        cardName: "",
         cardDocumentNumber: "",
+        cardName: "",
+        cardToken: "",
       };
 
       this.step = 3;
     },
-    processPayment () {
-      this.processingPayment = true;
+    tryAgainPayment() {
       this.errorPayment = false;
-      setTimeout(() => {
-        this.processingPayment = false;
-        this.paymentSuccess = true;
-      }, 3000);
+      this.paymentSuccess = false;
+    },
+    processPayment() {
+      this.processingPayment = true;
+      this.errorPaymentMessage = null;
+      this.errorPayment = false;
+      const { paymentInfo, contactInfo, total, currencyCode } =
+        this.flightReservation;
+      const { email } = contactInfo;
+      const { cardName, cardNumber, cardDocumentNumber, cardToken } =
+        paymentInfo;
+      processPayment(
+        cardName,
+        cardDocumentNumber,
+        cardNumber,
+        email,
+        total,
+        currencyCode,
+        this.bookingCode,
+        cardToken
+      )
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.success) {
+            this.paymentSuccess = true;
+          } else {
+            this.errorPayment = true;
+            this.errorPaymentMessage = response.message;
+          }
+        })
+        .finally(() => {
+          this.processingPayment = false;
+        });
     },
     saveReservation(reservationData) {
       console.log("save reservation to API >> ", reservationData);
@@ -238,16 +270,18 @@ export default {
         .then((response) => response.json())
         .then((data) => {
           console.log("data >> ", data);
-          if (data.status == 'success') {
+          if (data.status == "success") {
             this.reservationCreated = true;
             this.bookingCode = data.bookingId;
             this.processPayment();
           } else {
             this.errorReservation = true;
           }
-        }).catch(() => {
+        })
+        .catch(() => {
           this.errorReservation = true;
-        }).finally(() => {
+        })
+        .finally(() => {
           this.creatingReservation = false;
         });
     },

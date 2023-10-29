@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
     'Kiuws_Service_Flight_Management\\Services\\' => array($baseDir . '/services'),
     'Kiuws_Service_Flight_Management\\Includes\\' => array($baseDir . '/includes'),
     'Kiuws_Service_Flight_Management\\DB\\' => array($baseDir . '/db'),

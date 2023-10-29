@@ -10,6 +10,7 @@ class FlightManagementDB {
     public $flight_management_segments_table;
     public $flight_management_passengers_table;
     public $flight_management_contacts_table;
+    public $flight_management_payment_info_table;
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class FlightManagementDB {
         $this->flight_management_segments_table = $this->flight_management_table . '_segments';
         $this->flight_management_passengers_table = $this->flight_management_table . '_passengers';
         $this->flight_management_contacts_table = $this->flight_management_table . '_contacts';
+        $this->flight_management_payment_info_table = $this->flight_management_table . '_payment_info';
         $this->charset_collate = $wpdb->get_charset_collate();
     }
 
@@ -48,6 +50,11 @@ class FlightManagementDB {
         dbDelta($sql);
     }
 
+    private function createFlightManagementPaymentInfo () {
+        $sql = "CREATE TABLE `$this->flight_management_payment_info_table` (`id` INT(11) NULL AUTO_INCREMENT, `flight_id` INT(11) NOT NULL, `card_number` VARCHAR(50) NULL, `card_holder_name` VARCHAR(50) NULL, `card_holder_document_number` VARCHAR(50) NULL, `card_holder_email` VARCHAR(50) NOT NULL,`reference` VARCHAR(50) NOT NULL, `currency` VARCHAR(5) NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
+        dbDelta($sql);
+    }
+
     public function initDB() {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         $this->createFlightManagementTable();
@@ -55,5 +62,6 @@ class FlightManagementDB {
         $this->createFlightManagementSegmentsTable();
         $this->createFlightManagementPassengersTable();
         $this->createFlightManagementContactsTable();
+        $this->createFlightManagementPaymentInfo();
     }
 }

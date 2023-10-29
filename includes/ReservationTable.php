@@ -96,7 +96,7 @@ class ReservationTable extends WP_List_Table {
                 $text = 'Reservado';
                 $class = 'status-booked';
                 break;
-            case FlightManagementModel::STATUS_PAYED:
+            case FlightManagementModel::STATUS_PAID:
                 $text = 'Pagado';
                 $class = 'status-payed';
                 break;

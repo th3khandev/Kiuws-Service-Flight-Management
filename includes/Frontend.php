@@ -23,6 +23,16 @@ class Frontend {
         wp_enqueue_script('flight-management-manifest', FLIGHT_MANAGEMENT_URL . 'dist/js/manifest.js', [], FLIGHT_MANAGEMENT_VERSION, true);
         wp_enqueue_script('flight-management-vendor', FLIGHT_MANAGEMENT_URL . 'dist/js/vendor.js', ['flight-management-manifest'], FLIGHT_MANAGEMENT_VERSION, true);
         wp_enqueue_script('flight-management', FLIGHT_MANAGEMENT_URL . 'dist/js/flight-management.js', ['flight-management-vendor'], FLIGHT_MANAGEMENT_VERSION, true);
+        wp_enqueue_script('stripe', 'https://js.stripe.com/v3/', [], time());
+
+        // get stripe public key
+        $stripe_mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'stripe_mode');
+        $stripe_public_key = get_option(FLIGHT_MANAGEMENT_PREFIX . 'stripe_' . $stripe_mode . '_public_key');
+
+        // send stripe public key to frontend
+        wp_localize_script('flight-management', 'FLIGHT_MANAGEMENT', [
+            'STRIPE_PUBLIC_KEY' => $stripe_public_key,
+        ]);
     }
 
     public function loadStyles () {

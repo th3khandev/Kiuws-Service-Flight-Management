@@ -354,7 +354,7 @@
           <!-- Card name -->
           <div class="col-12 col-md-6">
             <div class="form-group">
-              <label for="card_name">Nombre tarjeta</label>
+              <label for="card_name">Nombre tarjeta <span class="text-danger">(*)</span> </label>
               <input
                 type="text"
                 class="form-control"
@@ -370,7 +370,7 @@
           <!-- Card document number -->
           <div class="col-12 col-md-6">
             <div class="form-group">
-              <label for="card_document_number">Número de documento</label>
+              <label for="card_document_number">Número de documento <span class="text-danger">(*)</span></label>
               <input
                 type="text"
                 class="form-control"
@@ -381,81 +381,17 @@
               />
             </div>
           </div>
-          <!-- Card number  and security code CVC -->
-          <div class="col-12 col-md-6">
-            <div class="row">
-              <div class="col-12 col-md-8">
-                <div class="form-group">
-                  <label for="card_number">Número de tarjeta</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="card_number"
-                    placeholder="Número de tarjeta"
-                    v-model="flightReservation.paymentInfo.cardNumber"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="col-12 col-md-4">
-                <div class="form-group">
-                  <label for="card_security_code">Código de seguridad</label>
-                  <input
-                    type="text"
-                    minlength="3"
-                    maxlength="3"
-                    required
-                    class="form-control"
-                    name="card_security_code"
-                    placeholder="Código de seguridad"
-                    v-model="flightReservation.paymentInfo.cardSecurityCode"
-                  />
-                </div>
-              </div>
-            </div>
+        </div>
+
+        <div class="row mt-3 mb-5">
+          <!-- Card element -->
+          <div class="col-12">
+            <label>
+              Número de tarjeta <span class="text-danger">(*)</span>
+            </label>
           </div>
-          <!-- Card expiration date -->
-          <div class="col-12 col-md-6">
-            <div class="form-group">
-              <label for="card_expiration_date">Fecha de expiración</label>
-              <div class="row">
-                <div class="col-6 col-md-6">
-                  <select
-                    name="card_expiration_month"
-                    class="form-control"
-                    v-model="flightReservation.paymentInfo.cardExpirationMonth"
-                    required
-                  >
-                    <option value="">-- Mes --</option>
-                    <option value="01">Enero</option>
-                    <option value="02">Febrero</option>
-                    <option value="03">Marzo</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Mayo</option>
-                    <option value="06">Junio</option>
-                    <option value="07">Julio</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                  </select>
-                </div>
-                <div class="col-6 col-md-6">
-                  <select
-                    class="form-control"
-                    name="card_expiration_year"
-                    v-model="flightReservation.paymentInfo.cardExpirationYear"
-                    required
-                  >
-                    <option value="">-- Año --</option>
-                    <option v-for="year in listYears" :key="year" :value="year">
-                      {{ year }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
+          <div class="col-12">
+            <div id="card-element"></div>
           </div>
         </div>
 
@@ -463,7 +399,8 @@
         <div class="row" v-if="creatingReservation">
           <div class="col-12 col-md-12">
             <div class="alert alert-info">
-              <strong>Espere un momento!</strong> estamos creando su reservación...
+              <strong>Espere un momento!</strong> estamos creando su
+              reservación...
               <div class="spinner-border text-info" role="status">
                 <span class="sr-only">Loading...</span>
               </div>
@@ -478,8 +415,9 @@
               <strong>Reservación creada!</strong> su reservación ha sido creada
               con éxito.
               <div>
-                <strong>Número de reservacion: </strong>{{ bookingCode }}<br/>
-                <strong>Importante: </strong> por favor guarde este número de reservación para futuras consultas.
+                <strong>Número de reservacion: </strong>{{ bookingCode }}<br />
+                <strong>Importante: </strong> por favor guarde este número de
+                reservación para futuras consultas.
               </div>
             </div>
           </div>
@@ -521,8 +459,16 @@
         <div class="row" v-if="errorPayment">
           <div class="col-12 col-md-12">
             <div class="alert alert-danger">
-              <strong>Error!</strong> ha ocurrido un error al intentar procesar
-              el pago, por favor verifique los datos e intente nuevamente.
+              <strong>Error!</strong> {{ errorPaymentMessage }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert error stripe -->
+        <div class="row" v-if="stripeError && messageErrorStripe">
+          <div class="col-12 col-md-12">
+            <div class="alert alert-danger">
+              <strong>Error!</strong> {{ messageErrorStripe }}
             </div>
           </div>
         </div>
@@ -533,40 +479,39 @@
             <button
               type="submit"
               class="btn btn-primary"
-              :disabled="creatingReservation || processingPayment"
+              :disabled="creatingReservation || processingPayment || stripeError"
             >
               Guargar reservación
             </button>
           </div>
         </div>
 
-        <div class="row" v-if="reservationCreated && !paymentSuccess && errorPayment">
+        <div
+          class="row"
+          v-if="reservationCreated && !paymentSuccess && errorPayment"
+        >
           <div class="col-12 col-md-12 text-center">
             <button
               type="button"
               class="btn btn-primary"
-              @click="$emit('proccessPayment')"
-              :disabled="creatingReservation || processingPayment"
+              @click="tryAgainPayment"
+              :disabled="creatingReservation || processingPayment || stripeError"
             >
               Procesar pago
             </button>
           </div>
         </div>
 
-        <div class="row" v-if="reservationCreated && paymentSuccess && bookingCode">
+        <div
+          class="row"
+          v-if="reservationCreated && paymentSuccess && bookingCode"
+        >
           <div class="col-12 col-md-12 text-center">
             <a href="/">
-              <button
-                type="button"
-                class="btn btn-primary"
-              >
-                Ir al home
-              </button>
+              <button type="button" class="btn btn-primary">Ir al home</button>
             </a>
           </div>
         </div>
-
-
       </form>
     </div>
   </div>
@@ -587,6 +532,7 @@ export default {
     "errorPayment",
     "paymentSuccess",
     "bookingCode",
+    "errorPaymentMessage",
   ],
   data: () => ({
     error: false,
@@ -594,6 +540,10 @@ export default {
     phoneInputs: [],
     currentYear: 2023,
     listYears: [],
+    stripe: null,
+    cardElement: null,
+    stripeError: true,
+    messageErrorStripe: "",
   }),
   created() {
     const currentDate = new Date();
@@ -682,10 +632,10 @@ export default {
         }
       });
 
-      // validate card fields
-      const cardNumber = document.querySelector("input[name=card_number]");
+      /* // validate card fields
+      const cardNumber = document.querySelector("input[name=cardnumber]");
       const cardSecurityCode = document.querySelector(
-        "input[name=card_security_code]"
+        "input[name=cvc]"
       );
       const cardExpirationMonth = document.querySelector(
         "select[name=card_expiration_month]"
@@ -695,7 +645,7 @@ export default {
       );
 
       if (
-        !cardNumber.checkValidity() ||
+        !cardNumber ||
         !cardSecurityCode.checkValidity() ||
         !cardExpirationMonth.checkValidity() ||
         !cardExpirationYear.checkValidity()
@@ -740,16 +690,24 @@ export default {
         // add class is-invalid to fields
         cardSecurityCode.classList.add("is-invalid");
         return false;
-      }
+      } */
 
       formReservation.classList.add("was-validated");
       return true;
     },
-    saveReservation() {
-      console.log("send form reservation >> ", this.flightReservation);
+    async saveReservation() {
+      this.messageErrorStripe = '';
+
       // validate form
       if (!this.formIsValid()) {
-        console.log("form invalid");
+        return;
+      }
+
+      // get token card
+      const cardToken = await this.getTokenCard();
+      if (!cardToken) {
+        this.stripeError = true;
+        this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
         return;
       }
 
@@ -762,11 +720,105 @@ export default {
       // send data to backend
       this.$emit("saveReservation", this.flightReservation);
     },
+    createStripe() {
+      this.stripe = Stripe(FLIGHT_MANAGEMENT.STRIPE_PUBLIC_KEY);
+      const elements = this.stripe.elements({
+        mode: "payment",
+        currency: this.$props.flightReservation.currencyCode.toLowerCase(),
+        amount: this.$props.flightReservation.total * 100,
+      });
+      this.cardElement = elements.create("card", {
+        style: {
+          base: {
+            fontSize: "16px",
+          },
+        },
+      });
+      this.cardElement.mount("#card-element");
+      setTimeout(() => {
+        this.cardElement.on('change', (event) => {
+          const { error, complete } = event;
+          if (error) {
+            this.stripeError = true;
+            const { code } = error;
+            if (code == 'incomplete_zip') {
+              this.messageErrorStripe = 'El código postal es requerido';
+            } else if (code == 'incomplete_cvc') {
+              this.messageErrorStripe = 'El código de seguridad es requerido';
+            } else if (code == 'incomplete_expiry') {
+              this.messageErrorStripe = 'La fecha de expiración es requerida';
+            } else if (code == 'incomplete_number') {
+              this.messageErrorStripe = 'El número de tarjeta es requerido';
+            } else if (code == 'invalid_number') {
+              this.messageErrorStripe = 'El número de tarjeta es inválido';
+            } else if (code == 'invalid_expiry_year_past') {
+              this.messageErrorStripe = 'La fecha de expiración es inválida';
+            } else {
+              this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+            }
+          } else {
+            if (complete) {
+              this.stripeError = false;
+              this.messageErrorStripe = '';
+            } else {
+              this.stripeError = true;
+              this.messageErrorStripe = 'Debe completar todos los campos de la tarjeta';
+            }
+          }
+        });
+      }, 1000);
+    },
+    async getTokenCard() {
+      const { cardName } = this.$props.flightReservation.paymentInfo;
+
+      try {
+        const stripeResponse = await this.stripe.createSource(this.cardElement, {
+          type: "card",
+          owner: {
+            name: cardName,
+          },
+          usage: "single_use",
+        });
+
+        console.log('stripeResponse', stripeResponse);
+
+        if (stripeResponse.error) {
+          this.stripeError = true;
+          this.messageErrorStripe = stripeResponse.error.message;
+          return null;
+        }
+
+        const { source } = stripeResponse;
+        const { id, card } = source;
+        this.$props.flightReservation.paymentInfo.cardToken = id;
+        // complete with '*' the card number
+        this.$props.flightReservation.paymentInfo.cardNumber = `************${card.last4}`;
+
+        // get token data
+        const cardToken = id;
+        return cardToken;
+      } catch (error) {
+        this.stripeError = true;
+        this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+        return null;
+      }
+    },
+    async tryAgainPayment() {
+      this.$emit('tryAgainPayment');
+      // get token card
+      const cardToken = await this.getTokenCard();
+      if (!cardToken) {
+        this.stripeError = true;
+        this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+        return;
+      }
+      this.$emit('proccessPayment');
+    },
   },
   mounted() {
-    console.log(this.flightReservation);
     setTimeout(() => {
       this.setInputsPhoneInthTel();
+      this.createStripe();
     }, 1000);
   },
 };
