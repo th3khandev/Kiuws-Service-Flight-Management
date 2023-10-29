@@ -61,8 +61,8 @@
         type="button"
         class="btn btn-primary"
         @click="$emit('flight-selected', flight)"
-        data-toggle="modal"
-        data-target="#flight-modal"
+        data-bs-toggle="modal"
+        data-bs-target="#flight-modal"
       >
         Reservar
       </button>

@@ -17,7 +17,7 @@
           <button
             type="button"
             class="close"
-            data-dismiss="modal"
+            data-bs-dismiss="modal"
             aria-label="Close"
           >
             <span aria-hidden="true">&times;</span>
@@ -75,7 +75,7 @@
               :segment="segment"
               :loading-prices="loadingPrices"
             />
-            <div class="flight-resume">
+            <div class="flight-resume mt-3 mb-3">
               <div class="flight-resume-depurate-date">
                 <label class="flight-resume-text">Salida: </label>
                 {{ flight.depurateDate }}
@@ -105,7 +105,7 @@
               </div>
             </div>
             <div class="row text-center">
-              <div class="col-12" v-if="error">
+              <div class="col-12 mb-3 mt-2" v-if="error">
                 <div class="alert alert-danger">
                   <button
                     type="button"
@@ -120,7 +120,7 @@
                   varios segmentos de vuelo, por favor intente nuevamente.
                 </div>
               </div>
-              <div class="col-12" v-if="!loadingPrices">
+              <div class="col-12 mt-1 mb-3" v-if="!loadingPrices">
                 <h6 class="price-total">
                   {{
                     totalPrice > 0
@@ -130,9 +130,9 @@
                 </h6>
                 <button
                   type="button"
-                  class="btn btn-primary"
+                  class="btn btn-primary mt-2"
                   target="modal"
-                  data-dismiss="modal"
+                  data-bs-dismiss="modal"
                   @click="createReservation"
                   v-if="!reservationError"
                 >

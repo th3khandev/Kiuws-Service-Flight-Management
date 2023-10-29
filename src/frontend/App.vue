@@ -171,6 +171,7 @@ export default {
     },
     handleFlightSelected(flight) {
       this.flightSelected = flight;
+      console.log('handleFlightSelected >> ', flight);
     },
     createPassengerData(type = "adult") {
       return {
@@ -298,6 +299,7 @@ export default {
 </script>
 
 <style>
+@import url("bootstrap/dist/css/bootstrap.min.css");
 @import url("vue-select/dist/vue-select.css");
 @import url("../../assets/css/main.css");
 </style>
