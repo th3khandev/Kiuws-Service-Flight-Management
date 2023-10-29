@@ -2,13 +2,16 @@
 
 namespace Kiuws_Service_Flight_Management\Api\Frontend;
 
+use Exception;
 use Kiuws_Service_Flight_Management\DB\FlightContactModel;
 use Kiuws_Service_Flight_Management\DB\FlightManagementModel;
 use Kiuws_Service_Flight_Management\DB\FlightPassengerModel;
+use Kiuws_Service_Flight_Management\DB\FlightPaymentInfoModel;
 use Kiuws_Service_Flight_Management\DB\FlightSegmentModel;
 use Kiuws_Service_Flight_Management\DB\FlightTaxModel;
 use Kiuws_Service_Flight_Management\Services\Kiuws;
 use Kiuws_Service_Flight_Management\Services\OpenFlightsOrg;
+use Stripe\StripeClient;
 use WP_REST_Controller;
 use WP_REST_Server;
 
@@ -81,6 +84,18 @@ class Route extends WP_REST_Controller
                 [
                     'methods' => WP_REST_Server::CREATABLE,
                     'callback' => [$this, 'create_reservation'],
+                    'permission_callback' => [$this, 'get_route_access'],
+                ]
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace,
+            'process-payment',
+            [
+                [
+                    'methods' => WP_REST_Server::CREATABLE,
+                    'callback' => [$this, 'process_payment'],
                     'permission_callback' => [$this, 'get_route_access'],
                 ]
             ]
@@ -301,5 +316,73 @@ class Route extends WP_REST_Controller
         $response['reservation_status'] = $flight->status;
         $response['message'] = 'Reserva creada correctamente.';
         return rest_ensure_response($response);
+    }
+
+    public function process_payment ($request) {
+        $params = $request->get_params();
+
+        // get stripe public key
+        $stripe_mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'stripe_mode');
+        $stripe_private_key = get_option(FLIGHT_MANAGEMENT_PREFIX . 'stripe_' . $stripe_mode . '_private_key');
+
+        // create stripe client
+        $stripe = new StripeClient($stripe_private_key);
+        $customer = $stripe->customers->create([
+            'email' => $params['card_email'],
+            'name' => $params['card_name'],
+        ]);
+
+        $paymentData = [
+            'amount'        => (int) ($params['amount'] * 100),
+            'currency'      => strtolower($params['currency_code']),
+            'description'   => 'Pago de reservacion de vuelo ID: ' . $params['flight_booking_id'],
+            'customer'      => $customer->id,
+            'source'        => $params['card_token'],
+        ];
+
+        try {
+            $stripe->charges->create($paymentData);
+        } catch (\Stripe\Exception\CardException $e) {
+            // El pago falló debido a un problema con la tarjeta
+            wp_send_json(['success' => false, 'message' => $e->getError()->message]);
+        } catch (\Stripe\Exception\RateLimitException $e) {
+            wp_send_json(['success' => false, 'message' => 'Error de límite de tasa']);
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            wp_send_json(['success' => false, 'message' => 'Error de solicitud inválida']);
+        } catch (\Stripe\Exception\AuthenticationException $e) {
+            wp_send_json(['success' => false, 'message' => 'Error de autenticación']);
+        } catch (\Stripe\Exception\ApiConnectionException $e) {
+            wp_send_json(['success' => false, 'message' => 'Error de conexión con la API']);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            wp_send_json(['success' => false, 'message' => 'Error de la API de Stripe']);
+        } catch (Exception $e) {
+            wp_send_json(['success' => false, 'message' => 'Error desconocido']);
+        }
+
+        // create payment info
+        $flight_payment_info = new FlightPaymentInfoModel();
+        $flight_payment_info->reference = $params['flight_booking_id'];
+        $flight_payment_info->card_holder_name = $params['card_name'];
+        $flight_payment_info->card_holder_document_number = $params['card_document_number'];
+        $flight_payment_info->card_holder_email = $params['card_email'];
+        $flight_payment_info->card_number = $params['card_number'];
+        $flight_payment_info->currency = $params['currency_code'];
+
+        // get flight by booling id
+        $flight_model = new FlightManagementModel();
+        $flight = $flight_model->getFlightByBookingId($params['flight_booking_id']);
+
+        // add flight id to payment model
+        $flight_payment_info->flight_id = $flight->id;
+        $flight_payment_info->save();
+
+        // update flight status
+        $flight->status = FlightManagementModel::STATUS_PAID;
+        $flight->update();
+
+        return [
+            'success' => true,
+            'message' => 'Pago realizado correctamente.',
+        ];
     }
 }
