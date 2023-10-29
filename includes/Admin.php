@@ -43,11 +43,20 @@ class Admin
 
         add_submenu_page(
             $slug,
-            __('Payment onfiguration', 'flight-management'),
-            __('Payment onfiguration', 'flight-management'),
+            __('Payment configuration', 'flight-management'),
+            __('Payment configuration', 'flight-management'),
             $capability,
             $slug . '-payment-configuration',
             [$this, 'flight_management_payment_configuration_page']
+        );
+
+        add_submenu_page(
+            $slug,
+            __('Kiuw parameters', 'flight-management'),
+            __('Kiuw parameters', 'flight-management'),
+            $capability,
+            $slug . '-kiuw-parameters',
+            [$this, 'flight_management_kiuw_parameters_page']
         );
     }
 
@@ -190,5 +199,17 @@ class Admin
         }
         // Show configuration form
         include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/payment-configuration.php';
+    }
+
+    public function flight_management_kiuw_parameters_page () {
+        // make request to https://ssl00.kiusys.com/ws3/ip_addr.php
+        $url = 'https://ssl00.kiusys.com/ws3/ip_addr.php';
+        $response = wp_remote_get($url);
+        $body = wp_remote_retrieve_body($response);
+        echo '<div class="wrap">';
+        echo '<div class="postbox" style="padding: 5px 15px;">';
+        echo '<h2>'. $body .'</h2>';
+        echo '</div>';
+        echo '</div>';
     }
 }
