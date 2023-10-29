@@ -19,8 +19,9 @@ class Frontend {
     }
 
     public function load_scripts () {
-        wp_enqueue_script('intlTelInput', 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js', [], time(), true);
-        wp_enqueue_script('flight-management-manifest', FLIGHT_MANAGEMENT_URL . 'dist/js/manifest.js', [], FLIGHT_MANAGEMENT_VERSION, true);
+        wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js', [], time(), true);
+        wp_enqueue_script('intlTelInput', 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js', ['bootstrap'], time(), true);
+        wp_enqueue_script('flight-management-manifest', FLIGHT_MANAGEMENT_URL . 'dist/js/manifest.js', ['intlTelInput'], FLIGHT_MANAGEMENT_VERSION, true);
         wp_enqueue_script('flight-management-vendor', FLIGHT_MANAGEMENT_URL . 'dist/js/vendor.js', ['flight-management-manifest'], FLIGHT_MANAGEMENT_VERSION, true);
         wp_enqueue_script('flight-management', FLIGHT_MANAGEMENT_URL . 'dist/js/flight-management.js', ['flight-management-vendor'], FLIGHT_MANAGEMENT_VERSION, true);
         wp_enqueue_script('stripe', 'https://js.stripe.com/v3/', [], time());

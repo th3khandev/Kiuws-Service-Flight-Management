@@ -143,17 +143,9 @@
       </div>
     </div>
     <div class="col-12" v-if="error">
-      <div class="alert alert-danger">
+      <div class="alert alert-danger alert-dismissible" role="alert">
         <strong>-</strong> {{ errorMessage }}
-        <button
-          type="button"
-          class="close"
-          data-dismiss="alert"
-          aria-label="Close"
-          @click="error = false"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     </div>
     <div class="col-12 col-md-12 text-center mt-5">

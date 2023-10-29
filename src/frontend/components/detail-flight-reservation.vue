@@ -20,38 +20,38 @@
           </div>
           <div class="flight-resume pl-0 pr-0">
             <div class="flight-resume-depurate-date">
-              <label class="flight-resume-text">Salida: </label>
+              <label class="flight-resume-text me-1">Salida: </label>
               {{ flightReservation.depurateDate }}
               <label class="separator"> | </label>
             </div>
             <div class="flight-resume-arrival-date">
-              <label class="flight-resume-text">Llegada: </label>
+              <label class="flight-resume-text me-1">Llegada: </label>
               {{ flightReservation.arrivalDate }}
               <label class="separator"> | </label>
             </div>
             <div class="flight-resume-duration">
-              <label class="flight-resume-text">Duración: </label>
+              <label class="flight-resume-text me-1">Duración: </label>
               {{ getDurationText(flightReservation.duration) }}
             </div>
           </div>
           <div class="flight-resume pl-0 pr-0">
             <div class="flight-resume-adults">
-              <label class="flight-resume-text">Adultos: </label>
+              <label class="flight-resume-text me-1">Adultos: </label>
               {{ flightReservation.adults }}
               <label class="separator"> | </label>
             </div>
             <div class="flight-resume-children">
-              <label class="flight-resume-text">Niños: </label>
+              <label class="flight-resume-text me-1">Niños: </label>
               {{ flightReservation.children }}
               <label class="separator"> | </label>
             </div>
             <div class="flight-resume-children">
-              <label class="flight-resume-text">Infantes: </label>
+              <label class="flight-resume-text me-1">Infantes: </label>
               {{ flightReservation.inf }}
               <label class="separator"> | </label>
             </div>
             <div class="flight-resume-children">
-              <label class="flight-resume-text">Escala(s): </label>
+              <label class="flight-resume-text me-1">Escala(s): </label>
               {{ flightReservation.stops }}
             </div>
           </div>
@@ -88,14 +88,14 @@
               <template
                 v-for="(passenger, index) in flightReservation.passengers"
               >
-                <div class="card">
-                  <div class="card-header p-0 mb-0" :id="`passenger-${index}`">
+                <div class="accordion-item">
+                  <div class="accordion-header p-0 mb-0" :id="`passenger-${index}`">
                     <h2 class="mb-0" style="margin: 0px !important">
                       <button
-                        class="btn btn-primary btn-block text-left"
+                        class="accordion-button"
                         type="button"
-                        data-toggle="collapse"
-                        :data-target="`#collapse-passenger-${index}`"
+                        data-bs-toggle="collapse"
+                        :data-bs-target="`#collapse-passenger-${index}`"
                         aria-expanded="true"
                         :aria-controls="`collapse-passenger-${index}`"
                       >
@@ -112,11 +112,11 @@
 
                   <div
                     :id="`collapse-passenger-${index}`"
-                    :class="`collapse ${index == 0 ? 'show' : ''}`"
+                    :class="`accordion-collapse collapse ${index == 0 ? 'show' : ''}`"
                     :aria-labelledby="`passenger-${index}`"
-                    data-parent="#accordion-passengers"
+                    ddata-bs-parent="#accordion-passengers"
                   >
-                    <div class="card-body">
+                    <div class="accordion-body">
                       <div class="row">
                         <!-- User name -->
                         <div class="col-12 col-md-6">
@@ -413,7 +413,7 @@
         <!-- Alert info creating reservation -->
         <div class="row" v-if="creatingReservation">
           <div class="col-12 col-md-12">
-            <div class="alert alert-info">
+            <div class="alert alert-info alert-dismissible">
               <strong>Espere un momento!</strong> estamos creando su
               reservación...
               <div class="spinner-border text-info" role="status">
@@ -426,7 +426,7 @@
         <!-- Alert success, reservation created -->
         <div class="row" v-if="reservationCreated">
           <div class="col-12 col-md-12">
-            <div class="alert alert-success">
+            <div class="alert alert-success alert-dismissible">
               <strong>Reservación creada!</strong> su reservación ha sido creada
               con éxito.
               <div>
@@ -441,7 +441,7 @@
         <!-- Alert error creating reservation -->
         <div class="row" v-if="errorReservation">
           <div class="col-12 col-md-12">
-            <div class="alert alert-danger">
+            <div class="alert alert-danger alert-dismissible">
               <strong>Error!</strong> ha ocurrido un error al intentar reservar,
               por favor intente nuevamente.
             </div>
@@ -451,7 +451,7 @@
         <!-- Alert info creating reservation -->
         <div class="row" v-if="processingPayment">
           <div class="col-12 col-md-12">
-            <div class="alert alert-info">
+            <div class="alert alert-info alert-dismissible">
               <strong>Procesando pago!</strong> estamos procesando su pago...
               <div class="spinner-border text-info" role="status">
                 <span class="sr-only">Loading...</span>
@@ -463,7 +463,7 @@
         <!-- Alert success, payment success -->
         <div class="row" v-if="paymentSuccess">
           <div class="col-12 col-md-12">
-            <div class="alert alert-success">
+            <div class="alert alert-success alert-dismissible">
               <strong>Pago completado!</strong> su pago ha sido completado con
               éxito.
             </div>
@@ -473,7 +473,7 @@
         <!-- Alert error processing payment -->
         <div class="row" v-if="errorPayment">
           <div class="col-12 col-md-12">
-            <div class="alert alert-danger">
+            <div class="alert alert-danger alert-dismissible">
               <strong>Error!</strong> {{ errorPaymentMessage }}
             </div>
           </div>
@@ -482,7 +482,7 @@
         <!-- Alert error stripe -->
         <div class="row" v-if="stripeError && messageErrorStripe">
           <div class="col-12 col-md-12">
-            <div class="alert alert-danger">
+            <div class="alert alert-danger alert-dismissible">
               <strong>Error!</strong> {{ messageErrorStripe }}
             </div>
           </div>
@@ -490,7 +490,7 @@
 
         <!-- Button submit -->
         <div class="row" v-if="!reservationCreated">
-          <div class="col-12 col-md-12 text-center">
+          <div class="col-12 col-md-12 text-center alert-dismissible">
             <button
               type="submit"
               class="btn btn-primary"

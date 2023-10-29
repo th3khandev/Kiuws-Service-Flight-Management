@@ -597,8 +597,8 @@ class Kiuws {
 
             $this->addAirTravelerToTravelerInfoXmlObject($travelerInfo, $ptc, $passenger['name'], $passenger['lastName'], $passenger['documentType'], $passenger['documentNumber'], $passenger['phoneCountryCode'], $passenger['phoneCountryCode'], $passenger['phoneNumber'], $passenger['email'], $passenger['birthDate'], $key + 1);
         }
-        // create date ticket limit (current date + 1 day)
-        $ticketLimit = date('Y-m-d H:i:s', strtotime('+1 day'));
+        // create date ticket limit ($request['depurateDate'] - 2 hour)
+        $ticketLimit = date('Y-m-d H:i:s', strtotime($request['depurateDate']) - 7200);
         $ticketLimit = str_replace(' ', 'T', $ticketLimit);
         // add Ticketing xml object to xml
         $this->xml->addChild('Ticketing');
