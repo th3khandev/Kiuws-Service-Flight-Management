@@ -44,6 +44,16 @@ class FlightPaymentInfoModel extends FlightManagementDB {
     public $currency;
 
     /**
+     * @var string
+     */
+    public $type;
+
+    /**
+     * @var string
+     */
+    public $date;
+
+    /**
      * Constructor
      */
     public function __construct() {
@@ -63,6 +73,8 @@ class FlightPaymentInfoModel extends FlightManagementDB {
             'card_holder_email' => $this->card_holder_email,
             'reference' => $this->reference,
             'currency' => $this->currency,
+            'type' => $this->type,
+            'date' => $this->date,
         ];
 
         $format = [
@@ -73,6 +85,8 @@ class FlightPaymentInfoModel extends FlightManagementDB {
             '%s',
             '%s',
             '%s',
+            '%s',
+            '%s'
         ];
 
         

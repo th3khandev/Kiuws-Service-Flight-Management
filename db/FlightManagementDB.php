@@ -26,7 +26,7 @@ class FlightManagementDB {
     }
 
     private function createFlightManagementTable () {
-        $sql = "CREATE TABLE `$this->flight_management_table` (`id` INT(11) NULL AUTO_INCREMENT, `departure_date_time` DATETIME NOT NULL , `arrival_date_time` DATETIME NOT NULL , `origin_airport_code` VARCHAR(5) NOT NULL, `origin` VARCHAR(255) NOT NULL , `destination_airport_code` VARCHAR(5) NOT NULL , `destination` VARCHAR(255) NOT NULL , `duration` VARCHAR(100) NOT NULL , `stops` INT NOT NULL , `adults` INT NOT NULL , `children` INT NOT NULL , `base_fare` DECIMAL NOT NULL , `total_taxes` DECIMAL NOT NULL , `total` DECIMAL NOT NULL, `currency_code` VARCHAR(5) NOT NULL, `status` INT(1) NOT NULL DEFAULT(1), `booking_id` VARCHAR(200) NOT NULL, `ticket_time_limit` VARCHAR(200) NOT NULL, `price_info_response` TEXT NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
+        $sql = "CREATE TABLE `$this->flight_management_table` (`id` INT(11) NULL AUTO_INCREMENT, `departure_date_time` DATETIME NOT NULL , `arrival_date_time` DATETIME NOT NULL , `origin_airport_code` VARCHAR(5) NOT NULL, `origin` VARCHAR(255) NOT NULL , `destination_airport_code` VARCHAR(5) NOT NULL , `destination` VARCHAR(255) NOT NULL , `duration` VARCHAR(100) NOT NULL , `stops` INT NOT NULL , `adults` INT NOT NULL , `children` INT NOT NULL, `inf` INT NOT NULL, `base_fare` DECIMAL NOT NULL , `total_taxes` DECIMAL NOT NULL , `total` DECIMAL NOT NULL, `currency_code` VARCHAR(5) NOT NULL, `status` INT(1) NOT NULL DEFAULT(1), `booking_id` VARCHAR(200) NOT NULL, `ticket_time_limit` VARCHAR(200) NOT NULL, `price_info_response` TEXT NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
         dbDelta($sql);
     }
 
@@ -51,7 +51,7 @@ class FlightManagementDB {
     }
 
     private function createFlightManagementPaymentInfo () {
-        $sql = "CREATE TABLE `$this->flight_management_payment_info_table` (`id` INT(11) NULL AUTO_INCREMENT, `flight_id` INT(11) NOT NULL, `card_number` VARCHAR(50) NULL, `card_holder_name` VARCHAR(50) NULL, `card_holder_document_number` VARCHAR(50) NULL, `card_holder_email` VARCHAR(50) NOT NULL,`reference` VARCHAR(50) NOT NULL, `currency` VARCHAR(5) NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
+        $sql = "CREATE TABLE `$this->flight_management_payment_info_table` (`id` INT(11) NULL AUTO_INCREMENT, `flight_id` INT(11) NOT NULL, `card_number` VARCHAR(50) NULL, `card_holder_name` VARCHAR(50) NULL, `card_holder_document_number` VARCHAR(50) NULL, `card_holder_email` VARCHAR(50) NOT NULL,`reference` VARCHAR(50) NOT NULL, `currency` VARCHAR(5) NULL, `type` VARCHAR(100), `date` DATE, PRIMARY KEY (`id`)) $this->charset_collate;";
         dbDelta($sql);
     }
 

@@ -68,6 +68,19 @@ class FlightPassengerModel extends FlightManagementDB {
      */
     const TYPE_ADULT = 'adult';
     const TYPE_CHILD = 'child';
+    const TYPE_INFANT = 'inf';
+
+    /**
+     * Get types
+     * @return array
+     */
+    public static function get_types() {
+        return [
+            self::TYPE_ADULT => 'Adulto',
+            self::TYPE_CHILD => 'Niño',
+            self::TYPE_INFANT => 'Infante'
+        ];
+    }
 
     /**
      * Constructor

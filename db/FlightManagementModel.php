@@ -48,6 +48,10 @@ class FlightManagementModel extends FlightManagementDB {
      */
     public $children;
     /**
+     * @var int
+     */
+    public $inf;
+    /**
      * @var float
      */
     public $base_fare;
@@ -102,6 +106,16 @@ class FlightManagementModel extends FlightManagementDB {
         $this->table_name = $this->flight_management_table;
     }
 
+    public static function getStatusList () {
+        return [
+            self::STATUS_PENDING => 'Pendiente',
+            self::STATUS_BOOKED => 'Reservado',
+            self::STATUS_CANCELLED => 'Cancelado',
+            self::STATUS_PAID => 'Pagado',
+            self::STATUS_COMPLETED => 'Completado'
+        ];
+    }
+
     /**
      * Create instance
      * @param array $database
@@ -120,6 +134,7 @@ class FlightManagementModel extends FlightManagementDB {
         $instance->stops = $data->stops;
         $instance->adults = $data->adults;
         $instance->children = $data->children;
+        $instance->inf = $data->inf;
         $instance->base_fare = $data->base_fare;
         $instance->total_taxes = $data->total_taxes;
         $instance->total = $data->total;
@@ -155,6 +170,7 @@ class FlightManagementModel extends FlightManagementDB {
             'stops'                     => $this->stops,
             'adults'                    => $this->adults,
             'children'                  => $this->children,
+            'inf'                       => $this->inf, // 'inf' => 'infant
             'base_fare'                 => $this->base_fare,
             'total_taxes'               => $this->total_taxes,
             'total'                     => $this->total,
@@ -204,6 +220,7 @@ class FlightManagementModel extends FlightManagementDB {
             'stops'                     => $this->stops,
             'adults'                    => $this->adults,
             'children'                  => $this->children,
+            'inf'                       => $this->inf, // 'inf' => 'infant
             'base_fare'                 => $this->base_fare,
             'total_taxes'               => $this->total_taxes,
             'total'                     => $this->total,
@@ -262,5 +279,33 @@ class FlightManagementModel extends FlightManagementDB {
         return $this->createInstance($result);
     }
 
+    /**
+     * Get segments
+     * @return []
+     */
+    public function getSegments() {
+        $sql = "SELECT * FROM $this->flight_management_segments_table WHERE flight_id = '$this->id'";
+        $result = $this->wpdb->get_results($sql);
+        return $result;
+    }
 
+    /**
+     * Get passengers
+     * @return []
+     */
+    public function getPassengers() {
+        $sql = "SELECT * FROM $this->flight_management_passengers_table WHERE flight_id = '$this->id'";
+        $result = $this->wpdb->get_results($sql);
+        return $result;
+    }
+
+    /**
+     * Get payment
+     * @return object payment
+     */
+    public function getPayment() {
+        $sql = "SELECT * FROM $this->flight_management_payment_info_table WHERE flight_id = $this->id";
+        $result = $this->wpdb->get_row($sql);
+        return $result;
+    }
 }

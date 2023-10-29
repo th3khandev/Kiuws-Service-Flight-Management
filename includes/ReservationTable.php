@@ -106,7 +106,7 @@ class ReservationTable extends WP_List_Table {
 
     public function column_actions($item) {
         $actions = [
-            'view' => sprintf('<a href="%s" target="_blank">Ver</a>', $item->booking_id),
+            'view' => sprintf('<a href="admin.php?page=flight-management&booking_id=%s">Ver</a>', $item->booking_id),
         ];
 
         if ($item->status == FlightManagementModel::STATUS_PENDING || $item->status == FlightManagementModel::STATUS_BOOKED) {

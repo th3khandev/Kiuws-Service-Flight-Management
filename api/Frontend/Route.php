@@ -251,6 +251,7 @@ class Route extends WP_REST_Controller
         $flight->stops = $params['stops'];
         $flight->adults = $params['adults'];
         $flight->children = $params['children'];
+        $flight->inf = $params['inf'];
         $flight->base_fare = $params['baseFare'];
         $flight->total_taxes = $params['totalTaxes'];
         $flight->total = $params['total'];
@@ -369,6 +370,7 @@ class Route extends WP_REST_Controller
         $flight_payment_info->card_holder_email = $params['card_email'];
         $flight_payment_info->card_number = $params['card_number'];
         $flight_payment_info->currency = $params['currency_code'];
+        $flight_payment_info->type = 'Stripe';
 
         // get flight by booling id
         $flight_model = new FlightManagementModel();

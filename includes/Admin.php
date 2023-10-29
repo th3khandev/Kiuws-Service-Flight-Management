@@ -3,6 +3,7 @@
 namespace Kiuws_Service_Flight_Management\Includes;
 
 use Kiuws_Service_Flight_Management\DB\FlightManagementModel;
+use Kiuws_Service_Flight_Management\DB\FlightPaymentInfoModel;
 use Kiuws_Service_Flight_Management\Services\Kiuws;
 
 class Admin
@@ -86,9 +87,36 @@ class Admin
                 $reservation->status = FlightManagementModel::STATUS_COMPLETED;
                 $reservation->update();
                 add_settings_error('flight-management-messages', 'success', 'Reservación actualizada con éxito', 'updated');
+            } else if ($_POST['action'] === 'add_payment') {
+                $payment = new FlightPaymentInfoModel();
+                $payment->flight_id = $reservation->id;
+                $payment->reference = $_POST['reference'];
+                $payment->date = $_POST['date'];
+                $payment->type = $_POST['type'];
+                $payment->card_number = '';
+                $payment->card_holder_name = '';
+                $payment->card_holder_document_number = '';
+                $payment->card_holder_email = '';
+                $payment->currency = 'USD';
+                $payment->save();
+
+                $reservation->status = FlightManagementModel::STATUS_PAID;
+                $reservation->update();
+
+                add_settings_error('flight-management-messages', 'success', 'Reservación actualizada con éxito', 'updated');
             }
         }
-        include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/reservations.php';
+
+        if (isset($_GET['booking_id'])) {
+            $id = $_GET['booking_id'];
+            $flight_management = new FlightManagementModel();
+            $reservation = $flight_management->getFlightByBookingId($id);
+            // show reservation details
+            include FLIGHT_MANAGEMENT_DIR . 'templates/admin/reservation-details.php';
+        } else {
+            include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/reservations.php';
+        }
+
     }
 
     public function flight_management_configuration_page()
