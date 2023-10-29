@@ -6,10 +6,11 @@ export const getFlightsAvailable = (
   depurateDate,
   returnDate,
   adults,
-  children
+  children,
+  inf
 ) => {
   return get(
-    `get-flight-available?origin=${origin}&destination=${destination}&depurate_date=${depurateDate}&return_date=${returnDate}&adults=${adults}&children=${children}`
+    `get-flight-available?origin=${origin}&destination=${destination}&depurate_date=${depurateDate}&return_date=${returnDate}&adults=${adults}&children=${children}&inf=${inf}`
   );
 };
 

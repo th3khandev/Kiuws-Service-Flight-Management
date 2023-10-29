@@ -14,6 +14,7 @@
           :step="step"
           :adults="adults"
           :children="children"
+          :inf="inf"
           :depurate-date="depurateDate"
           :destination-airport="destinationAirport"
           :origin-airport="originAirport"
@@ -59,6 +60,7 @@
       :flight="flightSelected"
       :children="children"
       :adults="adults"
+      :inf="inf"
       @createReservation="createReservation"
     />
   </div>
@@ -102,6 +104,7 @@ export default {
       returnDate: null,
       adults: 1,
       children: 0,
+      inf: 0,
       flightSelected: null,
       flightReservation: null,
       creatingReservation: false,
@@ -121,12 +124,14 @@ export default {
       depurateDate,
       returnDate,
       adults,
-      children
+      children,
+      inf
     ) {
       this.originAirport = originAirport;
       this.destinationAirport = destinationAirport;
       this.adults = adults;
       this.children = children;
+      this.inf = inf;
       this.depurateDate = depurateDate;
       this.loading = true;
       this.flights = [];
@@ -137,7 +142,8 @@ export default {
         depurateDate,
         returnDate,
         adults,
-        children
+        children,
+        inf
       )
         .then((response) => response.json())
         .then((data) => {
@@ -200,6 +206,11 @@ export default {
         this.flightReservation.passengers.push(
           this.createPassengerData("child")
         );
+      }
+
+      // create passengers by inf amount
+      for (let i = 0; i < this.flightReservation.inf; i++) {
+        this.flightReservation.passengers.push(this.createPassengerData("inf"));
       }
 
       // create contact info

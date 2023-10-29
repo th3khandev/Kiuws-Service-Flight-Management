@@ -32,8 +32,9 @@
             <div class="flight-resume-duration">
               <label class="flight-resume-text">Duración: </label>
               {{ getDurationText(flightReservation.duration) }}
-              <label class="separator"> | </label>
             </div>
+          </div>
+          <div class="flight-resume pl-0 pr-0">
             <div class="flight-resume-adults">
               <label class="flight-resume-text">Adultos: </label>
               {{ flightReservation.adults }}
@@ -42,6 +43,11 @@
             <div class="flight-resume-children">
               <label class="flight-resume-text">Niños: </label>
               {{ flightReservation.children }}
+              <label class="separator"> | </label>
+            </div>
+            <div class="flight-resume-children">
+              <label class="flight-resume-text">Infantes: </label>
+              {{ flightReservation.inf }}
               <label class="separator"> | </label>
             </div>
             <div class="flight-resume-children">
@@ -94,7 +100,11 @@
                         :aria-controls="`collapse-passenger-${index}`"
                       >
                         Pasagero #{{ index + 1 }} ({{
-                          passenger.type == "adult" ? "Adulto" : "Niño"
+                          passenger.type == "adult"
+                            ? "Adulto"
+                            : passenger.type == "child"
+                            ? "Niño"
+                            : "Infante"
                         }})
                       </button>
                     </h2>
@@ -256,7 +266,8 @@
                               :name="`birthDate_${index}`"
                               placeholder="Fecha de nacimiento"
                               v-model="passenger.birthDate"
-                              :max="getMinDate(passenger.type)"
+                              :min="getMinDate(passenger.type)"
+                              :max="getMaxDate(passenger.type)"
                               required
                             />
                           </div>
@@ -354,7 +365,9 @@
           <!-- Card name -->
           <div class="col-12 col-md-6">
             <div class="form-group">
-              <label for="card_name">Nombre tarjeta <span class="text-danger">(*)</span> </label>
+              <label for="card_name"
+                >Nombre tarjeta <span class="text-danger">(*)</span>
+              </label>
               <input
                 type="text"
                 class="form-control"
@@ -370,7 +383,9 @@
           <!-- Card document number -->
           <div class="col-12 col-md-6">
             <div class="form-group">
-              <label for="card_document_number">Número de documento <span class="text-danger">(*)</span></label>
+              <label for="card_document_number"
+                >Número de documento <span class="text-danger">(*)</span></label
+              >
               <input
                 type="text"
                 class="form-control"
@@ -479,7 +494,9 @@
             <button
               type="submit"
               class="btn btn-primary"
-              :disabled="creatingReservation || processingPayment || stripeError"
+              :disabled="
+                creatingReservation || processingPayment || stripeError || gettingToken
+              "
             >
               Guargar reservación
             </button>
@@ -495,7 +512,9 @@
               type="button"
               class="btn btn-primary"
               @click="tryAgainPayment"
-              :disabled="creatingReservation || processingPayment || stripeError"
+              :disabled="
+                creatingReservation || processingPayment || stripeError || gettingToken
+              "
             >
               Procesar pago
             </button>
@@ -544,6 +563,7 @@ export default {
     cardElement: null,
     stripeError: true,
     messageErrorStripe: "",
+    gettingToken: false,
   }),
   created() {
     const currentDate = new Date();
@@ -576,10 +596,33 @@ export default {
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth() + 1;
       const currentDay = currentDate.getDate();
-      const minDate = `${
-        currentYear - (passengerType == "adult" ? 18 : 2)
-      }-${currentMonth}-${currentDay}`;
+
+      if (passengerType == "adult") {
+        return "";
+      }
+
+      if (passengerType == "inf") {
+        return `${currentYear - 2}-${currentMonth}-${currentDay}`;
+      }
+
+      const minDate = `${currentYear - 12}-${currentMonth}-${currentDay}`;
       return minDate;
+    },
+    getMaxDate(passengerType) {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentDay = currentDate.getDate();
+
+      if (passengerType == "adult") {
+        return `${currentYear - 18}-${currentMonth}-${currentDay}`;
+      }
+
+      if (passengerType == "child") {
+        return `${currentYear - 2}-${currentMonth}-${currentDay}`;
+      }
+
+      return "";
     },
     formIsValid() {
       const formReservation = document.getElementById("form-reservation");
@@ -696,7 +739,7 @@ export default {
       return true;
     },
     async saveReservation() {
-      this.messageErrorStripe = '';
+      this.messageErrorStripe = "";
 
       // validate form
       if (!this.formIsValid()) {
@@ -707,7 +750,8 @@ export default {
       const cardToken = await this.getTokenCard();
       if (!cardToken) {
         this.stripeError = true;
-        this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+        this.messageErrorStripe =
+          "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
         return;
       }
 
@@ -736,49 +780,55 @@ export default {
       });
       this.cardElement.mount("#card-element");
       setTimeout(() => {
-        this.cardElement.on('change', (event) => {
+        this.cardElement.on("change", (event) => {
           const { error, complete } = event;
           if (error) {
             this.stripeError = true;
             const { code } = error;
-            if (code == 'incomplete_zip') {
-              this.messageErrorStripe = 'El código postal es requerido';
-            } else if (code == 'incomplete_cvc') {
-              this.messageErrorStripe = 'El código de seguridad es requerido';
-            } else if (code == 'incomplete_expiry') {
-              this.messageErrorStripe = 'La fecha de expiración es requerida';
-            } else if (code == 'incomplete_number') {
-              this.messageErrorStripe = 'El número de tarjeta es requerido';
-            } else if (code == 'invalid_number') {
-              this.messageErrorStripe = 'El número de tarjeta es inválido';
-            } else if (code == 'invalid_expiry_year_past') {
-              this.messageErrorStripe = 'La fecha de expiración es inválida';
+            if (code == "incomplete_zip") {
+              this.messageErrorStripe = "El código postal es requerido";
+            } else if (code == "incomplete_cvc") {
+              this.messageErrorStripe = "El código de seguridad es requerido";
+            } else if (code == "incomplete_expiry") {
+              this.messageErrorStripe = "La fecha de expiración es requerida";
+            } else if (code == "incomplete_number") {
+              this.messageErrorStripe = "El número de tarjeta es requerido";
+            } else if (code == "invalid_number") {
+              this.messageErrorStripe = "El número de tarjeta es inválido";
+            } else if (code == "invalid_expiry_year_past") {
+              this.messageErrorStripe = "La fecha de expiración es inválida";
             } else {
-              this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+              this.messageErrorStripe =
+                "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
             }
           } else {
             if (complete) {
               this.stripeError = false;
-              this.messageErrorStripe = '';
+              this.messageErrorStripe = "";
             } else {
               this.stripeError = true;
-              this.messageErrorStripe = 'Debe completar todos los campos de la tarjeta';
+              this.messageErrorStripe =
+                "Debe completar todos los campos de la tarjeta";
             }
           }
         });
       }, 1000);
     },
     async getTokenCard() {
+      this.gettingToken = true;
       const { cardName } = this.$props.flightReservation.paymentInfo;
 
       try {
-        const stripeResponse = await this.stripe.createSource(this.cardElement, {
-          type: "card",
-          owner: {
-            name: cardName,
-          },
-          usage: "single_use",
-        });
+        const stripeResponse = await this.stripe.createSource(
+          this.cardElement,
+          {
+            type: "card",
+            owner: {
+              name: cardName,
+            },
+            usage: "single_use",
+          }
+        );
 
         if (stripeResponse.error) {
           this.stripeError = true;
@@ -794,23 +844,27 @@ export default {
 
         // get token data
         const cardToken = id;
+        this.gettingToken = false;
         return cardToken;
       } catch (error) {
         this.stripeError = true;
-        this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+        this.messageErrorStripe =
+          "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
+        this.gettingToken = false;
         return null;
       }
     },
     async tryAgainPayment() {
-      this.$emit('tryAgainPayment');
+      this.$emit("tryAgainPayment");
       // get token card
       const cardToken = await this.getTokenCard();
       if (!cardToken) {
         this.stripeError = true;
-        this.messageErrorStripe = 'Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.';
+        this.messageErrorStripe =
+          "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
         return;
       }
-      this.$emit('proccessPayment');
+      this.$emit("proccessPayment");
     },
   },
   mounted() {
