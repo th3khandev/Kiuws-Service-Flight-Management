@@ -199,14 +199,6 @@ class Kiuws {
         // add Code, Quantity attributtes to PassengerTypeQuantity
         $passengerTypeQuantity->addAttribute('Code', 'ADT');
         $passengerTypeQuantity->addAttribute('Quantity', $adults);
-        
-        if ($children > 0) {
-            // add PassengerTypeQuantity to AirTravelerAvail
-            $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
-            // add Code, Quantity attributtes to PassengerTypeQuantity
-            $passengerTypeQuantity->addAttribute('Code', 'CNN');
-            $passengerTypeQuantity->addAttribute('Quantity', $children);
-        }
 
         if ($inf > 0) {
             // add PassengerTypeQuantity to AirTravelerAvail
@@ -214,6 +206,14 @@ class Kiuws {
             // add Code, Quantity attributtes to PassengerTypeQuantity
             $passengerTypeQuantity->addAttribute('Code', 'INF');
             $passengerTypeQuantity->addAttribute('Quantity', $inf);
+        }
+        
+        if ($children > 0) {
+            // add PassengerTypeQuantity to AirTravelerAvail
+            $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
+            // add Code, Quantity attributtes to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Code', 'CNN');
+            $passengerTypeQuantity->addAttribute('Quantity', $children);
         }
     }
 
@@ -563,8 +563,27 @@ class Kiuws {
         }
         // add TravelerInfo to xml
         $travelerInfo = $this->xml->addChild('TravelerInfo');
+
+        // order passengers first all adults, then all infants and finally all children
+        $passengers = [];
+        foreach ($request['passengers'] as $passenger) {
+            if ($passenger['type'] == 'adult') {
+                array_push($passengers, $passenger);
+            }
+        }
+        foreach ($request['passengers'] as $passenger) {
+            if ($passenger['type'] == 'inf') {
+                array_push($passengers, $passenger);
+            }
+        }
+        foreach ($request['passengers'] as $passenger) {
+            if ($passenger['type'] == 'child') {
+                array_push($passengers, $passenger);
+            }
+        }
+
         // add passenger info to TravelerInfo
-        foreach ($request['passengers'] as $key => $passenger) {
+        foreach ($passengers as $key => $passenger) {
 
             if ($passenger['type'] == 'adult') {
                 $ptc = 'ADT';
