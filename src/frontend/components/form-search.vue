@@ -101,7 +101,7 @@
     <!-- Amount Adults and children -->
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
       <div class="row">
-        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+        <div class="col-12 col-sm-12 col-md-4 col-lg-4">
           <label for="amount_adults" class="form-label">Adultos: </label>
           <input
             type="number"
@@ -114,14 +114,27 @@
             step="1"
           />
         </div>
-        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
-          <label for="amount_children" class="form-label">Niños: </label>
+        <div class="col-12 col-sm-12 col-md-4 col-lg-4">
+          <label for="amount_children" class="form-label">Niños (2-12 años): </label>
           <input
             type="number"
             name="amount_children"
             placeholder="Niños"
             class="form-control"
             v-model="children"
+            min="0"
+            max="9"
+            step="1"
+          />
+        </div>
+        <div class="col-12 col-sm-12 col-md-4 col-lg-4">
+          <label for="amount_children" class="form-label">Infantes (0-2 años): </label>
+          <input
+            type="number"
+            name="amount_inf"
+            placeholder="Infantes"
+            class="form-control"
+            v-model="inf"
             min="0"
             max="9"
             step="1"
@@ -177,6 +190,7 @@ export default {
     returnDate: null,
     adults: 1,
     children: 0,
+    inf: 0,
     error: false,
     errorMessage: null,
     currentDate: new Date().toISOString().slice(0, 10),
@@ -251,7 +265,8 @@ export default {
           this.departureDate,
           this.returnDate,
           this.adults,
-          this.children
+          this.children,
+          this.inf
         );
       }
     },

@@ -134,12 +134,13 @@ class Route extends WP_REST_Controller
         $departure_date = $params['depurate_date'];
         $adults = $params['adults'];
         $children = $params['children'];
+        $inf = $params['inf'];
 
         $attemp = 1;
         $max_attemp = 3;
 
         while ($attemp <= $max_attemp) {
-            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children);
+            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children, $inf);
             if ($response['status'] == 'success') {
                 break;
             }
@@ -164,6 +165,7 @@ class Route extends WP_REST_Controller
         $flight_segments_validate = [];
         $adults = 1;
         $children = 0;
+        $inf = 0;
 
         foreach($flight_segments as $flight_segment) {
             $depurate_date_time = $flight_segment['depurateDateTime'];
@@ -172,13 +174,14 @@ class Route extends WP_REST_Controller
             $destination = $flight_segment['destination'];
             $adults = $flight_segment['adults'];
             $children = $flight_segment['children'];
+            $inf = $flight_segment['inf'];
             $flight_number = $flight_segment['flightNumber'];
             $resBookDesig = $flight_segment['resBookDesig'];
             $airlineCode = $flight_segment['airlineCode'];
 
             $listResBookDesig = explode(',', $resBookDesig);
             foreach ($listResBookDesig as $value) {
-                $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children);
+                $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children, $inf);
                 if ($response['status'] == 'success') {
                     // add booking code to response
                     $flight_segments_validate[] = [
@@ -204,8 +207,7 @@ class Route extends WP_REST_Controller
             ]);
         }
 
-
-        $response = $this->kiuwsService->getFlightPriceMultipleSegments($flight_segments_validate, $adults, $children);
+        $response = $this->kiuwsService->getFlightPriceMultipleSegments($flight_segments_validate, $adults, $children, $inf);
         $response['flight_segments'] = $flight_segments_validate;
         return rest_ensure_response($response);
     }

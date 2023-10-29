@@ -4,11 +4,13 @@
       <img
         :src="flight.flightSegment[0].marketingAirlineLogo"
         :alt="flight.flightSegment[0].marketingAirlineName"
+        :style="flight.flightSegment[0].marketingAirlineLogo.includes('default.png') ? { width: '40px' } : {}"
       />
       <label
         v-if="
           flight.flightSegment[0].marketingAirlineLogo.includes('default.png')
         "
+        style="font-size: 12px;"
       >
         {{ flight.flightSegment[0].marketingAirlineName }}
       </label>

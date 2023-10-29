@@ -97,7 +97,11 @@
               </div>
               <div class="flight-resume-children">
                 <label class="flight-resume-text">Niños: </label>
-                {{ children }}
+                {{ children }} <label class="separator">|</label>
+              </div>
+              <div class="flight-resume-children">
+                <label class="flight-resume-text">Infantes: </label>
+                {{ inf }}
               </div>
             </div>
             <div class="row text-center">
@@ -172,7 +176,7 @@ export default {
     FligthSegment,
     Loading,
   },
-  props: ["flight", "adults", "children"],
+  props: ["flight", "adults", "children", "inf"],
   data: () => ({
     loadingPrices: false,
     totalPrice: 0,
@@ -212,6 +216,7 @@ export default {
             flightNumber,
             resBookDesig,
             airlineCode: marketingAirline,
+            inf: this.$props.inf,
           });
         }
         getFlightPrice(flightSegmentsBody)
@@ -271,6 +276,7 @@ export default {
         stops,
         adults: this.$props.adults,
         children: this.$props.children,
+        inf: this.$props.inf,
         total: totalPrice,
         origin,
         destination,
@@ -305,12 +311,12 @@ export default {
         }),
       });
     },
-    tryGetPrice () {
+    tryGetPrice() {
       this.totalPrice = 0;
       this.error = false;
       this.reservationError = false;
       this.getFlightPrices();
-    }
+    },
   },
   watch: {
     flight(newValue, oldValue) {

@@ -32,7 +32,9 @@
             <label>{{ depurateDate }}</label>
           </div>
           <div class="deatil-selected-passengers">
-            <label>{{ adults }} adulto | {{ children }} niños</label>
+            <label
+              >{{ adults }} adultos | {{ children }} niños | {{ inf }} infantes
+            </label>
           </div>
         </div>
         <div
@@ -52,7 +54,15 @@
 </template>
 <script>
 export default {
-  name: 'DetailFiltersSelected',
-  props: ['step', 'originAirport', 'destinationAirport', 'depurateDate', 'adults', 'children']
-}
+  name: "DetailFiltersSelected",
+  props: [
+    "step",
+    "originAirport",
+    "destinationAirport",
+    "depurateDate",
+    "adults",
+    "children",
+    "inf",
+  ],
+};
 </script>

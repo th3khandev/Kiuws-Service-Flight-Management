@@ -189,7 +189,7 @@ class Kiuws {
         $airTraveler->addChild('TravelerRefNumber RPH="'. $refNumber .'"');
     }
 
-    private function createTravelerInfoSummaryXmlObject($adults = 1, $children = 0) {
+    private function createTravelerInfoSummaryXmlObject($adults = 1, $children = 0, $inf = 0) {
         // add TravelerInfoSummary to xml
         $travelerInfoSummary = $this->xml->addChild('TravelerInfoSummary');
         // add AirTravelerAvail to TravelerInfoSummary
@@ -199,11 +199,22 @@ class Kiuws {
         // add Code, Quantity attributtes to PassengerTypeQuantity
         $passengerTypeQuantity->addAttribute('Code', 'ADT');
         $passengerTypeQuantity->addAttribute('Quantity', $adults);
-        // add PassengerTypeQuantity to AirTravelerAvail
-        $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
-        // add Code, Quantity attributtes to PassengerTypeQuantity
-        $passengerTypeQuantity->addAttribute('Code', 'CNN');
-        $passengerTypeQuantity->addAttribute('Quantity', $children);
+        
+        if ($children > 0) {
+            // add PassengerTypeQuantity to AirTravelerAvail
+            $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
+            // add Code, Quantity attributtes to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Code', 'CNN');
+            $passengerTypeQuantity->addAttribute('Quantity', $children);
+        }
+
+        if ($inf > 0) {
+            // add PassengerTypeQuantity to AirTravelerAvail
+            $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
+            // add Code, Quantity attributtes to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Code', 'INF');
+            $passengerTypeQuantity->addAttribute('Quantity', $inf);
+        }
     }
 
     private function createOriginDestinationInformation ($depurateDate, $originLocation, $destinationLocation) {
@@ -228,7 +239,7 @@ class Kiuws {
         $cabinPref->addAttribute('Cabin', 'Economy');
     }
 
-    private function createTravelerInfoSummary ($adults = 1, $children = 1) {
+    private function createTravelerInfoSummary ($adults = 1, $children = 0, $inf = 0) {
         // add TravelerInfoSummary xml object to xml
         $travelerInfoSummary = $this->xml->addChild('TravelerInfoSummary');
         // add AirTravelerAvail xml object to TravelerInfoSummary
@@ -239,12 +250,24 @@ class Kiuws {
         $passengerTypeQuantity->addAttribute('Code', 'ADT');
         // add Quantity Attribute to PassengerTypeQuantity
         $passengerTypeQuantity->addAttribute('Quantity', $adults);
-        // add PassengerTypeQuantity xml object to AirTravelerAvail
-        $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
-        // add Code Attribute to PassengerTypeQuantity
-        $passengerTypeQuantity->addAttribute('Code', 'CHD');
-        // add Quantity Attribute to PassengerTypeQuantity
-        $passengerTypeQuantity->addAttribute('Quantity', $children);
+        
+        if ($children > 0) {
+            // add PassengerTypeQuantity xml object to AirTravelerAvail
+            $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
+            // add Code Attribute to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Code', 'CHD');
+            // add Quantity Attribute to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Quantity', $children);
+        }
+
+        if  ($inf > 0) {
+            // add PassengerTypeQuantity xml object to AirTravelerAvail
+            $passengerTypeQuantity = $airTravelerAvail->addChild('PassengerTypeQuantity');
+            // add Code Attribute to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Code', 'INF');
+            // add Quantity Attribute to PassengerTypeQuantity
+            $passengerTypeQuantity->addAttribute('Quantity', $inf);
+        }
     }
 
     private function POST() {
@@ -443,7 +466,7 @@ class Kiuws {
         return $price;
     }
 
-    public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 1, $maxStopQuantity = 4) {
+    public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 0, $inf = 0, $maxStopQuantity = 4) {
         // Create the xml object
         $this->createKIU_AirAvailRQXmlObject();
         // add OriginDestinationInformation xml object to xml
@@ -451,7 +474,7 @@ class Kiuws {
         // add TravelPreferences xml object to xml
         $this->createTravelPreferences($maxStopQuantity);
         // add TravelerInfoSummary xml object to xml
-        $this->createTravelerInfoSummary($adults, $children);
+        $this->createTravelerInfoSummary($adults, $children, $inf);
         // POST
         $response = $this->POST();
         if ($response['status'] === 'error') {
@@ -470,13 +493,13 @@ class Kiuws {
         ];
     }
 
-    public function getFlightPrice ($depurateDateTime, $arrivalDateTime, $flightNumber, $resBookDesigCode, $originLocation, $destinationLocation, $airlineCode, $adults = 1, $children = 1) {
+    public function getFlightPrice ($depurateDateTime, $arrivalDateTime, $flightNumber, $resBookDesigCode, $originLocation, $destinationLocation, $airlineCode, $adults = 1, $children = 0, $inf = 0) {
         // Create the xml object
         $this->createKIU_AirPriceRQObject();
         // add AirItinerary xml object to xml
         $this->createAirItineraryXmlObject($depurateDateTime, $arrivalDateTime, $flightNumber, $resBookDesigCode, $originLocation, $destinationLocation, $airlineCode);
         // add TravelerInfoSummary xml object to xml
-        $this->createTravelerInfoSummaryXmlObject($adults, $children);
+        $this->createTravelerInfoSummaryXmlObject($adults, $children, $inf);
         // POST
         $response = $this->POST();
         if ($response['status'] === 'error') {
@@ -489,17 +512,18 @@ class Kiuws {
             'status'                => $response['status'],
             'message'               => $response['message'],
             'price'                 => $result,
-            'response'              => $response['response']
+            'response'              => $response['response'],
+            'xml'                   => $this->xml->asXML()
         ];
     }
 
-    public function getFlightPriceMultipleSegments ($flightSegments, $adults = 1, $children = 0) {
+    public function getFlightPriceMultipleSegments ($flightSegments, $adults = 1, $children = 0, $inf = 0) {
         // Create the xml object
         $this->createKIU_AirPriceRQObject();
         // add AirItinerary xml object to xml
         $this->createAirItineraryXmlObjectMultipleSegment($flightSegments);
         // add TravelerInfoSummary xml object to xml
-        $this->createTravelerInfoSummaryXmlObject($adults, $children);
+        $this->createTravelerInfoSummaryXmlObject($adults, $children, $inf);
         // POST
         $response = $this->POST();
         if ($response['status'] === 'error') {
@@ -541,7 +565,17 @@ class Kiuws {
         $travelerInfo = $this->xml->addChild('TravelerInfo');
         // add passenger info to TravelerInfo
         foreach ($request['passengers'] as $key => $passenger) {
-            $ptc = $passenger['type'] == 'adult' ? 'ADT' : 'CHD';
+
+            if ($passenger['type'] == 'adult') {
+                $ptc = 'ADT';
+            } else if ($passenger['type'] == 'child') {
+                $ptc = 'CHD';
+            } else if ($passenger['type'] == 'inf') {
+                $ptc = 'INF';
+            } else {
+                $ptc = '';
+            }
+
             $this->addAirTravelerToTravelerInfoXmlObject($travelerInfo, $ptc, $passenger['name'], $passenger['lastName'], $passenger['documentType'], $passenger['documentNumber'], $passenger['phoneCountryCode'], $passenger['phoneCountryCode'], $passenger['phoneNumber'], $passenger['email'], $passenger['birthDate'], $key + 1);
         }
         // create date ticket limit (current date + 1 day)

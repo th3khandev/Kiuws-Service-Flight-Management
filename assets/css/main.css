@@ -263,9 +263,12 @@
 
 .flight-resume {
   display: flex;
-  padding: 1rem 1.5rem;
   color: #545860;
   font-size: 12px;
+}
+
+.flight-resume > div {
+  display: flex;
 }
 
 .flight-resume-text {
