@@ -123,13 +123,15 @@ $reservationTable->prepare_items();
 </div>
 
 <script>
-    // Mostrar el modal cuando se hace clic en el botón "Cancelar"
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('cancel-booking')) {
+
+    // add event click all a tag with class cancel-booking
+    const cancelBookingButtons = document.querySelectorAll('.cancel-booking');
+    cancelBookingButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
-            const bookingId = e.target.getAttribute('data-id');
+            const bookingId = button.getAttribute('data-id');
             showConfirmationModal(bookingId);
-        }
+        });
     });
 
     // Mostrar el modal de confirmación
@@ -164,4 +166,41 @@ $reservationTable->prepare_items();
         const modal = document.getElementById('cancel-confirmation-modal');
         modal.style.display = 'none';
     }
+
+    // add event click to all a tag with class confirm-booking
+    const confirmBookingButtons = document.querySelectorAll('.confirm-booking');
+    confirmBookingButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bookingId = button.getAttribute('data-id');
+            // show confirm 
+            const confirm = window.confirm('¿Estás seguro de que deseas marcar esta reservación como completada?');
+            if (confirm) {
+                // create form 
+                const form = document.createElement('form');
+                // add display none
+                form.style.display = 'none';
+                form.setAttribute('method', 'post');
+                form.setAttribute('action', '');
+                // create input
+                const input = document.createElement('input');
+                input.setAttribute('type', 'hidden');
+                input.setAttribute('name', 'booking_id');
+                input.setAttribute('value', bookingId);
+                // append input to form
+                form.appendChild(input);
+                // create input
+                const inputAction = document.createElement('input');
+                inputAction.setAttribute('type', 'hidden');
+                inputAction.setAttribute('name', 'action');
+                inputAction.setAttribute('value', 'complete_reservation');
+                // append input to form
+                form.appendChild(inputAction);
+                // append form to body
+                document.body.appendChild(form);
+                // submit form
+                form.submit();
+            }
+        });
+    });
 </script>

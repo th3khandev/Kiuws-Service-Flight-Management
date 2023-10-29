@@ -50,14 +50,21 @@ class Admin
         );
     }
 
+    private function cancelReservation ($reservation, $kiuws_service) {
+        $result = $kiuws_service->cancelReservation($reservation->booking_id);
+        if ($result['status'] == 'success') {
+            add_settings_error('flight-management-messages', 'success', 'Reservación cancelada con éxito', 'updated');
+            $reservation->status = FlightManagementModel::STATUS_CANCELLED;
+            $reservation->update();
+        } else {
+            add_settings_error('flight-management-messages', 'error', $result['message'], 'error');
+            add_settings_error('flight-management-messages', 'error', 'Response: ' . json_encode($result['response']), 'error');
+        }
+    }
+
     public function flight_management_page()
     {
-        if (isset($_POST['action']) && $_POST['action'] === 'cancel_reservation') {
-            // Delete reservation
-            $id = $_POST['booking_id'];
-            $flight_management = new FlightManagementModel();
-            $reservation = $flight_management->getFlightByBookingId($id);
-
+        if (isset($_POST['action']) ) {
             // get options
             $base_url = get_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url');
             $agent_sine = get_option(FLIGHT_MANAGEMENT_PREFIX . 'agent_sine');
@@ -67,14 +74,18 @@ class Admin
             $mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'mode');
 
             $kiuws_service = new Kiuws($base_url, $agent_sine, $terminal_id, $user, $password, $mode);
-            $result = $kiuws_service->cancelReservation($reservation->booking_id);
-            if ($result['status'] == 'success') {
-                add_settings_error('flight-management-messages', 'success', 'Reservación cancelada con éxito', 'updated');
-                $reservation->status = FlightManagementModel::STATUS_CANCELLED;
+
+            $id = $_POST['booking_id'];
+            $flight_management = new FlightManagementModel();
+            $reservation = $flight_management->getFlightByBookingId($id);
+
+            if ($_POST['action'] === 'cancel_reservation') {
+                // Delete reservation
+                $this->cancelReservation($reservation, $kiuws_service);
+            } else if ($_POST['action'] === 'complete_reservation') {
+                $reservation->status = FlightManagementModel::STATUS_COMPLETED;
                 $reservation->update();
-            } else {
-                add_settings_error('flight-management-messages', 'error', $result['message'], 'error');
-                add_settings_error('flight-management-messages', 'error', 'Response: ' . json_encode($result['response']), 'error');
+                add_settings_error('flight-management-messages', 'success', 'Reservación actualizada con éxito', 'updated');
             }
         }
         include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/reservations.php';
