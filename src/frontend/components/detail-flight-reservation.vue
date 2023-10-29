@@ -780,8 +780,6 @@ export default {
           usage: "single_use",
         });
 
-        console.log('stripeResponse', stripeResponse);
-
         if (stripeResponse.error) {
           this.stripeError = true;
           this.messageErrorStripe = stripeResponse.error.message;

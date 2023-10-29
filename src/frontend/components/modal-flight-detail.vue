@@ -184,7 +184,6 @@ export default {
     async getFlightPrices() {
       this.loadingPrices = true;
       const { flightSegment } = this.$props.flight;
-      console.log("getFlightPrices >>> ");
       if (flightSegment.length > 0) {
         const flightSegmentsBody = [];
         for (let i = 0; i < flightSegment.length; i++) {
@@ -215,11 +214,9 @@ export default {
             airlineCode: marketingAirline,
           });
         }
-        console.log("flightSegmentsBody >>> ", flightSegmentsBody);
         getFlightPrice(flightSegmentsBody)
           .then((res) => res.json())
           .then((data) => {
-            console.log("data >>> ", data);
             if (data.status == "success") {
               this.$props.flight.price = {
                 ...data.price,
@@ -232,7 +229,6 @@ export default {
                   (segment) =>
                     segment.flightNumber == segment_validate.flightNumber
                 );
-                console.log("_flightSegment >> ", _flightSegment);
                 _flightSegment.resBookDesig = segment_validate.resBookDesig;
               }
             } else {
@@ -242,7 +238,6 @@ export default {
           })
           .catch((err) => {
             this.error = true;
-            console.log("err >>> ", err);
           })
           .finally(() => {
             // remove flight numbre from loadingPrices
@@ -319,7 +314,6 @@ export default {
   },
   watch: {
     flight(newValue, oldValue) {
-      console.log("change flight >>> ", newValue, oldValue);
       this.tryGetPrice();
     },
   },

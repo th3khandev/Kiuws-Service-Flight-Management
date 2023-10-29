@@ -181,7 +181,6 @@ export default {
       };
     },
     createReservation(reservationFlightData) {
-      console.log("create reservation >> ", reservationFlightData);
       this.reservationCreated = false;
       this.errorPaymentMessage = null;
       this.flightReservation = {
@@ -259,7 +258,6 @@ export default {
         });
     },
     saveReservation(reservationData) {
-      console.log("save reservation to API >> ", reservationData);
       this.creatingReservation = true;
       this.reservationCreated = false;
       this.errorReservation = false;
@@ -269,7 +267,6 @@ export default {
       createReservation(reservationData)
         .then((response) => response.json())
         .then((data) => {
-          console.log("data >> ", data);
           if (data.status == "success") {
             this.reservationCreated = true;
             this.bookingCode = data.bookingId;
