@@ -165,6 +165,9 @@
 // components
 import vSelect from "vue-select";
 
+// libs
+import _ from 'lodash';
+
 // services
 import { getAirportCodes } from '../../services/openFlightOrgService'
 
