@@ -489,7 +489,7 @@ class Kiuws {
             'depurateDate'          => $result['depurateDate'],
             'originLocation'        => $result['originLocation'],
             'destinationLocation'   => $result['destinationLocation'],
-            'response'              => $response['response']['OriginDestinationInformation']
+            'xml'                   => $this->xml->asXML()
         ];
     }
 

@@ -121,33 +121,46 @@
                 </div>
               </div>
               <div class="col-12 mt-1 mb-3" v-if="!loadingPrices">
-                <h6 class="price-total">
-                  {{
-                    totalPrice > 0
-                      ? `Total: USD ${totalPrice.toFixed(2)}`
-                      : "No disponible"
-                  }}
-                </h6>
-                <button
-                  type="button"
-                  class="btn btn-primary mt-2"
-                  target="modal"
-                  data-bs-dismiss="modal"
-                  @click="createReservation"
-                  v-if="!reservationError"
-                >
-                  Crear reservación
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  target="modal"
-                  data-dismiss="modal"
-                  @click="tryGetPrice"
-                  v-else
-                >
-                  Reintentar
-                </button>
+                <div class="row price-total">
+                  <div class="col-6 col-md-6 text-right text-end">Base:</div>
+                  <div class="col-6 col-md-6 text-left text-start">
+                    {{ priceDetail.currencyCode }} {{ priceDetail.baseFare }}
+                  </div>
+                  <div class="col-6 col-md-6 text-right text-end">
+                    Impuestos:
+                  </div>
+                  <div class="col-6 col-md-6 text-left text-start">
+                    {{ priceDetail.currencyCode }} {{ priceDetail.totalTaxes }}
+                  </div>
+                  <div class="col-6 col-md-6 text-right text-end">Total:</div>
+                  <div class="col-6 col-md-6 text-left text-start">
+                    {{ priceDetail.currencyCode }} {{ priceDetail.totalFare }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12 col-md-12 text-center">
+                    <button
+                      type="button"
+                      class="btn btn-primary mt-2"
+                      target="modal"
+                      data-bs-dismiss="modal"
+                      @click="createReservation"
+                      v-if="!reservationError"
+                    >
+                      Crear reservación
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      target="modal"
+                      data-dismiss="modal"
+                      @click="tryGetPrice"
+                      v-else
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                </div>
               </div>
               <div class="col-12 text-center" v-else>
                 <Loading />
@@ -182,6 +195,13 @@ export default {
     totalPrice: 0,
     error: false,
     reservationError: false,
+    priceDetail: {
+      baseFare: 0,
+      currencyCode: "",
+      taxes: [],
+      totalFare: 0,
+      totalTaxes: 0,
+    },
   }),
   methods: {
     getDurationText,
@@ -224,6 +244,9 @@ export default {
           .then((data) => {
             if (data.status == "success") {
               this.$props.flight.price = {
+                ...data.price,
+              };
+              this.priceDetail = {
                 ...data.price,
               };
               this.totalPrice += data.price.totalFare;
@@ -315,6 +338,13 @@ export default {
       this.totalPrice = 0;
       this.error = false;
       this.reservationError = false;
+      this.priceDetail = {
+        baseFare: 0,
+        currencyCode: "",
+        taxes: [],
+        totalFare: 0,
+        totalTaxes: 0,
+      };
       this.getFlightPrices();
     },
   },

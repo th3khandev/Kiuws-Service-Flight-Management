@@ -313,6 +313,11 @@ input[type=number] {
   font-weight: 700;
 }
 
+.price-total {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
 /* Modal */
 #flight-modal .itinerary-container {
   width: 100%;
