@@ -135,12 +135,14 @@ class Route extends WP_REST_Controller
         $adults = $params['adults'];
         $children = $params['children'];
         $inf = $params['inf'];
+        $return_date = $params['return_date'] ?? null;
+        $trip_type = $params['trip_type'] ?? 1;
 
         $attemp = 1;
         $max_attemp = 3;
 
         while ($attemp <= $max_attemp) {
-            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children, $inf);
+            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children, $inf, $return_date, $trip_type);
             if ($response['status'] == 'success') {
                 break;
             }

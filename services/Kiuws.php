@@ -322,16 +322,31 @@ class Kiuws {
         ];
     }
 
-    private function formatFlights ($apiResponse) {
+    private function formatFlights ($apiResponse, $tripType = 1) {
         $flights = [];
-        $depurateDate = $apiResponse['DepartureDateTime'];
-        $originLocation = $apiResponse['OriginLocation'];
-        $destinationLocation = $apiResponse['DestinationLocation'];
+        $returnFlights = [];
 
-        $originDestinationOptions = $apiResponse['OriginDestinationOptions']['OriginDestinationOption'];
-        if (isset($originDestinationOptions['FlightSegment'])) {
-            $originDestinationOptions = [$originDestinationOptions];
+        $depurateDate = null;
+        $originLocation = null;
+        $destinationLocation = null;
+
+        if ($tripType == 1) {
+            $depurateDate = $apiResponse['DepartureDateTime'];
+            $originLocation = $apiResponse['OriginLocation'];
+            $destinationLocation = $apiResponse['DestinationLocation'];
+            $originDestinationOptions = $apiResponse['OriginDestinationOptions']['OriginDestinationOption'];
+            if (isset($originDestinationOptions['FlightSegment'])) {
+                $originDestinationOptions = [$originDestinationOptions];
+            }
+        } else if ($tripType == 2) {
+            $originDestinationInformation = $apiResponse[0];
+            $depurateDate = $originDestinationInformation['DepartureDateTime'];
+            $originLocation = $originDestinationInformation['OriginLocation'];
+            $destinationLocation = $originDestinationInformation['DestinationLocation'];
+            $originDestinationOptions = $originDestinationInformation['OriginDestinationOptions']['OriginDestinationOption'];
         }
+
+
 
         // Forearch flights
         foreach ($originDestinationOptions as $originDestinationOption) {
@@ -386,11 +401,20 @@ class Kiuws {
 
                 // Forearch bookingClassAvail
                 foreach ($flightSegment['BookingClassAvail'] as $bookingClassAvail) {
-                    $_bookingClassAvail = [
-                        'resBookDesigCode'      => $bookingClassAvail['@attributes']['ResBookDesigCode'],
-                        'resBookDesigQuantity'  => $bookingClassAvail['@attributes']['ResBookDesigQuantity'],
-                        'rph'                   => $bookingClassAvail['@attributes']['RPH'],
-                    ];
+                    if (count($bookingClassAvail) == 1) {
+                        $_bookingClass = $bookingClassAvail['@attributes'];
+                        $_bookingClassAvail = [
+                            'resBookDesigCode'      => $_bookingClass['ResBookDesigCode'],
+                            'resBookDesigQuantity'  => $_bookingClass['ResBookDesigQuantity'],
+                            'rph'                   => $_bookingClass['RPH'],
+                        ];
+                    } else {
+                        $_bookingClassAvail = [
+                            'resBookDesigCode'      => $bookingClassAvail['ResBookDesigCode'],
+                            'resBookDesigQuantity'  => $bookingClassAvail['ResBookDesigQuantity'],
+                            'rph'                   => $bookingClassAvail['RPH'],
+                        ];
+                    }
                     array_push($_flightSegment['bookingClassAvail'], $_bookingClassAvail);
                 }
 
@@ -408,16 +432,103 @@ class Kiuws {
             array_push($flights, $flight);
         }
 
+        // if tripType is roundtrip, set returnFlights
+        $returnFlightsDestinationOptions = $apiResponse[1]['OriginDestinationOptions']['OriginDestinationOption'];
+        foreach ($returnFlightsDestinationOptions as $originDestinationOption) {
+            $flight = [
+                'flightSegment' => [],
+                'depurateDate'  => '',
+                'arrivalDate'   => '',
+                'duration'      => '',
+                'stops'         => 0,
+                'id'            => '',
+            ];
+
+            $flightSegments = $originDestinationOption['FlightSegment'];
+            if (isset($flightSegments['@attributes'])) {
+                $flightSegments = [$flightSegments];
+            }
+            // Forearch flightSegment
+            foreach ($flightSegments as $key => $flightSegment) {
+                $airlineCode = $flightSegment['MarketingAirline']['@attributes']['CompanyShortName'];
+                $_flightSegment = [
+                    'departureDateTime'     => $flightSegment['@attributes']['DepartureDateTime'],
+                    'arrivalDateTime'       => $flightSegment['@attributes']['ArrivalDateTime'],
+                    'flightNumber'          => $flightSegment['@attributes']['FlightNumber'],
+                    'stopQuantity'          => $flightSegment['@attributes']['StopQuantity'],
+                    'journeyDuration'       => $flightSegment['@attributes']['JourneyDuration'],
+                    'departureAirport'      => $flightSegment['DepartureAirport']['@attributes']['LocationCode'],
+                    'arrivalAirport'        => $flightSegment['ArrivalAirport']['@attributes']['LocationCode'],
+                    'marketingAirline'      => $airlineCode,
+                    'marketingAirlineName'  => '',
+                    'marketingAirlineLogo'  => '',
+                    'equipment'             => $flightSegment['Equipment']['@attributes']['AirEquipType'],
+                    'meal'                  => $flightSegment['Meal']['@attributes']['MealCode'],
+                    'marketingCabin'        => [
+                        'cabinType' => $flightSegment['MarketingCabin']['@attributes']['CabinType'],
+                        'rph'       => $flightSegment['MarketingCabin']['@attributes']['RPH'],
+                    ],
+                    'bookingClassAvail' => [],
+                ];
+
+                // Get stops
+                if ($key > 0 && $key < count($flightSegments) - 1) {
+                    $flight['stops']++;
+                }
+
+                // Get airline info
+                $airline = $this->iataServices->getAirlineByCode($airlineCode);
+                if (is_null($airline)) {
+                    $airline = $this->iataServices->addAirlineToFile($airlineCode);
+                }
+                $_flightSegment['marketingAirlineName'] = $airline['name'];
+                $_flightSegment['marketingAirlineLogo'] = FLIGHT_MANAGEMENT_URL . $airline['logo'];
+
+                // Forearch bookingClassAvail
+                foreach ($flightSegment['BookingClassAvail'] as $bookingClassAvail) {
+                    if (count($bookingClassAvail) == 1) {
+                        $_bookingClass = $bookingClassAvail['@attributes'];
+                        $_bookingClassAvail = [
+                            'resBookDesigCode'      => $_bookingClass['ResBookDesigCode'],
+                            'resBookDesigQuantity'  => $_bookingClass['ResBookDesigQuantity'],
+                            'rph'                   => $_bookingClass['RPH'],
+                        ];
+                    } else {
+                        $_bookingClassAvail = [
+                            'resBookDesigCode'      => $bookingClassAvail['ResBookDesigCode'],
+                            'resBookDesigQuantity'  => $bookingClassAvail['ResBookDesigQuantity'],
+                            'rph'                   => $bookingClassAvail['RPH'],
+                        ];
+                    }
+                    array_push($_flightSegment['bookingClassAvail'], $_bookingClassAvail);
+                }
+
+                array_push($flight['flightSegment'], $_flightSegment);
+
+                // modify id flight
+                $flight['id'] .= $flightSegment['@attributes']['FlightNumber'];
+            }
+
+            // get depurate time flight
+            $flight['depurateDate'] = $flight['flightSegment'][0]['departureDateTime'];
+            // get arrival time flight
+            $flight['arrivalDate'] = $flight['flightSegment'][count($flight['flightSegment']) - 1]['arrivalDateTime'];
+            // get duration time flight (ArrivalDateTime - DepartureDateTime)
+            $flight['duration'] = date('H:i', strtotime($flight['arrivalDate']) - strtotime($flight['depurateDate']));
+            array_push($returnFlights, $flight);                
+        }
+
+
         return [
             'depurateDate'          => $depurateDate,
             'originLocation'        => $originLocation,
             'destinationLocation'   => $destinationLocation,
-            'flights'               => $flights
+            'flights'               => $flights,
+            'returnFlights'         => $returnFlights,
         ];
     }
 
     private function formatFlightPrice ($apiResponse) {
-        /* format $apiResponse = <?xml version="1.0" encoding="UTF-8"?><KIU_AirPriceRS EchoToken="1" TimeStamp="2023-10-24T00:32:59+00:00" Target="Testing" Version="3.0" SequenceNmbr="1"><Success/><PricedItineraries><PricedItinerary SequenceNumber="1"><AirItinerary><OriginDestinationOptions><OriginDestinationOption><FlightSegment DepartureDateTime="2023-10-28 09:30:00" ArrivalDateTime="2023-10-28 12:00:00" FlightNumber="301" ResBookDesigCode="Y"><DepartureAirport LocationCode="MIA"/><ArrivalAirport LocationCode="PUJ"/><MarketingAirline Code="KN"/></FlightSegment></OriginDestinationOption></OriginDestinationOptions></AirItinerary><AirItineraryPricingInfo><ItinTotalFare><BaseFare Amount="87.73" CurrencyCode="USD"/><EquivFare Amount="87.73" CurrencyCode="USD"/><Taxes><Tax TaxCode="AY" Amount="5.6" CurrencyCode="USD"/><Tax TaxCode="US" Amount="21.1" CurrencyCode="USD"/><Tax TaxCode="XF" Amount="4.5" CurrencyCode="USD"/><Tax TaxCode="YQ" Amount="80" CurrencyCode="USD"/></Taxes><TPA_Extension><Surcharges><Surcharge FareChargeCode="" FareChargeAmount="0.00" /></Surcharges></TPA_Extension><TotalFare Amount="198.93" CurrencyCode="USD"/></ItinTotalFare><PTC_FareBreakdowns><PTC_FareBreakdown><PassengerTypeQuantity Quantity="1" Code="ADT" /><PassengerFare><BaseFare Amount="87.73" CurrencyCode="USD"/><EquivFare Amount="87.73" CurrencyCode="USD"/><Taxes><Tax TaxCode="AY" Amount="5.6" CurrencyCode="USD" /><Tax TaxCode="US" Amount="21.1" CurrencyCode="USD" /><Tax TaxCode="XF" Amount="4.5" CurrencyCode="USD" /><Tax TaxCode="YQ" Amount="80" CurrencyCode="USD" /></Taxes><TPA_Extension><Surcharges><Surcharge FareChargeCode="" FareChargeAmount="0.00" /></Surcharges></TPA_Extension></PassengerFare></PTC_FareBreakdown></PTC_FareBreakdowns></AirItineraryPricingInfo></PricedItinerary></PricedItineraries><IssueOfficeInfo OfficeID=""/></KIU_AirPriceRS>*/
 
         $price = [
             'baseFare'      => 0,
@@ -466,11 +577,17 @@ class Kiuws {
         return $price;
     }
 
-    public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 0, $inf = 0, $maxStopQuantity = 4) {
+    public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 0, $inf = 0,  $returnDate = null, $tripType = 1, $maxStopQuantity = 4) {
         // Create the xml object
         $this->createKIU_AirAvailRQXmlObject();
         // add OriginDestinationInformation xml object to xml
         $this->createOriginDestinationInformation($depurateDate, $originLocation, $destinationLocation);
+
+        if ($tripType == 2) {
+            // add OriginDestinationInformation xml object to xml
+            $this->createOriginDestinationInformation($returnDate, $destinationLocation, $originLocation);
+        }
+
         // add TravelPreferences xml object to xml
         $this->createTravelPreferences($maxStopQuantity);
         // add TravelerInfoSummary xml object to xml
@@ -478,18 +595,21 @@ class Kiuws {
         // POST
         $response = $this->POST();
         if ($response['status'] === 'error') {
-            return $response;
+            return $response + ['xml' => $this->xml->asXML()];
         }
+        
         // Format response
-        $result = $this->formatFlights($response['response']['OriginDestinationInformation']);
+        $result = $this->formatFlights($response['response']['OriginDestinationInformation'], $tripType);
         return [
             'status'                => $response['status'],
             'message'               => $response['message'],
             'flights'               => $result['flights'],
+            'returnFlights'         => $result['returnFlights'],
             'depurateDate'          => $result['depurateDate'],
             'originLocation'        => $result['originLocation'],
             'destinationLocation'   => $result['destinationLocation'],
-            'xml'                   => $this->xml->asXML()
+            'xml'                   => $this->xml->asXML(),
+            'response'              => $response['response'],
         ];
     }
 

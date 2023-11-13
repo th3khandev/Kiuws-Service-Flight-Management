@@ -105,6 +105,7 @@ export default {
       adults: 1,
       children: 0,
       inf: 0,
+      tripType: 1,
       flightSelected: null,
       flightReservation: null,
       creatingReservation: false,
@@ -125,7 +126,8 @@ export default {
       returnDate,
       adults,
       children,
-      inf
+      inf,
+      tripType
     ) {
       this.originAirport = originAirport;
       this.destinationAirport = destinationAirport;
@@ -136,6 +138,12 @@ export default {
       this.loading = true;
       this.flights = [];
       this.flightReservation = null;
+      this.errorReservation = false;
+      this.errorPayment = false;
+      this.paymentSuccess = false;
+      this.bookingCode = null;
+      this.errorPaymentMessage = null;
+      this.tripType = tripType;
       getFlightsAvailable(
         originAirport.code,
         destinationAirport.code,
@@ -143,7 +151,8 @@ export default {
         returnDate,
         adults,
         children,
-        inf
+        inf,
+        tripType
       )
         .then((response) => response.json())
         .then((data) => {

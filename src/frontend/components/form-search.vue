@@ -1,5 +1,16 @@
 <template>
   <div class="row" id="flight-search-form">
+    <div class="col-12 col-sm-12">
+      <!-- Add checks "Solo ida" o "Ida y vuelta" -->
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="trip_type" id="trip_type_one_way" v-model="tripType" value="1">
+        <label class="form-check-label" for="trip_type_one_way">Solo ida</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="trip_type" id="trip_type_round_trip" v-model="tripType" value="2">
+        <label class="form-check-label" for="trip_type_round_trip">Ida y Vuelta</label>
+      </div>
+    </div>
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
       <label for="origin" class="form-label">Desde: </label>
       <v-select
@@ -83,11 +94,11 @@
         class="form-control"
         v-model="departureDate"
         :min="currentDate"
-        @change="depurateDate = null"
+        @change="returnDate = null"
       />
     </div>
     <!-- Return date -->
-    <!-- <div class="col-12 col-sm-12 col-md-4 col-lg-4 mb-2">
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2" v-if="tripType == 2">
       <label for="return_date" class="form-label">Fecha de regreso: </label>
       <input
         type="date"
@@ -96,8 +107,9 @@
         class="form-control"
         v-model="returnDate"
         :min="departureDate"
+        :disabled="!departureDate"
       />
-    </div> -->
+    </div>
     <!-- Amount Adults and children -->
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
       <div class="row">
@@ -165,9 +177,6 @@
 // components
 import vSelect from "vue-select";
 
-// libs
-import _ from 'lodash';
-
 // services
 import { getAirportCodes } from '../../services/openFlightOrgService'
 
@@ -188,6 +197,7 @@ export default {
     inf: 0,
     error: false,
     errorMessage: null,
+    tripType: 1,
     currentDate: new Date().toISOString().slice(0, 10),
     gettingAirports: false,
   }),
@@ -261,7 +271,8 @@ export default {
           this.returnDate,
           this.adults,
           this.children,
-          this.inf
+          this.inf,
+          this.tripType
         );
       }
     },
