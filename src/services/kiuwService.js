@@ -15,9 +15,10 @@ export const getFlightsAvailable = (
   );
 };
 
-export const getFlightPrice = (flightSegments) => {
+export const getFlightPrice = (departureFlightSegments, returnFlightSegments) => {
   return post("get-flight-price", {
-    flight_segments: flightSegments,
+    departure_flight_segments: departureFlightSegments,
+    return_flight_segments: returnFlightSegments
   });
 };
 

@@ -253,6 +253,14 @@ export default {
         this.setError("El campo 'Niños' no deber ser mayor a 9");
         return false;
       }
+
+      if (this.tripType == 2) {
+        if (!this.returnDate) {
+          this.setError("Debe seleccionar una fecha de regreso");
+          return false;
+        }
+      }
+
       return true;
     },
     setError(message) {

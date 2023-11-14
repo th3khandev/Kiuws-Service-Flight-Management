@@ -163,13 +163,16 @@ class Route extends WP_REST_Controller
     public function get_flight_price ($request) {
         $params = $request->get_params();
 
-        $flight_segments = $params['flight_segments'];
-        $flight_segments_validate = [];
+        $departure_flight_segments = $params['departure_flight_segments'];
+        $return_flight_segments = $params['return_flight_segments'];
+        $departure_flight_segments_validate = [];
+        $return_flight_segments_validate = [];
         $adults = 1;
         $children = 0;
         $inf = 0;
 
-        foreach($flight_segments as $flight_segment) {
+        // validate departure segments
+        foreach($departure_flight_segments as $flight_segment) {
             $depurate_date_time = $flight_segment['depurateDateTime'];
             $arrival_date_time = $flight_segment['arrivalDateTime'];
             $origin = $flight_segment['origin'];
@@ -186,7 +189,7 @@ class Route extends WP_REST_Controller
                 $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children, $inf);
                 if ($response['status'] == 'success') {
                     // add booking code to response
-                    $flight_segments_validate[] = [
+                    $departure_flight_segments_validate[] = [
                         'depurateDateTime' => $depurate_date_time,
                         'arrivalDateTime' => $arrival_date_time,
                         'origin' => $origin,
@@ -202,15 +205,58 @@ class Route extends WP_REST_Controller
             }
         }
 
-        if (count($flight_segments) != count($flight_segments_validate)) {
+        if (count($departure_flight_segments) != count($departure_flight_segments_validate)) {
             return rest_ensure_response([
                 'status' => 'error',
                 'message' => 'No se completo la cotización de todos los vuelos.'
             ]);
         }
 
-        $response = $this->kiuwsService->getFlightPriceMultipleSegments($flight_segments_validate, $adults, $children, $inf);
-        $response['flight_segments'] = $flight_segments_validate;
+        // validate return segments
+        foreach($return_flight_segments as $flight_segment) {
+            $depurate_date_time = $flight_segment['depurateDateTime'];
+            $arrival_date_time = $flight_segment['arrivalDateTime'];
+            $origin = $flight_segment['origin'];
+            $destination = $flight_segment['destination'];
+            $adults = $flight_segment['adults'];
+            $children = $flight_segment['children'];
+            $inf = $flight_segment['inf'];
+            $flight_number = $flight_segment['flightNumber'];
+            $resBookDesig = $flight_segment['resBookDesig'];
+            $airlineCode = $flight_segment['airlineCode'];
+
+            $listResBookDesig = explode(',', $resBookDesig);
+            foreach ($listResBookDesig as $value) {
+                $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children, $inf);
+                if ($response['status'] == 'success') {
+                    // add booking code to response
+                    $return_flight_segments_validate[] = [
+                        'depurateDateTime' => $depurate_date_time,
+                        'arrivalDateTime' => $arrival_date_time,
+                        'origin' => $origin,
+                        'destination' => $destination,
+                        'adults' => $adults,
+                        'children' => $children,
+                        'flightNumber' => $flight_number,
+                        'resBookDesig' => trim($value),
+                        'airlineCode' => $airlineCode,
+                    ];
+                    break;
+                }
+            }
+        }
+
+        if (count($return_flight_segments) != count($return_flight_segments_validate)) {
+            return rest_ensure_response([
+                'status' => 'error',
+                'message' => 'No se completo la cotización de todos los vuelos.'
+            ]);
+        }
+
+
+        $response = $this->kiuwsService->getFlightPriceMultipleSegments($departure_flight_segments_validate, $return_flight_segments_validate, $adults, $children, $inf);
+        $response['departure_flight_segments'] = $departure_flight_segments_validate;
+        $response['return_flight_segments'] = $return_flight_segments_validate;
         return rest_ensure_response($response);
     }
 

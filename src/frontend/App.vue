@@ -61,6 +61,8 @@
       :children="children"
       :adults="adults"
       :inf="inf"
+      :return-flights="returnFlights"
+      :trip-type="tripType"
       @createReservation="createReservation"
     />
   </div>
@@ -98,6 +100,7 @@ export default {
       step: 1,
       loading: false,
       flights: [],
+      returnFlights: [],
       originAirport: null,
       destinationAirport: null,
       depurateDate: null,
@@ -144,6 +147,7 @@ export default {
       this.bookingCode = null;
       this.errorPaymentMessage = null;
       this.tripType = tripType;
+      this.returnFlights = [];
       getFlightsAvailable(
         originAirport.code,
         destinationAirport.code,
@@ -163,13 +167,14 @@ export default {
               "Se ha presentado un error, por favor intente más tarde"
             );
           } else if (data.status == "success") {
-            const { flights } = data;
+            const { flights, returnFlights } = data;
             if (flights.length == 0) {
               this.$refs.flightSearchForm.setError(
                 "No se encontraron vuelos disponibles, para los datos ingresados"
               );
             } else {
               this.flights = flights;
+              this.returnFlights = returnFlights;
               this.step = 2;
             }
           }

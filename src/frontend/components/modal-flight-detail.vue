@@ -104,6 +104,68 @@
                 {{ inf }}
               </div>
             </div>
+
+            <!-- Detail options return -->
+            <div class="row" v-if="tripType == 2">
+              <div class="col-12 col-md-12">
+                <h6>Seleccione una opción de vuelo de regreso:</h6>
+              </div>
+              <div class="col-12 col-md-12">
+                <div class="accordion" id="accordion-return-flights">
+                  <div
+                    class="card"
+                    v-for="(returnFlight, index) in returnFlights"
+                    :key="index"
+                  >
+                    <div
+                      class="card-header"
+                      :id="`return-flight-${returnFlight.id}`"
+                    >
+                      <h2 style="margin-bottom: 0px !important">
+                        <button
+                          class="btn btn-link btn-block text-left text-primary p-0"
+                          type="button"
+                          data-toggle="collapse"
+                          :data-target="`#collapse-return-flight-${returnFlight.id}`"
+                          aria-expanded="true"
+                          :aria-controls="`collapse-return-flight-${returnFlight.id}`"
+                          @click="handleFlightSelected(returnFlight)"
+                        >
+                          <input
+                            class="form-check-input"
+                            type="radio"
+                            name="return_flight_selected"
+                            :id="`return_flight_${returnFlight.id}`"
+                            style="position: relative; margin-left: 0px"
+                          />
+                          Salida: {{ returnFlight.depurateDate }} | Llegada:
+                          {{ returnFlight.arrivalDate }} | Duración:
+                          {{ getDurationText(returnFlight.duration) }}
+                        </button>
+                      </h2>
+                    </div>
+
+                    <div
+                      :id="`collapse-return-flight-${returnFlight.id}`"
+                      :class="`collapse ${index == 0 ? 'show' : ''}`"
+                      :aria-labelledby="`return-flight-${returnFlight.id}`"
+                      data-parent="#accordion-return-flights"
+                    >
+                      <div class="card-body">
+                        <FligthSegment
+                          v-for="segment in returnFlight.flightSegment"
+                          :key="segment.flightNumber"
+                          :segment="segment"
+                          :loading-prices="loadingPrices"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End detail options return -->
+
             <div class="row text-center">
               <div class="col-12 mb-3 mt-2" v-if="error">
                 <div class="alert alert-danger">
@@ -189,7 +251,7 @@ export default {
     FligthSegment,
     Loading,
   },
-  props: ["flight", "adults", "children", "inf"],
+  props: ["flight", "adults", "children", "inf", "returnFlights", "tripType"],
   data: () => ({
     loadingPrices: false,
     totalPrice: 0,
@@ -202,13 +264,16 @@ export default {
       totalFare: 0,
       totalTaxes: 0,
     },
+    returnFlightSelected: null,
   }),
   methods: {
     getDurationText,
-    async getFlightPrices() {
-      this.loadingPrices = true;
-      const { flightSegment } = this.$props.flight;
-      if (flightSegment.length > 0) {
+    getReturnFlightSelectedData() {
+      const returnFlightSelected = this.returnFlights.find(
+        (flight) => flight.id == this.returnFlightSelected
+      );
+      if (returnFlightSelected) {
+        const { flightSegment } = returnFlightSelected;
         const flightSegmentsBody = [];
         for (let i = 0; i < flightSegment.length; i++) {
           const segment = flightSegment[i];
@@ -239,7 +304,58 @@ export default {
             inf: this.$props.inf,
           });
         }
-        getFlightPrice(flightSegmentsBody)
+        return flightSegmentsBody;
+      }
+      return [];
+    },
+    async getFlightPrices() {
+      this.loadingPrices = true;
+      const { flightSegment } = this.$props.flight;
+      if (flightSegment.length > 0) {
+        const flightSegmentsBody = [];
+        const returnFlightDataBody = {};
+        const departureFlightDataBody = {};
+        for (let i = 0; i < flightSegment.length; i++) {
+          const segment = flightSegment[i];
+          const {
+            departureDateTime,
+            arrivalDateTime,
+            departureAirport,
+            arrivalAirport,
+            flightNumber,
+            bookingClassAvail,
+            marketingAirline,
+          } = segment;
+          // create string with resBookDesig with , separate
+          const resBookDesig = bookingClassAvail
+            .map((book) => book.resBookDesigCode)
+            .join(",");
+
+          flightSegmentsBody.push({
+            depurateDateTime: departureDateTime,
+            arrivalDateTime,
+            origin: departureAirport,
+            destination: arrivalAirport,
+            adults: this.$props.adults,
+            children: this.$props.children,
+            flightNumber,
+            resBookDesig,
+            airlineCode: marketingAirline,
+            inf: this.$props.inf,
+          });
+        }
+
+        departureFlightDataBody.flightSegments = flightSegmentsBody;
+
+        if (this.$props.tripType == 2) {
+          returnFlightDataBody.flightSegments =
+            this.getReturnFlightSelectedData();
+        }
+
+        getFlightPrice(
+          departureFlightDataBody.flightSegments,
+          returnFlightDataBody.flightSegments
+        )
           .then((res) => res.json())
           .then((data) => {
             if (data.status == "success") {
@@ -251,13 +367,32 @@ export default {
               };
               this.totalPrice += data.price.totalFare;
               // set res book desig validate by segment
-              for (let i = 0; i < data.flight_segments.length; i++) {
-                const segment_validate = data.flight_segments[i];
+              for (let i = 0; i < data.departure_flight_segments.length; i++) {
+                const segment_validate = data.departure_flight_segments[i];
                 const _flightSegment = this.$props.flight.flightSegment.find(
                   (segment) =>
                     segment.flightNumber == segment_validate.flightNumber
                 );
-                _flightSegment.resBookDesig = segment_validate.resBookDesig;
+                if (_flightSegment) {
+                  _flightSegment.resBookDesig = segment_validate.resBookDesig;
+                }
+              }
+              // set resbooking desig return flight
+              if (this.$props.tripType == 2) {
+                for (
+                  let i = 0;
+                  i < data.return_flight_segments.length;
+                  i++
+                ) {
+                  const return_segment_validate = data.return_flight_segments[i];
+                  const _returnFlightSegment = this.$props.returnFlights[0].flightSegment.find(
+                    (segment) =>
+                      segment.flightNumber == return_segment_validate.flightNumber
+                  );
+                  if (_returnFlightSegment) {
+                    _returnFlightSegment.resBookDesig = return_segment_validate.resBookDesig;
+                  }
+                }
               }
             } else {
               this.error = true;
@@ -266,6 +401,7 @@ export default {
           })
           .catch((err) => {
             this.error = true;
+            console.log('error >> ', err)
           })
           .finally(() => {
             // remove flight numbre from loadingPrices
@@ -291,6 +427,11 @@ export default {
       const destination =
         flightSegment[flightSegment.length - 1].arrivalAirport;
 
+      // get return flight selected
+      const returnFlightSelected = this.returnFlights.find(
+        (flight) => flight.id == this.returnFlightSelected
+      );
+
       this.$emit("createReservation", {
         depurateDate,
         arrivalDate,
@@ -308,7 +449,32 @@ export default {
         totalTaxes,
         baseFare,
         taxes,
+        tripType: this.$props.tripType,
         segment: flightSegment.map((segment) => {
+          const {
+            arrivalAirport,
+            arrivalDateTime,
+            departureAirport,
+            departureDateTime,
+            journeyDuration,
+            marketingAirline,
+            marketingAirlineName,
+            flightNumber,
+            resBookDesig,
+          } = segment;
+          return {
+            arrivalAirport,
+            arrivalDateTime,
+            departureAirport,
+            departureDateTime,
+            duration: journeyDuration,
+            airlineCode: marketingAirline,
+            airlineName: marketingAirlineName,
+            flightNumber,
+            resBookDesig,
+          };
+        }),
+        returnSegments: returnFlightSelected.flightSegment.map(segment => {
           const {
             arrivalAirport,
             arrivalDateTime,
@@ -347,10 +513,40 @@ export default {
       };
       this.getFlightPrices();
     },
+    handleFlightSelected(returnFlight) {
+      if (this.returnFlightSelected == returnFlight.id) {
+        this.returnFlightSelected = null;
+        return;
+      }
+
+      this.returnFlightSelected = returnFlight.id;
+      console.log("handleFlightSelected >> ", returnFlight);
+      // check button radio `return_flight_${returnFlight.id}`
+      const radio = document.getElementById(`return_flight_${returnFlight.id}`);
+      console.log('radio: ', radio);
+      if (radio) {
+        radio.checked = true;
+      }
+      setTimeout(() => {
+        this.tryGetPrice();
+      }, 250);
+    },
+    setFirstReturnFlight() {
+      if (this.returnFlights.length > 0) {
+        this.handleFlightSelected(this.returnFlights[0]);
+      }
+    },
   },
   watch: {
     flight(newValue, oldValue) {
-      this.tryGetPrice();
+      this.returnFlightSelected = null;
+      if (this.$props.tripType == 1) {
+        this.tryGetPrice();
+      } else {
+        setTimeout(() => {
+          this.setFirstReturnFlight();
+        }, 500);
+      }
     },
   },
 };

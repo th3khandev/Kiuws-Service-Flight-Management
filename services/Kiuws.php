@@ -111,7 +111,7 @@ class Kiuws {
         $flightSegment->addChild('MarketingAirline Code="'. $airlineCode .'"');
     }
 
-    private function createAirItineraryXmlObjectMultipleSegment ($flightSegments) {
+    private function createAirItineraryXmlObjectMultipleSegment ($departureFlightSegments, $returnFlightSegments) {
         // add AirItinerary xml object to xml
         $airItinerary = $this->xml->addChild('AirItinerary');
         // add OriginDestinationOptions xml object to AirItinerary
@@ -119,7 +119,7 @@ class Kiuws {
         // add OriginDestinationOption xml object to OriginDestinationOptions
         $originDestinationOption = $originDestinationOptions->addChild('OriginDestinationOption');
 
-        foreach ($flightSegments as $segment) {
+        foreach ($departureFlightSegments as $segment) {
             // add FlightSegment xml object to OriginDestinationOption
             $flightSegment = $originDestinationOption->addChild('FlightSegment');
             // add DepurateDateTime, ArrivalDateTime, FlightNumber, ResBookDesigCode attributtes to FlightSegment
@@ -133,6 +133,27 @@ class Kiuws {
             $flightSegment->addChild('ArrivalAirport LocationCode="'. $segment['destination'] .'"');
             // add MarketingAirline xml object to FlightSegment
             $flightSegment->addChild('MarketingAirline Code="'. $segment['airlineCode'] .'"');
+        }
+
+        if (count($returnFlightSegments) > 0) {
+            // add OriginDestinationOption xml object to OriginDestinationOptions
+            $originDestinationOption = $originDestinationOptions->addChild('OriginDestinationOption');
+
+            foreach ($returnFlightSegments as $segment) {
+                // add FlightSegment xml object to OriginDestinationOption
+                $flightSegment = $originDestinationOption->addChild('FlightSegment');
+                // add DepurateDateTime, ArrivalDateTime, FlightNumber, ResBookDesigCode attributtes to FlightSegment
+                $flightSegment->addAttribute('DepartureDateTime', $segment['depurateDateTime']);
+                $flightSegment->addAttribute('ArrivalDateTime', $segment['arrivalDateTime']);
+                $flightSegment->addAttribute('FlightNumber', $segment['flightNumber']);
+                $flightSegment->addAttribute('ResBookDesigCode', $segment['resBookDesig']);
+                // add DepartureAirport xml object to FlightSegment
+                $flightSegment->addChild('DepartureAirport LocationCode="'. $segment['origin'] .'"');
+                // add ArrivalAirport xml object to FlightSegment
+                $flightSegment->addChild('ArrivalAirport LocationCode="'. $segment['destination'] .'"');
+                // add MarketingAirline xml object to FlightSegment
+                $flightSegment->addChild('MarketingAirline Code="'. $segment['airlineCode'] .'"');
+            }
         }
     }
 
@@ -637,17 +658,17 @@ class Kiuws {
         ];
     }
 
-    public function getFlightPriceMultipleSegments ($flightSegments, $adults = 1, $children = 0, $inf = 0) {
+    public function getFlightPriceMultipleSegments ($departureFlightSegments, $returnFlightSegments, $adults = 1, $children = 0, $inf = 0) {
         // Create the xml object
         $this->createKIU_AirPriceRQObject();
         // add AirItinerary xml object to xml
-        $this->createAirItineraryXmlObjectMultipleSegment($flightSegments);
+        $this->createAirItineraryXmlObjectMultipleSegment($departureFlightSegments, $returnFlightSegments);
         // add TravelerInfoSummary xml object to xml
         $this->createTravelerInfoSummaryXmlObject($adults, $children, $inf);
         // POST
         $response = $this->POST();
         if ($response['status'] === 'error') {
-            return $response;
+            return $response + ['xml' => $this->xml->asXML()];
         }
         // format price data
         $result = $this->formatFlightPrice($response['response']);
