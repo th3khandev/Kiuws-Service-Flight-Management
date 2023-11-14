@@ -64,7 +64,7 @@
         data-bs-toggle="modal"
         data-bs-target="#flight-modal"
       >
-        Reservar
+        Ver detalle
       </button>
     </div>
   </div>
