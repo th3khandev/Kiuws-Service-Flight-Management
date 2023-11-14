@@ -439,6 +439,7 @@ class Route extends WP_REST_Controller
         $flight_payment_info->card_number = $params['card_number'];
         $flight_payment_info->currency = $params['currency_code'];
         $flight_payment_info->type = 'Stripe';
+        $flight_payment_info->date = date('Y-m-d H:i:s');
 
         // get flight by booling id
         $flight_model = new FlightManagementModel();
