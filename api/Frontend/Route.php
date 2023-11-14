@@ -100,6 +100,18 @@ class Route extends WP_REST_Controller
                 ]
             ]
         );
+
+        register_rest_route(
+            $this->namespace,
+            'test-email-reservation',
+            [
+                [
+                    'methods' => WP_REST_Server::READABLE,
+                    'callback' => [$this, 'testEmail'],
+                    'permission_callback' => [$this, 'get_route_access'],
+                ]
+            ]
+        );
     }
 
     /**
@@ -164,7 +176,7 @@ class Route extends WP_REST_Controller
         $params = $request->get_params();
 
         $departure_flight_segments = $params['departure_flight_segments'];
-        $return_flight_segments = $params['return_flight_segments'];
+        $return_flight_segments = $params['return_flight_segments'] ?? [];
         $departure_flight_segments_validate = [];
         $return_flight_segments_validate = [];
         $adults = 1;
@@ -303,7 +315,7 @@ class Route extends WP_REST_Controller
         $flight->base_fare = $params['baseFare'];
         $flight->total_taxes = $params['totalTaxes'];
         $flight->total = $params['total'];
-        $flight->currency_code = $params['currencyCode'];
+        $flight->currency_code = 'USD';
         $flight->status = FlightManagementModel::STATUS_BOOKED;
         $flight->booking_id = $response['bookingId'];
         $flight->ticket_time_limit = $response['ticketTimeLimit'];
@@ -338,6 +350,7 @@ class Route extends WP_REST_Controller
         }
 
         // save return flight segments
+        $flight_segments = [];
         if (isset($params['returnSegments']) && count($params['returnSegments']) > 0) {
             foreach ($params['returnSegments'] as $segment) {
                 $flight_segment = new FlightSegmentModel();
@@ -352,6 +365,8 @@ class Route extends WP_REST_Controller
                 $flight_segment->flight_number = $segment['flightNumber'];
                 $flight_segment->res_book_desig = $segment['resBookDesig'];
                 $flight_segment->save();
+
+                $flight_segments[] = $flight_segment;
             }
 
         }
@@ -383,9 +398,12 @@ class Route extends WP_REST_Controller
             $flight_passenger->save();
         }
 
-        $response['flight_id'] = $flight->id;
-        $response['reservation_status'] = $flight->status;
-        $response['message'] = 'Reserva creada correctamente.';
+        // send email to user admin
+        $this->sendEmailToAdmin($flight, $flight_contact);
+
+        // send email to user
+        $this->sendEmailToUser($flight_contact->email, $flight, $flight_contact, $flight_segments);
+
         return rest_ensure_response($response);
     }
 
@@ -457,5 +475,207 @@ class Route extends WP_REST_Controller
             'success' => true,
             'message' => 'Pago realizado correctamente.',
         ];
+    }
+
+    private function sendEmailToAdmin ($flight, $flight_contact) {
+        // send email to user admin
+        $email_to = get_option(FLIGHT_MANAGEMENT_PREFIX . 'email_to');
+        $email_to = trim($email_to);
+
+        // get blogname
+        $blogname = get_option('blogname');
+
+        // get html template
+        $html_template = file_get_contents(FLIGHT_MANAGEMENT_DIR . 'templates/emails/admin.php');
+
+        // replate title in template by blogname
+        $html_template = str_replace('{{title}}', $blogname, $html_template);
+
+        // get blog logo url
+        $logo_url = FLIGHT_MANAGEMENT_URL . 'assets/images/logo-puncana.jpg';
+
+        // replace logo url in template
+        $html_template = str_replace('{{logo}}', $logo_url, $html_template);
+
+        // get url site
+        $url_site = get_site_url();
+
+        // replace url site in template
+        $html_template = str_replace('{{site_url}}', $url_site, $html_template);
+
+        // set main banner
+        $main_banner = FLIGHT_MANAGEMENT_URL . 'assets/images/somos-la-familia-puncana.jpg';
+
+        // replace main banner in template
+        $html_template = str_replace('{{main_banner}}', $main_banner, $html_template);
+
+        // set flight data in template
+        $html_template = str_replace('{{departure_date}}', $flight->departure_date_time, $html_template);
+        $html_template = str_replace('{{arrival_date}}', $flight->arrival_date_time, $html_template);
+        $html_template = str_replace('{{origin}}', $flight->origin, $html_template);
+        $html_template = str_replace('{{destination}}', $flight->destination, $html_template);
+        $html_template = str_replace('{{adults}}', $flight->adults, $html_template);
+        $html_template = str_replace('{{children}}', $flight->children, $html_template);
+        $html_template = str_replace('{{inf}}', $flight->inf, $html_template);
+        $html_template = str_replace('{{duration}}', $flight->duration, $html_template);
+        $html_template = str_replace('{{stops}}', $flight->stops, $html_template);
+        $trip_type = 'NO';
+        if ($flight->trip_type == FlightManagementModel::TRIP_TYPE_ROUND_TRIP) {
+            $trip_type = 'SI';
+        }
+        $html_template = str_replace('{{trip_type}}', $trip_type, $html_template);
+
+        // add flight contact data
+        $html_template = str_replace('{{contact_name}}', $flight_contact->name, $html_template);
+        $html_template = str_replace('{{contact_last_name}}', $flight_contact->last_name, $html_template);
+        $html_template = str_replace('{{contact_email}}', $flight_contact->email, $html_template);
+        $html_template = str_replace('{{contact_phone_number}}', $flight_contact->phone_number, $html_template);
+
+        // create flight_link 
+        $flight_link = get_site_url() . '/wp-admin/admin.php?page=flight-management&booking_id=' . $flight->booking_id;
+        
+        // replce flight_link in template html
+        $html_template = str_replace('{{flight_link}}', $flight_link, $html_template);
+
+        // create puncana footer image
+        $puncana_footer_image = FLIGHT_MANAGEMENT_URL . 'assets/images/puncana-footer.jpg';
+
+        // replace image_footer in template html
+        $html_template = str_replace('{{image_footer}}', $puncana_footer_image, $html_template);
+
+
+        // set header response html not like JSON
+        // header('Content-Type: text/html; charset=UTF-8');
+
+        // send email
+        wp_mail($email_to, 'Nueva reserva de vuelo', $html_template, [
+            'Content-Type: text/html; charset=UTF-8',
+        ]);
+    }
+
+    private function sendEmailToUser ($user_email, $flight, $flight_contact, $flight_segments) {
+        // get blogname
+        $blogname = get_option('blogname');
+
+        // get html template
+        $html_template = file_get_contents(FLIGHT_MANAGEMENT_DIR . 'templates/emails/user.php');
+
+        // replate title in template by blogname
+        $html_template = str_replace('{{title}}', $blogname, $html_template);
+
+        // get blog logo url
+        $logo_url = FLIGHT_MANAGEMENT_URL . 'assets/images/logo-puncana.jpg';
+
+        // replace logo url in template
+        $html_template = str_replace('{{logo}}', $logo_url, $html_template);
+
+        // get url site
+        $url_site = get_site_url();
+
+        // replace url site in template
+        $html_template = str_replace('{{site_url}}', $url_site, $html_template);
+
+        // set main banner
+        $main_banner = FLIGHT_MANAGEMENT_URL . 'assets/images/somos-la-familia-puncana.jpg';
+
+        // replace main banner in template
+        $html_template = str_replace('{{main_banner}}', $main_banner, $html_template);
+
+        // set flight data in template
+        $html_template = str_replace('{{id}}', $flight->booking_id, $html_template);
+        $html_template = str_replace('{{departure_date}}', $flight->departure_date_time, $html_template);
+        $html_template = str_replace('{{arrival_date}}', $flight->arrival_date_time, $html_template);
+        $html_template = str_replace('{{origin}}', $flight->origin, $html_template);
+        $html_template = str_replace('{{destination}}', $flight->destination, $html_template);
+        $html_template = str_replace('{{adults}}', $flight->adults, $html_template);
+        $html_template = str_replace('{{children}}', $flight->children, $html_template);
+        $html_template = str_replace('{{inf}}', $flight->inf, $html_template);
+        $html_template = str_replace('{{duration}}', $flight->duration, $html_template);
+        $html_template = str_replace('{{stops}}', $flight->stops, $html_template);
+        $trip_type = 'NO';
+        if ($flight->trip_type == FlightManagementModel::TRIP_TYPE_ROUND_TRIP) {
+            $trip_type = 'SI';
+        }
+        $html_template = str_replace('{{trip_type}}', $trip_type, $html_template);
+
+        // add flight contact data
+        $html_template = str_replace('{{contact_name}}', $flight_contact->name, $html_template);
+        $html_template = str_replace('{{contact_last_name}}', $flight_contact->last_name, $html_template);
+        $html_template = str_replace('{{contact_email}}', $flight_contact->email, $html_template);
+        $html_template = str_replace('{{contact_phone_number}}', $flight_contact->phone_number, $html_template);
+
+        // add payment data
+        $html_template = str_replace('{{currency_code}}', $flight->currency_code, $html_template);
+        $html_template = str_replace('{{base_fare}}', $flight->base_fare, $html_template);
+        $html_template = str_replace('{{total_taxes}}', $flight->total_taxes, $html_template);
+        $html_template = str_replace('{{total}}', $flight->total, $html_template);
+
+        // create segments html
+        $segments_html = '';
+        foreach ($flight_segments as $key => $segment) {
+            $index = $key + 1;
+            $segments_html .= '<tr>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;" colspan="4">' . $index . '. ' . $segment->airline_name . ' (' . $segment->airline_code . ') - vuelo #' . $segment->flight_number . '</th>';
+            $segments_html .= '</tr>';
+            $segments_html .= '<tr>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;">Desde: </th>';
+            $segments_html .= '<td style="padding: 5px 0px 0px 10px;">' . $segment->origin_airport_code . '</td>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;">Hora de salida: </th>';
+            $segments_html .= '<td style="padding: 5px 0px 0px 10px;">' . $segment->departure_date_time . '</td>';
+            $segments_html .= '</tr>';
+            $segments_html .= '<tr>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;">Hasta: </th>';
+            $segments_html .= '<td style="padding: 5px 0px 0px 10px;">' . $segment->destination_airport_code . '</td>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;">Hora de llegada: </th>';
+            $segments_html .= '<td style="padding: 5px 0px 0px 10px;">' . $segment->arrival_date_time . '</td>';
+            $segments_html .= '</tr>';
+            $segments_html .= '<tr>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;">Duracion: </th>';
+            $segments_html .= '<td style="padding: 5px 0px 0px 10px;">' . $segment->duration . '</td>';
+            $segments_html .= '<th style="padding: 5px 0px 0px 10px; text-align: right;">Clase: </th>';
+            $segments_html .= '<td style="padding: 5px 0px 0px 10px;">' . $segment->res_book_desig . '</td>';
+            $segments_html .= '</tr>';
+        }
+
+        // replace segments in template
+        $html_template = str_replace('{{segment_section}}', $segments_html, $html_template);
+
+        // create flight_link 
+        $flight_link = get_site_url() . '/wp-admin/admin.php?page=flight-management&booking_id=' . $flight->booking_id;
+        
+        // replce flight_link in template html
+        $html_template = str_replace('{{flight_link}}', $flight_link, $html_template);
+
+        // create puncana footer image
+        $puncana_footer_image = FLIGHT_MANAGEMENT_URL . 'assets/images/puncana-footer.jpg';
+
+        // replace image_footer in template html
+        $html_template = str_replace('{{image_footer}}', $puncana_footer_image, $html_template);
+
+        // send email to user
+        wp_mail($user_email, 'Reserva de vuelo', $html_template, [
+            'Content-Type: text/html; charset=UTF-8',
+        ]);
+    }
+
+    public function testEmail () {
+        $flight_test = new FlightManagementModel();
+        $flight_test = $flight_test->getFlightById(1);
+
+        $flight_contact_test = new FlightContactModel();
+        $flight_contact_test = $flight_contact_test->get_contact_by_flight_id($flight_test->id);
+        $this->sendEmailToAdmin($flight_test, $flight_contact_test);
+
+        $flight_segments = new FlightSegmentModel();
+        $flight_segments = $flight_segments->get_by_flight_id($flight_test->id);
+
+        // send email to user
+        $this->sendEmailToUser('anthonydeyvis32@gmail.com', $flight_test, $flight_contact_test, $flight_segments);
+
+
+        return rest_ensure_response([
+            'status' => 'success',
+            'message' => 'Email enviado correctamente.'
+        ]);
     }
 }

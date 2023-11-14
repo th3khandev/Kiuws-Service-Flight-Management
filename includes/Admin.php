@@ -165,6 +165,9 @@ class Admin
         if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'base_url'])) {
             update_option(FLIGHT_MANAGEMENT_PREFIX . 'base_url', esc_url($_POST[FLIGHT_MANAGEMENT_PREFIX . 'base_url']));
         }
+        if (isset($_POST[FLIGHT_MANAGEMENT_PREFIX . 'email_to'])) {
+            update_option(FLIGHT_MANAGEMENT_PREFIX . 'email_to', sanitize_text_field($_POST[FLIGHT_MANAGEMENT_PREFIX . 'email_to']));
+        }
     }
 
     public function save_flight_payment_configuration () {
