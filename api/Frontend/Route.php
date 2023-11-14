@@ -308,6 +308,7 @@ class Route extends WP_REST_Controller
         $flight->booking_id = $response['bookingId'];
         $flight->ticket_time_limit = $response['ticketTimeLimit'];
         $flight->price_info_response = json_encode($response['priceInfoResponse'], JSON_UNESCAPED_UNICODE);
+        $flight->trip_type = $params['tripType'];
         $flight->save();
 
         // save taxes in database
@@ -334,6 +335,25 @@ class Route extends WP_REST_Controller
             $flight_segment->flight_number = $segment['flightNumber'];
             $flight_segment->res_book_desig = $segment['resBookDesig'];
             $flight_segment->save();
+        }
+
+        // save return flight segments
+        if (isset($params['returnSegments']) && count($params['returnSegments']) > 0) {
+            foreach ($params['returnSegments'] as $segment) {
+                $flight_segment = new FlightSegmentModel();
+                $flight_segment->flight_id = $flight->id;
+                $flight_segment->departure_date_time = $segment['departureDateTime'];
+                $flight_segment->arrival_date_time = $segment['arrivalDateTime'];
+                $flight_segment->origin_airport_code = $segment['departureAirport'];
+                $flight_segment->destination_airport_code = $segment['arrivalAirport'];
+                $flight_segment->duration = $segment['duration'];
+                $flight_segment->airline_code = $segment['airlineCode'];
+                $flight_segment->airline_name = $segment['airlineName'];
+                $flight_segment->flight_number = $segment['flightNumber'];
+                $flight_segment->res_book_desig = $segment['resBookDesig'];
+                $flight_segment->save();
+            }
+
         }
 
         // save contacts in database

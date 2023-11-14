@@ -162,10 +162,8 @@ class Kiuws {
         $airItinerary = $this->xml->addChild('AirItinerary');
         // add OriginDestinationOptions xml object to AirItinerary
         $originDestinationOptions = $airItinerary->addChild('OriginDestinationOptions');
-        // add OriginDestinationOption xml object to OriginDestinationOptions
-        $originDestinationOption = $originDestinationOptions->addChild('OriginDestinationOption');
 
-        return $originDestinationOption;
+        return $originDestinationOptions;
     }
 
     private function addSegmentToOriginDestinationOptionXmlObject ($originDestinationOption, $depurateDateTime, $flightNumber, $resBookDesigCode, $departureAirport, $arrivalAirport, $airlineCode, $arrivalDateTime = null, $segmentRPH = 1) {
@@ -696,12 +694,27 @@ class Kiuws {
         // create xml object
         $this->createKIU_AirBookV2RQ_XmlObject();
         // add AirItinerary xml object to xml
-        $originDestinationOption = $this->createAirItineraryXmlToReservation();
-        // add flight segments
+        $originDestinationOptions = $this->createAirItineraryXmlToReservation();
+
+        // add OriginDestinationOption xml object to OriginDestinationOptions
+        $originDestinationOption = $originDestinationOptions->addChild('OriginDestinationOption');
+
+        // add flight segments for departure flight
         foreach ($request['segment'] as $segment) {
             $departureDateTime = str_replace(' ', 'T', $segment['departureDateTime']);
             $this->addSegmentToOriginDestinationOptionXmlObject($originDestinationOption, $departureDateTime, $segment['flightNumber'], $segment['resBookDesig'], $segment['departureAirport'], $segment['arrivalAirport'], $segment['airlineCode']);
         }
+
+        // add flight segments for return flight
+        if (isset($request['returnSegments']) && count($request['returnSegments']) > 0) {
+            $originDestinationOption = $originDestinationOptions->addChild('OriginDestinationOption');
+            foreach ($request['returnSegments'] as $segment) {
+                $departureDateTime = str_replace(' ', 'T', $segment['departureDateTime']);
+                $this->addSegmentToOriginDestinationOptionXmlObject($originDestinationOption, $departureDateTime, $segment['flightNumber'], $segment['resBookDesig'], $segment['departureAirport'], $segment['arrivalAirport'], $segment['airlineCode']);
+            }
+        }
+
+
         // add TravelerInfo to xml
         $travelerInfo = $this->xml->addChild('TravelerInfo');
 
@@ -763,7 +776,8 @@ class Kiuws {
             'bookingId'             => $result['bookingId'],
             'ticketTimeLimit'       => $result['ticketTimeLimit'],
             'priceInfoResponse'     => $result['priceInfoResponse'],
-            'response'              => $response['response']
+            'response'              => $response['response'],
+            'xml'                   => $this->xml->asXML(),
         ];
     }
 

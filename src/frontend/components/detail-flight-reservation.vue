@@ -53,6 +53,11 @@
             <div class="flight-resume-children">
               <label class="flight-resume-text me-1">Escala(s): </label>
               {{ flightReservation.stops }}
+              <label class="separator"> | </label>
+            </div>
+            <div class="flight-resume-children" v-if="flightReservation.tripType == 2">
+              <label class="flight-resume-text me-1">Ida y Vuelta: </label>
+              SI
             </div>
           </div>
         </div>

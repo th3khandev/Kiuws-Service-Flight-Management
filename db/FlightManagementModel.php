@@ -83,6 +83,10 @@ class FlightManagementModel extends FlightManagementDB {
      * @var string
      */
     public $price_info_response;
+    /**
+     * @var int
+     */
+    public $trip_type;
 
     /**
      * Status of flight
@@ -92,6 +96,12 @@ class FlightManagementModel extends FlightManagementDB {
     const STATUS_CANCELLED = 3;
     const STATUS_PAID = 4;
     const STATUS_COMPLETED = 5;
+
+    /**
+     * Trip type
+     */
+    const TRIP_TYPE_ONE_WAY = 1;
+    const TRIP_TYPE_ROUND_TRIP = 2;
 
     /**
      * table name
@@ -113,6 +123,13 @@ class FlightManagementModel extends FlightManagementDB {
             self::STATUS_CANCELLED => 'Cancelado',
             self::STATUS_PAID => 'Pagado',
             self::STATUS_COMPLETED => 'Completado'
+        ];
+    }
+
+    public static function getTripTypeList () {
+        return [
+            self::TRIP_TYPE_ONE_WAY => 'Solo ida',
+            self::TRIP_TYPE_ROUND_TRIP => 'Ida y vuelta'
         ];
     }
 
@@ -143,6 +160,7 @@ class FlightManagementModel extends FlightManagementDB {
         $instance->booking_id = $data->booking_id;
         $instance->ticket_time_limit = $data->ticket_time_limit;
         $instance->price_info_response = $data->price_info_response;
+        $instance->trip_type = $data->trip_type;
         return $instance;
     }
 
@@ -178,7 +196,8 @@ class FlightManagementModel extends FlightManagementDB {
             'status'                    => $this->status,
             'booking_id'                => $this->booking_id,
             'ticket_time_limit'         => $this->ticket_time_limit,
-            'price_info_response'       => $this->price_info_response
+            'price_info_response'       => $this->price_info_response,
+            'trip_type'                 => $this->trip_type
         ];
         $format = [
             '%s',
@@ -198,7 +217,8 @@ class FlightManagementModel extends FlightManagementDB {
             '%d',
             '%s',
             '%s',
-            '%s'
+            '%s',
+            '%d'
         ];
         $this->wpdb->insert($this->table_name, $data, $format);
         $this->id = $this->wpdb->insert_id;
@@ -228,7 +248,8 @@ class FlightManagementModel extends FlightManagementDB {
             'status'                    => $this->status,
             'booking_id'                => $this->booking_id,
             'ticket_time_limit'         => $this->ticket_time_limit,
-            'price_info_response'       => $this->price_info_response
+            'price_info_response'       => $this->price_info_response,
+            'trip_type'                 => $this->trip_type
         ];
         $where = [
             'id' => $this->id
@@ -250,7 +271,8 @@ class FlightManagementModel extends FlightManagementDB {
             '%d',
             '%s',
             '%s',
-            '%s'
+            '%s',
+            '%d'
         ];
         $this->wpdb->update($this->table_name, $data, $where, $format);
     }
