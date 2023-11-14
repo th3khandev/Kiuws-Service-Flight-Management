@@ -22,7 +22,7 @@ $passenger_types = FlightPassengerModel::get_types();
         background-color: #545860;
         line-height: 0;
         text-align: center;
-        margin-top: 15%;
+        margin-top: 15px;
     }
 
     .line svg {
@@ -50,15 +50,15 @@ $passenger_types = FlightPassengerModel::get_types();
     <div class="postbox">
         <div class="inside">
             <div class="row">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4 text-center">
                     <h6 class="card-title"><?php echo $reservation->origin; ?></h6>
                 </div>
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2 text-center">
                     <div class="line"><svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 12 12" class="LegInfo_planeEnd__ZDkxM">
                             <path fill="#898294" d="M3.922 12h.499a.52.52 0 0 0 .444-.247L7.949 6.8l3.233-.019A.8.8 0 0 0 12 6a.8.8 0 0 0-.818-.781L7.949 5.2 4.866.246A.525.525 0 0 0 4.421 0h-.499a.523.523 0 0 0-.489.71L5.149 5.2H2.296l-.664-1.33a.523.523 0 0 0-.436-.288L0 3.509 1.097 6 0 8.491l1.196-.073a.523.523 0 0 0 .436-.288l.664-1.33h2.853l-1.716 4.49a.523.523 0 0 0 .489.71"></path>
                         </svg></div>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4 text-center">
                     <h6 class="card-title"><?php echo $reservation->destination; ?></h6>
                 </div>
             </div>
@@ -100,6 +100,10 @@ $passenger_types = FlightPassengerModel::get_types();
                     <input type="text" name="total" id="total" class="w-100" value="<?php echo $reservation->total . ' ' . $reservation->currency_code; ?>" readonly>
                 </div>
                 <div class="col-12 col-md-3 mt-2 mb-1">
+                    <label for="status">Ida y vuelta</label>
+                    <input type="text" name="status" id="status" class="w-100" value="<?php echo $reservation->trip_type == FlightManagementModel::TRIP_TYPE_ROUND_TRIP ? 'SI' : 'NO'; ?>" readonly>
+                </div>
+                <div class="col-12 col-md-3 mt-2 mb-1">
                     <label for="status">Status</label>
                     <input type="text" name="status" id="status" class="w-100" value="<?php echo $status_list[$reservation->status]; ?>" readonly>
                 </div>
@@ -129,8 +133,16 @@ $passenger_types = FlightPassengerModel::get_types();
                 </div>
                 <div class="row mb-3">
                     <div class="col-12 col-md-3 mt-2 mb-1">
+                        <label for="departure_date_time">Desde</label>
+                        <input type="text" name="airline" id="origin_airport_code" class="w-100" value="<?php echo $segment->origin_airport_code; ?>" readonly>
+                    </div>
+                    <div class="col-12 col-md-3 mt-2 mb-1">
                         <label for="departure_date_time">Hora de salida</label>
                         <input type="text" name="airline" id="departure_date_time" class="w-100" value="<?php echo $segment->departure_date_time; ?>" readonly>
+                    </div>
+                    <div class="col-12 col-md-3 mt-2 mb-1">
+                        <label for="destination_airport_code">Hasta</label>
+                        <input type="text" name="airline" id="destination_airport_code" class="w-100" value="<?php echo $segment->destination_airport_code; ?>" readonly>
                     </div>
                     <div class="col-12 col-md-3 mt-2 mb-1">
                         <label for="arrival_date_time">Hora de llegada</label>

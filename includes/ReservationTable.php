@@ -30,6 +30,7 @@ class ReservationTable extends WP_List_Table {
             'children' => 'Niños',
             'stops' => 'Escalas',
             'total' => 'Total',
+            'trip_type' => 'Ida y vuelta',
             'status' => 'Status',
             'actions' => 'Acciones',
         ];
@@ -104,6 +105,10 @@ class ReservationTable extends WP_List_Table {
         return sprintf('<span class="status %s">%s</span>', $class, $text);
     }
 
+    public function column_trip_type($item) {
+        return $item->trip_type == FlightManagementModel::TRIP_TYPE_ROUND_TRIP ? 'SI' : 'NO';
+    }
+
     public function column_actions($item) {
         $actions = [
             'view' => sprintf('<a href="admin.php?page=flight-management&booking_id=%s">Ver</a>', $item->booking_id),
@@ -131,6 +136,7 @@ class ReservationTable extends WP_List_Table {
             'children'              => array('children', false),
             'stops'                 => array('stops', false),
             'total'                 => array('total', false),
+            'trip_type'             => array('trip_type', false),
             'status'                => array('status', false),
         );
         return $sortable_columns;
