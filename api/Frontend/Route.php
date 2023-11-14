@@ -333,6 +333,8 @@ class Route extends WP_REST_Controller
             $flight_tax->save();
         }
 
+        $flight_segments = [];
+
         // save segments in database
         foreach ($params['segment'] as $segment) {
             $flight_segment = new FlightSegmentModel();
@@ -347,10 +349,11 @@ class Route extends WP_REST_Controller
             $flight_segment->flight_number = $segment['flightNumber'];
             $flight_segment->res_book_desig = $segment['resBookDesig'];
             $flight_segment->save();
+
+            $flight_segments[] = $flight_segment;
         }
 
         // save return flight segments
-        $flight_segments = [];
         if (isset($params['returnSegments']) && count($params['returnSegments']) > 0) {
             foreach ($params['returnSegments'] as $segment) {
                 $flight_segment = new FlightSegmentModel();

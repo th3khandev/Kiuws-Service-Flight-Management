@@ -431,6 +431,10 @@ export default {
       const returnFlightSelected = this.returnFlights.find(
         (flight) => flight.id == this.returnFlightSelected
       );
+      let _returnflightSegment = [];
+      if (returnFlightSelected) {
+        _returnflightSegment = returnFlightSelected.flightSegment;
+      }
 
       this.$emit("createReservation", {
         depurateDate,
@@ -474,7 +478,7 @@ export default {
             resBookDesig,
           };
         }),
-        returnSegments: returnFlightSelected.flightSegment.map(segment => {
+        returnSegments: _returnflightSegment.map(segment => {
           const {
             arrivalAirport,
             arrivalDateTime,
