@@ -125,8 +125,8 @@
                         <button
                           class="btn btn-link btn-block text-left text-primary p-0"
                           type="button"
-                          data-toggle="collapse"
-                          :data-target="`#collapse-return-flight-${returnFlight.id}`"
+                          data-bs-toggle="collapse"
+                          :data-bs-target="`#collapse-return-flight-${returnFlight.id}`"
                           aria-expanded="true"
                           :aria-controls="`collapse-return-flight-${returnFlight.id}`"
                           @click="handleFlightSelected(returnFlight)"
@@ -149,7 +149,7 @@
                       :id="`collapse-return-flight-${returnFlight.id}`"
                       :class="`collapse ${index == 0 ? 'show' : ''}`"
                       :aria-labelledby="`return-flight-${returnFlight.id}`"
-                      data-parent="#accordion-return-flights"
+                      data-bs-parent="#accordion-return-flights"
                     >
                       <div class="card-body">
                         <FligthSegment

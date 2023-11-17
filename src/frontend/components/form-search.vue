@@ -180,6 +180,9 @@ import vSelect from "vue-select";
 // services
 import { getAirportCodes } from '../../services/openFlightOrgService'
 
+// add lodash
+import __ from 'lodash'
+
 export default {
   name: 'FormSearchComponent',
   components: {
@@ -214,7 +217,7 @@ export default {
         this.search(search, loading, this, "destination");
       }
     },
-    search: _.debounce( async (search, loading, vm, type) => {
+    search: __.debounce( async (search, loading, vm, type) => {
       loading(true);
       await getAirportCodes(search)
         .then((response) => response.json())

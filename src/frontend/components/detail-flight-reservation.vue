@@ -119,7 +119,7 @@
                     :id="`collapse-passenger-${index}`"
                     :class="`accordion-collapse collapse ${index == 0 ? 'show' : ''}`"
                     :aria-labelledby="`passenger-${index}`"
-                    ddata-bs-parent="#accordion-passengers"
+                    data-bs-parent="#accordion-passengers"
                   >
                     <div class="accordion-body">
                       <div class="row">
