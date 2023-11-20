@@ -186,17 +186,17 @@
                 <div class="row price-total">
                   <div class="col-6 col-md-6 text-right text-end">Base:</div>
                   <div class="col-6 col-md-6 text-left text-start">
-                    {{ priceDetail.currencyCode }} {{ priceDetail.baseFare }}
+                    {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.baseFare).toFixed(2) }}
                   </div>
                   <div class="col-6 col-md-6 text-right text-end">
                     Impuestos:
                   </div>
                   <div class="col-6 col-md-6 text-left text-start">
-                    {{ priceDetail.currencyCode }} {{ priceDetail.totalTaxes }}
+                    {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.totalTaxes).toFixed(2) }}
                   </div>
                   <div class="col-6 col-md-6 text-right text-end">Total:</div>
                   <div class="col-6 col-md-6 text-left text-start">
-                    {{ priceDetail.currencyCode }} {{ priceDetail.totalFare }}
+                    {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.totalFare).toFixed(2) }}
                   </div>
                 </div>
                 <div class="row">
