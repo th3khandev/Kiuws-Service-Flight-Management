@@ -96,13 +96,26 @@ $passenger_types = FlightPassengerModel::get_types();
                     <input type="text" name="stops" id="stops" class="w-100" value="<?php echo $reservation->stops; ?>" readonly>
                 </div>
                 <div class="col-12 col-md-3 mt-2 mb-1">
-                    <label for="total">Total</label>
-                    <input type="text" name="total" id="total" class="w-100" value="<?php echo $reservation->total . ' ' . $reservation->currency_code; ?>" readonly>
-                </div>
-                <div class="col-12 col-md-3 mt-2 mb-1">
                     <label for="status">Ida y vuelta</label>
                     <input type="text" name="status" id="status" class="w-100" value="<?php echo $reservation->trip_type == FlightManagementModel::TRIP_TYPE_ROUND_TRIP ? 'SI' : 'NO'; ?>" readonly>
                 </div>
+                <div class="col-12 col-md-3 mt-2 mb-1">
+                    <label for="base_fare">Base</label>
+                    <input type="text" name="base_fare" id="base_fare" class="w-100" value="<?php echo $reservation->base_fare . ' ' . $reservation->currency_code; ?>" readonly>
+                </div>
+                <div class="col-12 col-md-3 mt-2 mb-1">
+                    <label for="total_taxes">Impuestos</label>
+                    <input type="text" name="total_taxes" id="total_taxes" class="w-100" value="<?php echo $reservation->total_taxes . ' ' . $reservation->currency_code; ?>" readonly>
+                </div>
+                <div class="col-12 col-md-3 mt-2 mb-1">
+                    <label for="extra">Comisión</label>
+                    <input type="text" name="extra" id="extra" class="w-100" value="<?php echo $reservation->extra . ' ' . $reservation->currency_code; ?>" readonly>
+                </div>
+                <div class="col-12 col-md-3 mt-2 mb-1">
+                    <label for="total">Total</label>
+                    <input type="text" name="total" id="total" class="w-100" value="<?php echo $reservation->total . ' ' . $reservation->currency_code; ?>" readonly>
+                </div>
+                
                 <div class="col-12 col-md-3 mt-2 mb-1">
                     <label for="status">Status</label>
                     <input type="text" name="status" id="status" class="w-100" value="<?php echo $status_list[$reservation->status]; ?>" readonly>
