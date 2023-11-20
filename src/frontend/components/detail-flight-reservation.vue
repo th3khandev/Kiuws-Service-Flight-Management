@@ -55,7 +55,10 @@
               {{ flightReservation.stops }}
               <label class="separator"> | </label>
             </div>
-            <div class="flight-resume-children" v-if="flightReservation.tripType == 2">
+            <div
+              class="flight-resume-children"
+              v-if="flightReservation.tripType == 2"
+            >
               <label class="flight-resume-text me-1">Ida y Vuelta: </label>
               SI
             </div>
@@ -94,7 +97,10 @@
                 v-for="(passenger, index) in flightReservation.passengers"
               >
                 <div class="accordion-item">
-                  <div class="accordion-header p-0 mb-0" :id="`passenger-${index}`">
+                  <div
+                    class="accordion-header p-0 mb-0"
+                    :id="`passenger-${index}`"
+                  >
                     <h2 class="mb-0" style="margin: 0px !important">
                       <button
                         class="accordion-button"
@@ -117,7 +123,9 @@
 
                   <div
                     :id="`collapse-passenger-${index}`"
-                    :class="`accordion-collapse collapse ${index == 0 ? 'show' : ''}`"
+                    :class="`accordion-collapse collapse ${
+                      index == 0 ? 'show' : ''
+                    }`"
                     :aria-labelledby="`passenger-${index}`"
                     data-bs-parent="#accordion-passengers"
                   >
@@ -139,6 +147,8 @@
                               required
                               minlength="1"
                               maxlength="20"
+                              @blur="handleChangeFirstPassenger(index)"
+                              :id="`passenger-name-${index}`"
                             />
                             <div class="invalid-feedback">
                               Error validation.
@@ -161,6 +171,8 @@
                               required
                               minlength="1"
                               maxlength="20"
+                              @blur="handleChangeFirstPassenger(index)"
+                              :id="`passenger-last-name-${index}`"
                             />
                           </div>
                         </div>
@@ -177,6 +189,8 @@
                               placeholder="Email"
                               v-model="passenger.email"
                               required
+                              @blur="handleChangeFirstPassenger(index)"
+                              :id="`passenger-email-${index}`"
                             />
                           </div>
                         </div>
@@ -197,6 +211,7 @@
                               required
                               maxlength="13"
                               minlength="6"
+                              @blur="handleChangeFirstPassenger(index)"
                             />
                           </div>
                         </div>
@@ -308,6 +323,7 @@
                 required
                 minlength="1"
                 maxlength="20"
+                id="contact_name"
               />
             </div>
           </div>
@@ -324,6 +340,7 @@
                 required
                 minlength="1"
                 maxlength="20"
+                id="contact_last_name"
               />
             </div>
           </div>
@@ -338,6 +355,7 @@
                 placeholder="Email"
                 v-model="flightReservation.contactInfo.email"
                 required
+                id="contact_email"
               />
             </div>
           </div>
@@ -500,7 +518,10 @@
               type="submit"
               class="btn btn-primary"
               :disabled="
-                creatingReservation || processingPayment || stripeError || gettingToken
+                creatingReservation ||
+                processingPayment ||
+                stripeError ||
+                gettingToken
               "
             >
               Guargar reservación
@@ -518,7 +539,10 @@
               class="btn btn-primary"
               @click="tryAgainPayment"
               :disabled="
-                creatingReservation || processingPayment || stripeError || gettingToken
+                creatingReservation ||
+                processingPayment ||
+                stripeError ||
+                gettingToken
               "
             >
               Procesar pago
@@ -870,6 +894,42 @@ export default {
         return;
       }
       this.$emit("proccessPayment");
+    },
+    handleChangeFirstPassenger(index) {
+      console.log(
+        "handleChangeFirstPassenger >> ",
+        this.flightReservation.passengers[0]
+      );
+      console.log("index >> ", index);
+      if (index === 0) {
+        setTimeout(() => {
+          this.$nextTick(() => {
+            const firstPassenger = this.flightReservation.passengers[0];
+            this.flightReservation.contactInfo.name = firstPassenger.name;
+            this.flightReservation.contactInfo.lastName =
+              firstPassenger.lastName;
+            this.flightReservation.contactInfo.email = firstPassenger.email;
+            this.flightReservation.contactInfo.phoneNumber =
+              firstPassenger.phoneNumber;
+            console.log(
+              "DOM actualizado. >> ",
+              this.flightReservation.contactInfo
+            );
+
+            // get inputs contact
+            const inputName = document.getElementById("contact_name");
+            const inputLastName = document.getElementById("contact_last_name");
+            const inputEmail = document.getElementById("contact_email");
+            const inputPhone = document.getElementById("contact_phone");
+
+            // set value
+            inputName.value = firstPassenger.name;
+            inputLastName.value = firstPassenger.lastName;
+            inputEmail.value = firstPassenger.email;
+            inputPhone.value = firstPassenger.phoneNumber;
+          });
+        }, 200);
+      }
     },
   },
   mounted() {
