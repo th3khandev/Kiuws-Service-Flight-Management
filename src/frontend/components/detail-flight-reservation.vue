@@ -616,6 +616,23 @@ export default {
         const iti = window.intlTelInput(input, {
           utilsScript:
             "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+          initialCountry: "auto",
+          geoIpLookup: function (success, failure) {
+            // make fetch to 'https://ipinfo.io/'
+            fetch("http://ip-api.com/json/", {
+              headers: {
+                accept: "application/json ",
+              },
+            })
+              .then((resp) => resp.json())
+              .then((resp) => {
+                const countryCode = resp.countryCode;
+                success(countryCode);
+              })
+              .catch(() => {
+                failure();
+              });
+          },
         });
         this.phoneInputs.push({ id, iti });
       });
