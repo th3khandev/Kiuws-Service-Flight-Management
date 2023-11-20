@@ -12,6 +12,7 @@ class Kiuws {
     private $user;
     private $password;
     private $mode;
+    private $fee = 0;
     private $errors = [
         '10035'     => 'La fecha de salida no debe ser pasada ni superior a 330 días.',
         '10026'     => 'The TerminalID is not an authorized device',
@@ -20,13 +21,14 @@ class Kiuws {
     ];
     private $iataServices;
 
-    public function __construct($baseUrl, $agentSine, $termialID, $user, $password, $mode) {
+    public function __construct($baseUrl, $agentSine, $termialID, $user, $password, $mode, $fee = 0) {
         $this->baseUrl = $baseUrl;
         $this->agentSine = $agentSine;
         $this->termialID = $termialID;
         $this->user = $user;
         $this->password = $password;
         $this->mode = $mode;
+        $this->fee = $fee;
         $this->iataServices = new IataOrg();
     }
 
@@ -551,6 +553,7 @@ class Kiuws {
 
         $price = [
             'baseFare'      => 0,
+            'fee'           => 0,
             'currencyCode'  => '',
             'taxes'         => [],
             'totalTaxes'    => 0,
@@ -593,6 +596,8 @@ class Kiuws {
             }
         }
 
+        // get fee from base fare
+        $price['fee'] = $price['baseFare'] * ($this->fee / 100);
         return $price;
     }
 

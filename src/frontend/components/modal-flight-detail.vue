@@ -194,9 +194,15 @@
                   <div class="col-6 col-md-6 text-left text-start">
                     {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.totalTaxes).toFixed(2) }}
                   </div>
+                  <div class="col-6 col-md-6 text-right text-end">
+                    Cargos:
+                  </div>
+                  <div class="col-6 col-md-6 text-left text-start">
+                    {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.fee).toFixed(2) }}
+                  </div>
                   <div class="col-6 col-md-6 text-right text-end">Total:</div>
                   <div class="col-6 col-md-6 text-left text-start">
-                    {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.totalFare).toFixed(2) }}
+                    {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.totalFare + priceDetail.fee).toFixed(2) }}
                   </div>
                 </div>
                 <div class="row">
@@ -366,6 +372,8 @@ export default {
                 ...data.price,
               };
               this.totalPrice += data.price.totalFare;
+              this.totalPrice += data.price.fee;
+
               // set res book desig validate by segment
               for (let i = 0; i < data.departure_flight_segments.length; i++) {
                 const segment_validate = data.departure_flight_segments[i];
