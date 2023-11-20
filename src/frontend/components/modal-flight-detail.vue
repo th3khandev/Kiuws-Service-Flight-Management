@@ -183,7 +183,7 @@
                 </div>
               </div>
               <div class="col-12 mt-1 mb-3" v-if="!loadingPrices">
-                <div class="row price-total">
+                <div class="row price-total" v-if="!error">
                   <div class="col-6 col-md-6 text-right text-end">Base:</div>
                   <div class="col-6 col-md-6 text-left text-start">
                     {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.baseFare).toFixed(2) }}
@@ -409,7 +409,6 @@ export default {
           })
           .catch((err) => {
             this.error = true;
-            console.log('error >> ', err)
           })
           .finally(() => {
             // remove flight numbre from loadingPrices
@@ -428,7 +427,6 @@ export default {
         price,
       } = this.$props.flight;
       const { totalFare, totalTaxes, baseFare, taxes, currencyCode, fee } = price;
-      const { totalPrice } = this;
 
       // get origin and destination
       const origin = flightSegment[0].departureAirport;
@@ -453,11 +451,10 @@ export default {
         adults: this.$props.adults,
         children: this.$props.children,
         inf: this.$props.inf,
-        total: totalPrice,
         origin,
         destination,
         currencyCode,
-        total: totalFare,
+        total: totalFare + fee,
         totalTaxes,
         baseFare,
         taxes,
@@ -533,10 +530,8 @@ export default {
       }
 
       this.returnFlightSelected = returnFlight.id;
-      console.log("handleFlightSelected >> ", returnFlight);
       // check button radio `return_flight_${returnFlight.id}`
       const radio = document.getElementById(`return_flight_${returnFlight.id}`);
-      console.log('radio: ', radio);
       if (radio) {
         radio.checked = true;
       }
