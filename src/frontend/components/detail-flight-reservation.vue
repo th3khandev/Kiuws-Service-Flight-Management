@@ -913,11 +913,6 @@ export default {
       this.$emit("proccessPayment");
     },
     handleChangeFirstPassenger(index) {
-      console.log(
-        "handleChangeFirstPassenger >> ",
-        this.flightReservation.passengers[0]
-      );
-      console.log("index >> ", index);
       if (index === 0) {
         setTimeout(() => {
           this.$nextTick(() => {
@@ -928,10 +923,6 @@ export default {
             this.flightReservation.contactInfo.email = firstPassenger.email;
             this.flightReservation.contactInfo.phoneNumber =
               firstPassenger.phoneNumber;
-            console.log(
-              "DOM actualizado. >> ",
-              this.flightReservation.contactInfo
-            );
 
             // get inputs contact
             const inputName = document.getElementById("contact_name");

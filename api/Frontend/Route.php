@@ -317,16 +317,14 @@ class Route extends WP_REST_Controller
         $flight->base_fare = $params['baseFare'];
         $flight->total_taxes = $params['totalTaxes'];
         $flight->extra = $params['fee'];
-        $flight->total = $params['total'] + $params['fee'];
+        $flight->total = $params['total'];
         $flight->currency_code = 'USD';
         $flight->status = FlightManagementModel::STATUS_BOOKED;
         $flight->booking_id = $response['bookingId'];
         $flight->ticket_time_limit = $response['ticketTimeLimit'];
         $flight->price_info_response = json_encode($response['priceInfoResponse'], JSON_UNESCAPED_UNICODE);
         $flight->trip_type = $params['tripType'];
-
         $flight->save();
-        return $flight;
 
         // save taxes in database
         foreach ($params['taxes'] as $tax) {

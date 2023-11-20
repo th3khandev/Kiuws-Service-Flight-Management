@@ -185,7 +185,6 @@ export default {
     },
     handleFlightSelected(flight) {
       this.flightSelected = flight;
-      console.log('handleFlightSelected >> ', flight);
     },
     createPassengerData(type = "adult") {
       return {
