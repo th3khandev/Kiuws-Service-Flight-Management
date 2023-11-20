@@ -427,7 +427,7 @@ export default {
         flightSegment,
         price,
       } = this.$props.flight;
-      const { totalFare, totalTaxes, baseFare, taxes, currencyCode } = price;
+      const { totalFare, totalTaxes, baseFare, taxes, currencyCode, fee } = price;
       const { totalPrice } = this;
 
       // get origin and destination
@@ -461,6 +461,7 @@ export default {
         totalTaxes,
         baseFare,
         taxes,
+        fee,
         tripType: this.$props.tripType,
         segment: flightSegment.map((segment) => {
           const {

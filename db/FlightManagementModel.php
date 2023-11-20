@@ -62,6 +62,10 @@ class FlightManagementModel extends FlightManagementDB {
     /**
      * @var float
      */
+    public $extra;
+    /**
+     * @var float
+     */
     public $total;
     /**
      * @var string
@@ -154,6 +158,7 @@ class FlightManagementModel extends FlightManagementDB {
         $instance->inf = $data->inf;
         $instance->base_fare = $data->base_fare;
         $instance->total_taxes = $data->total_taxes;
+        $instance->extra = $data->extra;
         $instance->total = $data->total;
         $instance->currency_code = $data->currency_code;
         $instance->status = $data->status;
@@ -191,6 +196,7 @@ class FlightManagementModel extends FlightManagementDB {
             'inf'                       => $this->inf, // 'inf' => 'infant
             'base_fare'                 => $this->base_fare,
             'total_taxes'               => $this->total_taxes,
+            'extra'                     => $this->extra,
             'total'                     => $this->total,
             'currency_code'             => $this->currency_code,
             'status'                    => $this->status,
@@ -200,25 +206,27 @@ class FlightManagementModel extends FlightManagementDB {
             'trip_type'                 => $this->trip_type
         ];
         $format = [
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%d',
-            '%d',
-            '%d',
-            '%f',
-            '%f',
-            '%f',
-            '%s',
-            '%d',
-            '%s',
-            '%s',
-            '%s',
-            '%d'
+            '%s', // departure_date_time
+            '%s', // arrival_date_time
+            '%s', // origin_airport_code
+            '%s', // origin
+            '%s', // destination_airport_code
+            '%s', // destination
+            '%s', // duration
+            '%d', // stops
+            '%d', // adults
+            '%d', // children
+            '%d', // inf
+            '%f', // base_fare
+            '%f', // total_taxes
+            '%f', // extra
+            '%f', // total
+            '%s', // currency_code
+            '%d', // status
+            '%s', // booking_id
+            '%s', // ticket_time_limit
+            '%s', // price_info_response
+            '%d'  // trip_type
         ];
         $this->wpdb->insert($this->table_name, $data, $format);
         $this->id = $this->wpdb->insert_id;
@@ -243,6 +251,7 @@ class FlightManagementModel extends FlightManagementDB {
             'inf'                       => $this->inf, // 'inf' => 'infant
             'base_fare'                 => $this->base_fare,
             'total_taxes'               => $this->total_taxes,
+            'extra'                     => $this->extra,
             'total'                     => $this->total,
             'currency_code'             => $this->currency_code,
             'status'                    => $this->status,
@@ -255,24 +264,27 @@ class FlightManagementModel extends FlightManagementDB {
             'id' => $this->id
         ];
         $format = [
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%s',
-            '%d',
-            '%d',
-            '%d',
-            '%f',
-            '%f',
-            '%f',
-            '%s',
-            '%d',
-            '%s',
-            '%s',
-            '%s',
-            '%d'
+            '%s', // departure_date_time
+            '%s', // arrival_date_time
+            '%s', // origin_airport_code
+            '%s', // origin
+            '%s', // destination_airport_code
+            '%s', // destination
+            '%s', // duration
+            '%d', // stops
+            '%d', // adults
+            '%d', // children
+            '%d', // inf
+            '%f', // base_fare
+            '%f', // total_taxes
+            '%f', // extra
+            '%f', // total
+            '%s', // currency_code
+            '%d', // status
+            '%s', // booking_id
+            '%s', // ticket_time_limit
+            '%s', // price_info_response
+            '%d'  // trip_type
         ];
         $this->wpdb->update($this->table_name, $data, $where, $format);
     }
