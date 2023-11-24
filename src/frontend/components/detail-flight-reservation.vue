@@ -815,7 +815,7 @@ export default {
       const elements = this.stripe.elements({
         mode: "payment",
         currency: this.$props.flightReservation.currencyCode.toLowerCase(),
-        amount: this.$props.flightReservation.total * 100,
+        amount: parseInt((this.$props.flightReservation.total * 100).toFixed(2)),
       });
       this.cardElement = elements.create("card", {
         style: {
