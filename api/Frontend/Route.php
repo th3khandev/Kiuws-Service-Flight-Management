@@ -614,6 +614,7 @@ class Route extends WP_REST_Controller
         $html_template = str_replace('{{currency_code}}', $flight->currency_code, $html_template);
         $html_template = str_replace('{{base_fare}}', $flight->base_fare, $html_template);
         $html_template = str_replace('{{total_taxes}}', $flight->total_taxes, $html_template);
+        $html_template = str_replace('{{extra}}', $flight->extra, $html_template);
         $html_template = str_replace('{{total}}', $flight->total, $html_template);
 
         // create segments html
