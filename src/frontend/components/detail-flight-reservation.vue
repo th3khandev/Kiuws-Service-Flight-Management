@@ -619,14 +619,14 @@ export default {
           initialCountry: "auto",
           geoIpLookup: function (success, failure) {
             // make fetch to 'https://ipinfo.io/'
-            fetch("http://ip-api.com/json/", {
+            fetch("https://ipinfo.io/", {
               headers: {
                 accept: "application/json ",
               },
             })
               .then((resp) => resp.json())
               .then((resp) => {
-                const countryCode = resp.countryCode;
+                const countryCode = resp.country;
                 success(countryCode);
               })
               .catch(() => {
