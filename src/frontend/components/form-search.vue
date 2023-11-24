@@ -180,6 +180,28 @@ import vSelect from "vue-select";
 // services
 import { getAirportCodes } from '../../services/openFlightOrgService'
 
+const debounce = (func, wait, immediate) => {
+  let timeout;
+
+  return function executedFunction() {
+    const context = this;
+    const args = arguments;
+
+    const later = function () {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+
+    const callNow = immediate && !timeout;
+
+    clearTimeout(timeout);
+
+    timeout = setTimeout(later, wait);
+
+    if (callNow) func.apply(context, args);
+  };
+}
+
 export default {
   name: 'FormSearchComponent',
   components: {
@@ -214,7 +236,7 @@ export default {
         this.search(search, loading, this, "destination");
       }
     },
-    search: _.debounce( async (search, loading, vm, type) => {
+    search: debounce( async (search, loading, vm, type) => {
       loading(true);
       await getAirportCodes(search)
         .then((response) => response.json())
