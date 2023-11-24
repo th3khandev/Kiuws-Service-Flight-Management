@@ -202,16 +202,7 @@ export default {
     gettingAirports: false,
   }),
   props: ["loading", "step"],
-  created() {
-    this.loadLodash();
-  },
   methods: {
-    async loadLodash() {
-      if (typeof window._ === 'undefined') {
-        const _ = await import('lodash');
-        window._ = _;
-      }
-    },
     onSearchOriginAirports(search, loading) {
       if (search.length > 3) {
         loading(true);
