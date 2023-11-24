@@ -24,6 +24,7 @@ class IataOrg {
             'LA'    => $this->dirAirlineLogos . 'LA.png',
             'UA'    => $this->dirAirlineLogos . 'UA.png',
             '5R'    => $this->dirAirlineLogos . '5R.png',
+            'QL'    => $this->dirAirlineLogos . 'QL.png',
         ];
     }
 
