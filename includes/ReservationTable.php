@@ -119,7 +119,7 @@ class ReservationTable extends WP_List_Table {
         }
 
         if ($item->status == FlightManagementModel::STATUS_PAID) {
-            $actions['confirm'] = sprintf('<a href="javascript:void(0)" data-id="%s" class="confirm-booking">Confirmardo</a>', $item->booking_id);
+            $actions['confirm'] = sprintf('<a href="javascript:void(0)" data-id="%s" class="confirm-booking">Confirmado</a>', $item->booking_id);
         }
         return $this->row_actions($actions);
     }
