@@ -280,6 +280,24 @@ class Route extends WP_REST_Controller
         $attemp = 1;
         $max_attemp = 3;
 
+        // get contant info
+        $contactInfo = $request['contactInfo'];
+
+        // get all passengers
+        $passengers = $request['passengers'];
+
+        // update passengers child and inf
+        foreach ($passengers as $key => $passenger) {
+            if ($passenger['type'] == 'inf' || $passenger['type'] == 'child') {
+                $passengers[$key]['email'] = $contactInfo['email'];
+                $passengers[$key]['phoneCountryCode'] = $contactInfo['phoneCountryCode'];
+                $passengers[$key]['phoneNumber'] = $contactInfo['phoneNumber'];
+            }
+        }
+
+        // update passengers params
+        $params['passengers'] = $passengers;
+
         while ($attemp <= $max_attemp) {
             $response = $this->kiuwsService->createReservation($params);
             if ($response['status'] == 'success') {
