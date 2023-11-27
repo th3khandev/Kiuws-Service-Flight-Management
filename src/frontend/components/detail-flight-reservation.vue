@@ -177,7 +177,7 @@
                           </div>
                         </div>
                         <!-- User email -->
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-6" v-if="passenger.type == 'adult'">
                           <div class="form-group">
                             <label :for="`email_${index}`"
                               >Email <span class="text-danger">(*)</span></label
@@ -195,7 +195,7 @@
                           </div>
                         </div>
                         <!-- User phone -->
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-6" v-if="passenger.type == 'adult'">
                           <div class="form-group">
                             <label class="w-100" :for="`phone_${index}`"
                               >Número de teléfono
@@ -619,7 +619,7 @@ export default {
           initialCountry: "auto",
           geoIpLookup: function (success, failure) {
             // make fetch to 'https://ipinfo.io/'
-            fetch("https://ipinfo.io/", {
+            fetch("https://api.country.is", {
               headers: {
                 accept: "application/json ",
               },
