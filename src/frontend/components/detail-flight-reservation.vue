@@ -185,7 +185,7 @@
                             <input
                               type="email"
                               class="form-control"
-                              :name="`lastName_${index}`"
+                              :name="`email_${index}`"
                               placeholder="Email"
                               v-model="passenger.email"
                               required
@@ -265,6 +265,7 @@
                             <select
                               class="form-control"
                               v-model="passenger.gender"
+                              :name="`gender_${index}`"
                               required
                             >
                               <option value="">-- Selecione una opción</option>
@@ -593,6 +594,7 @@ export default {
     stripeError: true,
     messageErrorStripe: "",
     gettingToken: false,
+    countryCodePhoneDefault: "",
   }),
   created() {
     const currentDate = new Date();
@@ -617,6 +619,7 @@ export default {
           utilsScript:
             "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
           initialCountry: "auto",
+          separateDialCode: true,
           geoIpLookup: function (success, failure) {
             // make fetch to 'https://ipinfo.io/'
             fetch("https://api.country.is", {
@@ -627,6 +630,7 @@ export default {
               .then((resp) => resp.json())
               .then((resp) => {
                 const countryCode = resp.country;
+                this.countryCodePhoneDefault = countryCode;
                 success(countryCode);
               })
               .catch(() => {
@@ -720,67 +724,6 @@ export default {
           inputElement.classList.remove("is-invalid");
         }
       });
-
-      /* // validate card fields
-      const cardNumber = document.querySelector("input[name=cardnumber]");
-      const cardSecurityCode = document.querySelector(
-        "input[name=cvc]"
-      );
-      const cardExpirationMonth = document.querySelector(
-        "select[name=card_expiration_month]"
-      );
-      const cardExpirationYear = document.querySelector(
-        "select[name=card_expiration_year]"
-      );
-
-      if (
-        !cardNumber ||
-        !cardSecurityCode.checkValidity() ||
-        !cardExpirationMonth.checkValidity() ||
-        !cardExpirationYear.checkValidity()
-      ) {
-        formReservation.classList.add("was-validated");
-        return false;
-      }
-
-      // validate card expiration date
-      const currentMonth = new Date().getMonth() + 1;
-      const currentYear = new Date().getFullYear();
-      const cardExpirationMonthValue = parseInt(cardExpirationMonth.value);
-
-      if (
-        cardExpirationYear.value == currentYear &&
-        cardExpirationMonthValue < currentMonth
-      ) {
-        // add class is-invalid to fields
-        cardExpirationMonth.classList.add("is-invalid");
-        cardExpirationYear.classList.add("is-invalid");
-        return false;
-      }
-
-      // validate card number
-      if (cardNumber.value.length < 16) {
-        // add class is-invalid to fields
-        cardNumber.classList.add("is-invalid");
-        return false;
-      }
-
-      // validate card security code
-      if (
-        cardSecurityCode.value.length < 3 ||
-        cardSecurityCode.value.length >= 4
-      ) {
-        // validate if value is only numeric
-        if (!/^\d+$/.test(cardSecurityCode.value)) {
-          // add class is-invalid to fields
-          cardSecurityCode.classList.add("is-invalid");
-          return false;
-        }
-        // add class is-invalid to fields
-        cardSecurityCode.classList.add("is-invalid");
-        return false;
-      } */
-
       formReservation.classList.add("was-validated");
       return true;
     },
@@ -801,11 +744,29 @@ export default {
         return;
       }
 
+       let inputIntTel = null;
+
       // set area country code to users
-      this.flightReservation.passengers.forEach((passenger) => {
-        passenger.phoneCountryCode =
-          this.phoneInputs[0].iti.getSelectedCountryData().dialCode;
+      this.flightReservation.passengers.forEach((passenger, index) => {
+        inputIntTel = this.phoneInputs.find(
+          (input) => input.id == `phone_${index}`
+        );
+        if (inputIntTel) {
+          passenger.phoneCountryCode = inputIntTel.iti.getSelectedCountryData().dialCode;
+        } else {
+          passenger.phoneCountryCode = this.countryCodePhoneDefault;
+        }
       });
+      
+      // update country phone to contact info
+      inputIntTel = this.phoneInputs.find(
+        (input) => input.id == `contact_phone`
+      );
+      if (inputIntTel) {
+        this.flightReservation.contactInfo.phoneCountryCode = inputIntTel.iti.getSelectedCountryData().dialCode;
+      } else {
+        this.flightReservation.contactInfo.phoneCountryCode = this.countryCodePhoneDefault;
+      }
 
       // send data to backend
       this.$emit("saveReservation", this.flightReservation);
@@ -935,6 +896,20 @@ export default {
             inputLastName.value = firstPassenger.lastName;
             inputEmail.value = firstPassenger.email;
             inputPhone.value = firstPassenger.phoneNumber;
+
+            // get input intTel for passenger wint index = $index
+            const inputIntTelPassenger = this.phoneInputs.find(
+              (input) => input.id == `phone_${index}`
+            );
+
+            // get input IntTel for contact info
+            const inputIntTel = this.phoneInputs.find(
+              (input) => input.id == `contact_phone`
+            );
+            if (inputIntTel && inputIntTelPassenger) {
+              // set country code
+              inputIntTel.iti.setCountry(inputIntTelPassenger.iti.getSelectedCountryData().iso2);
+            }
           });
         }, 200);
       }
