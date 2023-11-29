@@ -78,6 +78,7 @@ class IataOrg {
         $table = $xpath->query('//table[@class="datatable"]')->item(0);
 
         $airline = [];
+        $airline_not_found = false;
 
         if (is_null($table)) {
             $airline = $this->getAirlineExtraByCode($code);
@@ -85,6 +86,7 @@ class IataOrg {
             if (isset($this->airlinesLogoDefault[$code])) {
                 $airline['logo'] = $this->airlinesLogoDefault[$code];
             }
+            $airline_not_found = true;
         } else {
             // get rows into tbody
             $rows = $table->getElementsByTagName('tbody')->item(0)->getElementsByTagName('tr');
@@ -104,18 +106,19 @@ class IataOrg {
                     break;
                 }
             }
-
         }
-        // add airline to file
-        $fileAirline = file_get_contents($this->airlinesDbFile);
-        // decode json to array
-        $airlines = json_decode($fileAirline, true);
-        // add airline
-        $airlines[] = $airline;
-        // encode array to json
-        $fileAirline = json_encode($airlines);
-        // save file
-        file_put_contents($this->airlinesDbFile, $fileAirline);
+        if (!$airline_not_found) {
+            // add airline to file
+            $fileAirline = file_get_contents($this->airlinesDbFile);
+            // decode json to array
+            $airlines = json_decode($fileAirline, true);
+            // add airline
+            $airlines[] = $airline;
+            // encode array to json
+            $fileAirline = json_encode($airlines);
+            // save file
+            file_put_contents($this->airlinesDbFile, $fileAirline);
+        }
         return $airline;
     }
 }
