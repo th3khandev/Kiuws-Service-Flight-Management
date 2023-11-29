@@ -367,8 +367,7 @@ class Kiuws {
             $originDestinationOptions = $originDestinationInformation['OriginDestinationOptions']['OriginDestinationOption'];
         }
 
-
-
+        
         // Forearch flights
         foreach ($originDestinationOptions as $originDestinationOption) {
             $flight = [
@@ -379,10 +378,15 @@ class Kiuws {
                 'stops'         => 0,
                 'id'            => '',
             ];
-
+            
             $flightSegments = $originDestinationOption['FlightSegment'];
-            if (isset($flightSegments['@attributes'])) {
-                $flightSegments = [$flightSegments];
+            if ($originDestinationOption['FlightSegment']) {
+                $flightSegments = $originDestinationOption['FlightSegment'];
+                if (isset($flightSegments['@attributes'])) {
+                    $flightSegments = [$flightSegments];
+                }
+            } else {
+                $flightSegments = [$originDestinationOption];
             }
             // Forearch flightSegment
             foreach ($flightSegments as $key => $flightSegment) {
@@ -465,9 +469,13 @@ class Kiuws {
                 'id'            => '',
             ];
 
-            $flightSegments = $originDestinationOption['FlightSegment'];
-            if (isset($flightSegments['@attributes'])) {
-                $flightSegments = [$flightSegments];
+            if (isset($originDestinationOption['FlightSegment'])) {
+                $flightSegments = $originDestinationOption['FlightSegment'];
+                if (isset($flightSegments['@attributes'])) {
+                    $flightSegments = [$flightSegments];
+                }
+            } else {
+                $flightSegments = [$originDestinationOption];
             }
             // Forearch flightSegment
             foreach ($flightSegments as $key => $flightSegment) {
