@@ -10,6 +10,13 @@ class IataOrg {
     private $logoDefault = '';
     private $airlinesLogoDefault = [];
     private $airlinesDbFile = FLIGHT_MANAGEMENT_DIR . 'db/json/airlines.json';
+    private $airlines_extras = [
+        [
+            'code' => 'G0',
+            'name' => 'Albatros Airlines',
+            'country' => 'Venezuela'
+        ]
+    ];
 
     public function __construct()
     {
@@ -42,6 +49,19 @@ class IataOrg {
         return null;
     }
 
+    private function getAirlineExtraByCode ($code) {
+        foreach ($this->airlines_extras as $airline) {
+            if ($airline['code'] == $code) {
+                return $airline;
+            }
+        }
+        return [
+            'code' => $code,
+            'name' => 'Airline not found',
+            'country' => ''
+        ];
+    }
+
     public function addAirlineToFile ($code) {
         // make GET to https://www.iata.org/PublicationDetails/Search/?currentBlock=314383
         $response = wp_remote_get('https://www.iata.org/PublicationDetails/Search/?currentBlock=314383&airline.search=' . $code);
@@ -55,25 +75,36 @@ class IataOrg {
         @$dom->loadHTML($html);
         $xpath = new DOMXPath($dom);
         // get table with class datatable
-        $table = $xpath->query('//table[@class="datatable"]')->item(0); // <table class="datatable"><thead> <tr><td>Company name</td><td>Country / Territory</td><td>2-letter code</td></tr></thead><tbody><tr><td>Air China Cargo Co., Ltd</td><td>People&#x27;s Republic of China</td><td>CA*</td></tr> <tr> <td>Air China LTD</td><td>People&#x27;s Republic of China</td><td>CA</td></tr></tbody></table>
-        // get rows into tbody
-        $rows = $table->getElementsByTagName('tbody')->item(0)->getElementsByTagName('tr');
-        // get airline
+        $table = $xpath->query('//table[@class="datatable"]')->item(0);
+
         $airline = [];
-        foreach ($rows as $row) {
-            $tds = $row->getElementsByTagName('td');
-            if ($tds->length == 3) {
-                $airline['name'] = $tds->item(0)->nodeValue;
-                $airline['country'] = $tds->item(1)->nodeValue;
-                $airline['code'] = $code;
-                $airline['logo'] = '';
-                if (isset($this->airlinesLogoDefault[$code])) {
-                    $airline['logo'] = $this->airlinesLogoDefault[$code];
-                } else {
-                    $airline['logo'] = $this->logoDefault;
-                }
-                break;
+
+        if (is_null($table)) {
+            $airline = $this->getAirlineExtraByCode($code);
+            $airline['logo'] = $this->logoDefault;
+            if (isset($this->airlinesLogoDefault[$code])) {
+                $airline['logo'] = $this->airlinesLogoDefault[$code];
             }
+        } else {
+            // get rows into tbody
+            $rows = $table->getElementsByTagName('tbody')->item(0)->getElementsByTagName('tr');
+            // get airline
+            foreach ($rows as $row) {
+                $tds = $row->getElementsByTagName('td');
+                if ($tds->length == 3) {
+                    $airline['name'] = $tds->item(0)->nodeValue;
+                    $airline['country'] = $tds->item(1)->nodeValue;
+                    $airline['code'] = $code;
+                    $airline['logo'] = '';
+                    if (isset($this->airlinesLogoDefault[$code])) {
+                        $airline['logo'] = $this->airlinesLogoDefault[$code];
+                    } else {
+                        $airline['logo'] = $this->logoDefault;
+                    }
+                    break;
+                }
+            }
+
         }
         // add airline to file
         $fileAirline = file_get_contents($this->airlinesDbFile);
