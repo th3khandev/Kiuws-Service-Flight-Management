@@ -41,7 +41,7 @@
           class="col-12 col-sm-12 col-md-3 col-lg-3 deatil-selected-button text-center"
         >
           <button
-            class="btn btn-primary"
+            class="btn btn-primary btn-gray"
             type="button"
             @click="$emit('refresh')"
           >
