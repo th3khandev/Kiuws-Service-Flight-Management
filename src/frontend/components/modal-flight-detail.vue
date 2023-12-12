@@ -99,7 +99,7 @@
                 <label class="flight-resume-text">Niños: </label>
                 {{ children }} <label class="separator">|</label>
               </div>
-              <div class="flight-resume-children">
+              <div class="flight-resume-infants">
                 <label class="flight-resume-text">Infantes: </label>
                 {{ inf }}
               </div>
@@ -195,7 +195,7 @@
                     {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.totalTaxes).toFixed(2) }}
                   </div>
                   <div class="col-6 col-md-6 text-right text-end">
-                    Cargos:
+                    Cargos/Impuestos:
                   </div>
                   <div class="col-6 col-md-6 text-left text-start">
                     {{ priceDetail.currencyCode }} {{ parseFloat(priceDetail.fee).toFixed(2) }}

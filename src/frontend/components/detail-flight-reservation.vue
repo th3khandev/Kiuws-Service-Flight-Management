@@ -45,18 +45,18 @@
               {{ flightReservation.children }}
               <label class="separator"> | </label>
             </div>
-            <div class="flight-resume-children">
+            <div class="flight-resume-infants">
               <label class="flight-resume-text me-1">Infantes: </label>
               {{ flightReservation.inf }}
               <label class="separator"> | </label>
             </div>
-            <div class="flight-resume-children">
+            <div class="flight-resume-stops">
               <label class="flight-resume-text me-1">Escala(s): </label>
               {{ flightReservation.stops }}
               <label class="separator"> | </label>
             </div>
             <div
-              class="flight-resume-children"
+              class="flight-resume-type"
               v-if="flightReservation.tripType == 2"
             >
               <label class="flight-resume-text me-1">Ida y Vuelta: </label>
@@ -408,7 +408,7 @@
           <div class="col-12 col-md-6">
             <div class="form-group">
               <label for="card_document_number"
-                >Número de documento <span class="text-danger">(*)</span></label
+                >Número de identificación <span class="text-danger">(*)</span></label
               >
               <input
                 type="text"

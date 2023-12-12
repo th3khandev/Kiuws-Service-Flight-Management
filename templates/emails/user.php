@@ -353,7 +353,7 @@
                                                             <td style="padding: 5px 0px 0px 10px;">{{currency_code}} {{base_fare}}</td>
                                                             <th style="padding: 5px 0px 0px 10px; text-align: right;">Impuestos: </th>
                                                             <td style="padding: 5px 0px 0px 10px;">{{currency_code}} {{total_taxes}}</td>
-                                                            <th style="padding: 5px 0px 0px 10px; text-align: right;">Cargos: </th>
+                                                            <th style="padding: 5px 0px 0px 10px; text-align: right;">Cargos/Impuesto: </th>
                                                             <td style="padding: 5px 0px 0px 10px;">{{currency_code}} {{extra}}</td>
                                                             <th style="padding: 5px 0px 0px 10px; text-align: right;">Total a pagar: </th>
                                                             <td style="padding: 5px 0px 0px 10px;">{{currency_code}} {{total}}</td>
