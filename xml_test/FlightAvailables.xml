@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<KIU_AirAvailRQ EchoToken="1" TimeStamp="2013-01-24T19:20:43+00:00" Target="Production"
+    Version="3.0" SequenceNmbr="1" PrimaryLangID="en-us" DirectFlightsOnly="false" MaxResponses="10"
+    CombinedItineraries="false">
+    <POS>
+        <Source AgentSine="MIAT8040F" TerminalID="MIAT80400P" ISOCountry="US" ISOCurrency="USD" />
+    </POS>
+    <OriginDestinationInformation>
+        <DepartureDateTime>2023-12-31</DepartureDateTime>
+        <OriginLocation LocationCode="MIA" />
+        <DestinationLocation LocationCode="PUJ" />
+    </OriginDestinationInformation>
+    <TravelPreferences MaxStopsQuantity="4">
+        <CabinPref Cabin="Economy" />
+    </TravelPreferences>
+    <TravelerInfoSummary>
+        <AirTravelerAvail>
+            <PassengerTypeQuantity Code="ADT" Quantity="1" />
+        </AirTravelerAvail>
+    </TravelerInfoSummary>
+</KIU_AirAvailRQ>
