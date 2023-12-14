@@ -298,6 +298,10 @@ class Route extends WP_REST_Controller
                     }
                 }
             }
+
+            if (!is_null($departure_flight_segments_validate_item)) {
+                $return_flight_segments_validate[] = $return_flight_segments_validate_item;
+            }
         }
 
         if (count($return_flight_segments) != count($return_flight_segments_validate)) {
