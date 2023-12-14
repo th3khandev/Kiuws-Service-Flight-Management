@@ -199,11 +199,13 @@ class Route extends WP_REST_Controller
             $airlineCode = $flight_segment['airlineCode'];
 
             $listResBookDesig = explode(',', $resBookDesig);
+            
+            $departure_flight_segments_validate_by_booking_class = [];
             foreach ($listResBookDesig as $value) {
                 $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children, $inf);
                 if ($response['status'] == 'success') {
                     // add booking code to response
-                    $departure_flight_segments_validate[] = [
+                    $departure_flight_segments_validate_by_booking_class[] = [
                         'depurateDateTime' => $depurate_date_time,
                         'arrivalDateTime' => $arrival_date_time,
                         'origin' => $origin,
@@ -213,10 +215,31 @@ class Route extends WP_REST_Controller
                         'flightNumber' => $flight_number,
                         'resBookDesig' => trim($value),
                         'airlineCode' => $airlineCode,
+                        'total_fare'    => $response['price']['totalFare'],
                     ];
-                    break;
                 }
             }
+
+            // search the lowest price
+            $departure_flight_segments_validate_item = null;
+            if (count($departure_flight_segments_validate_by_booking_class) > 0) {
+                foreach ($departure_flight_segments_validate_by_booking_class as $key => $booking_class_item) {
+                    if ($key == 0) {
+                        $departure_flight_segments_validate_item = $booking_class_item;
+                    } else {
+                        if (!is_null($departure_flight_segments_validate_item)) {
+                            if ($booking_class_item['total_fare'] < $departure_flight_segments_validate_item['total_fare']) {
+                                $departure_flight_segments_validate_item = $booking_class_item;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!is_null($departure_flight_segments_validate_item)) {
+                $departure_flight_segments_validate[] = $departure_flight_segments_validate_item;
+            }
+
         }
 
         if (count($departure_flight_segments) != count($departure_flight_segments_validate)) {
@@ -240,11 +263,12 @@ class Route extends WP_REST_Controller
             $airlineCode = $flight_segment['airlineCode'];
 
             $listResBookDesig = explode(',', $resBookDesig);
+            $return_flight_segments_validate_by_booking_class = [];
             foreach ($listResBookDesig as $value) {
                 $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children, $inf);
                 if ($response['status'] == 'success') {
                     // add booking code to response
-                    $return_flight_segments_validate[] = [
+                    $return_flight_segments_validate_by_booking_class[] = [
                         'depurateDateTime' => $depurate_date_time,
                         'arrivalDateTime' => $arrival_date_time,
                         'origin' => $origin,
@@ -254,8 +278,24 @@ class Route extends WP_REST_Controller
                         'flightNumber' => $flight_number,
                         'resBookDesig' => trim($value),
                         'airlineCode' => $airlineCode,
+                        'total_fare'    => $response['price']['totalFare'],
                     ];
-                    break;
+                }
+            }
+
+            // search the lowest price
+            $return_flight_segments_validate_item = null;
+            if (count($return_flight_segments_validate_by_booking_class) > 0) {
+                foreach ($return_flight_segments_validate_by_booking_class as $key => $booking_class_item) {
+                    if ($key == 0) {
+                        $return_flight_segments_validate_item = $booking_class_item;
+                    } else {
+                        if (!is_null($return_flight_segments_validate_item)) {
+                            if ($booking_class_item['total_fare'] < $return_flight_segments_validate_item['total_fare']) {
+                                $return_flight_segments_validate_item = $booking_class_item;
+                            }
+                        }
+                    }
                 }
             }
         }
