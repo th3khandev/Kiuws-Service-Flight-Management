@@ -34,8 +34,10 @@ class Route extends WP_REST_Controller
         $mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'mode');
         // set fee value
         $fee = get_option(FLIGHT_MANAGEMENT_PREFIX . 'fee');
+        // set fee fixed value
+        $fee_fixed = get_option(FLIGHT_MANAGEMENT_PREFIX . 'fee_fixed');
 
-        $this->kiuwsService = new Kiuws($base_url, $agent_sine, $terminal_id, $user, $password, $mode, $fee);
+        $this->kiuwsService = new Kiuws($base_url, $agent_sine, $terminal_id, $user, $password, $mode, $fee, $fee_fixed);
     }
 
     /**
