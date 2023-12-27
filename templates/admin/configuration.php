@@ -70,6 +70,10 @@
                 <th scope="row">Enter rate percentage:</th>
                 <td><input type="text" name="<?php echo FLIGHT_MANAGEMENT_PREFIX . 'fee' ?>" value="<?php echo esc_attr(get_option(FLIGHT_MANAGEMENT_PREFIX . 'fee')); ?>" /></td>
             </tr>
+            <tr>
+                <th scope="row">Enter rate fixed:</th>
+                <td><input type="text" name="<?php echo FLIGHT_MANAGEMENT_PREFIX . 'fee_fixed' ?>" value="<?php echo esc_attr(get_option(FLIGHT_MANAGEMENT_PREFIX . 'fee_fixed')); ?>" /></td>
+            </tr>
         </table>
         <?php submit_button('Save Configuration'); ?>
     </form>
