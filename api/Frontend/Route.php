@@ -151,12 +151,12 @@ class Route extends WP_REST_Controller
         $inf = $params['inf'];
         $return_date = $params['return_date'] ?? null;
         $trip_type = $params['trip_type'] ?? 1;
-
+        $only_direct_flights = (bool) $params['only_direct_flights'] ?? false;
         $attemp = 1;
         $max_attemp = 3;
 
         while ($attemp <= $max_attemp) {
-            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children, $inf, $return_date, $trip_type);
+            $response = $this->kiuwsService->getAvailabilityFlights($departure_date, $origin, $destination, $adults, $children, $inf, $return_date, $trip_type, 4, $only_direct_flights);
             if ($response['status'] == 'success') {
                 break;
             }

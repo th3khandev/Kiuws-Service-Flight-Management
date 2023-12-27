@@ -3,12 +3,28 @@
     <div class="col-12 col-sm-12">
       <!-- Add checks "Solo ida" o "Ida y vuelta" -->
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="trip_type" id="trip_type_one_way" v-model="tripType" value="1">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="trip_type"
+          id="trip_type_one_way"
+          v-model="tripType"
+          value="1"
+        />
         <label class="form-check-label" for="trip_type_one_way">Solo ida</label>
       </div>
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="trip_type" id="trip_type_round_trip" v-model="tripType" value="2">
-        <label class="form-check-label" for="trip_type_round_trip">Ida y Vuelta</label>
+        <input
+          class="form-check-input"
+          type="radio"
+          name="trip_type"
+          id="trip_type_round_trip"
+          v-model="tripType"
+          value="2"
+        />
+        <label class="form-check-label" for="trip_type_round_trip"
+          >Ida y Vuelta</label
+        >
       </div>
     </div>
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
@@ -127,7 +143,9 @@
           />
         </div>
         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
-          <label for="amount_children" class="form-label">Niños (2-12 años): </label>
+          <label for="amount_children" class="form-label"
+            >Niños (2-12 años):
+          </label>
           <input
             type="number"
             name="amount_children"
@@ -140,7 +158,9 @@
           />
         </div>
         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
-          <label for="amount_children" class="form-label">Infantes (0-2 años): </label>
+          <label for="amount_children" class="form-label"
+            >Infantes (0-2 años):
+          </label>
           <input
             type="number"
             name="amount_inf"
@@ -154,10 +174,31 @@
         </div>
       </div>
     </div>
+
+    <!-- Only direct flight -->
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+      <div class="row">
+        <div class="col-12 col-sm-12">
+          <!-- Add checks "Solo ida" o "Ida y vuelta" -->
+          <div class="form-check form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="only_direct_flights"
+              id="only_direct_flights"
+              v-model="onlyDirectFlights"
+            />
+            <label class="form-check-label" for="only_direct_flights"
+              >Solo vuelos directos</label
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="col-12" v-if="error">
       <div class="alert alert-danger alert-dismissible" role="alert">
         <strong>-</strong> {{ errorMessage }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     </div>
     <div class="col-12 col-md-12 text-center mt-5">
@@ -178,7 +219,7 @@
 import vSelect from "vue-select";
 
 // services
-import { getAirportCodes } from '../../services/openFlightOrgService'
+import { getAirportCodes } from "../../services/openFlightOrgService";
 
 const debounce = (func, wait, immediate) => {
   let timeout;
@@ -200,12 +241,12 @@ const debounce = (func, wait, immediate) => {
 
     if (callNow) func.apply(context, args);
   };
-}
+};
 
 export default {
-  name: 'FormSearchComponent',
+  name: "FormSearchComponent",
   components: {
-    vSelect
+    vSelect,
   },
   data: () => ({
     originAirports: [],
@@ -222,21 +263,22 @@ export default {
     tripType: 1,
     currentDate: new Date().toISOString().slice(0, 10),
     gettingAirports: false,
+    onlyDirectFlights: false,
   }),
   props: ["loading", "step"],
   methods: {
     onSearchOriginAirports(search, loading) {
-      if (search.length > 3) {
+      if (search.length >= 2) {
         loading(true);
         this.search(search, loading, this, "origin");
       }
     },
     onSearchDestinationAirports(search, loading) {
-      if (search.length >= 3) {
+      if (search.length >= 2) {
         this.search(search, loading, this, "destination");
       }
     },
-    search: debounce( async (search, loading, vm, type) => {
+    search: debounce(async (search, loading, vm, type) => {
       loading(true);
       await getAirportCodes(search)
         .then((response) => response.json())
@@ -253,7 +295,7 @@ export default {
         .finally(() => {
           loading(false);
         });
-    }, 1000),
+    }, 300),
     validForm() {
       if (!this.originAirport) {
         this.setError("Debe seleccionar una ciudad destino");
@@ -271,7 +313,7 @@ export default {
         this.setError("El campo 'Adultos' debe ser entre 1 y 9");
         return false;
       }
-      if ( this.children > 9) {
+      if (this.children > 9) {
         this.setError("El campo 'Niños' no deber ser mayor a 9");
         return false;
       }
@@ -292,7 +334,7 @@ export default {
     searhFlights() {
       if (this.validForm()) {
         this.error = false;
-        this.errorMessage = '';
+        this.errorMessage = "";
         this.$emit(
           "submit",
           this.originAirport,
@@ -302,7 +344,8 @@ export default {
           this.adults,
           this.children,
           this.inf,
-          this.tripType
+          this.tripType,
+          this.onlyDirectFlights
         );
       }
     },

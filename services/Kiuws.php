@@ -343,7 +343,7 @@ class Kiuws {
         ];
     }
 
-    private function formatFlights ($apiResponse, $tripType = 1) {
+    private function formatFlights ($apiResponse, $tripType = 1, $onlyDirectFlights = false) {
         $flights = [];
         $returnFlights = [];
 
@@ -412,7 +412,7 @@ class Kiuws {
                 ];
 
                 // Get stops
-                if ($key > 0 && $key < count($flightSegments) - 1) {
+                if ($key > 0) {
                     $flight['stops']++;
                 }
 
@@ -454,6 +454,12 @@ class Kiuws {
             $flight['arrivalDate'] = $flight['flightSegment'][count($flight['flightSegment']) - 1]['arrivalDateTime'];
             // get duration time flight (ArrivalDateTime - DepartureDateTime)
             $flight['duration'] = date('H:i', strtotime($flight['arrivalDate']) - strtotime($flight['depurateDate']));
+
+            // if onlyDirectFlights is true, only add direct flights
+            if ($onlyDirectFlights && $flight['stops'] > 0) {
+                continue;
+            }
+
             array_push($flights, $flight);
         }
 
@@ -501,7 +507,7 @@ class Kiuws {
                 ];
 
                 // Get stops
-                if ($key > 0 && $key < count($flightSegments) - 1) {
+                if ($key > 0) {
                     $flight['stops']++;
                 }
 
@@ -544,6 +550,10 @@ class Kiuws {
             $flight['arrivalDate'] = $flight['flightSegment'][count($flight['flightSegment']) - 1]['arrivalDateTime'];
             // get duration time flight (ArrivalDateTime - DepartureDateTime)
             $flight['duration'] = date('H:i', strtotime($flight['arrivalDate']) - strtotime($flight['depurateDate']));
+            // if onlyDirectFlights is true, only add direct flights
+            if ($onlyDirectFlights && $flight['stops'] > 0) {
+                continue;
+            }
             array_push($returnFlights, $flight);                
         }
 
@@ -609,7 +619,7 @@ class Kiuws {
         return $price;
     }
 
-    public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 0, $inf = 0,  $returnDate = null, $tripType = 1, $maxStopQuantity = 4) {
+    public function getAvailabilityFlights ($depurateDate, $originLocation, $destinationLocation, $adults = 1, $children = 0, $inf = 0,  $returnDate = null, $tripType = 1, $maxStopQuantity = 4, $onlyDirectFlights = false) {
         // Create the xml object
         $this->createKIU_AirAvailRQXmlObject();
         // add OriginDestinationInformation xml object to xml
@@ -631,7 +641,7 @@ class Kiuws {
         }
         
         // Format response
-        $result = $this->formatFlights($response['response']['OriginDestinationInformation'], $tripType);
+        $result = $this->formatFlights($response['response']['OriginDestinationInformation'], $tripType, $onlyDirectFlights);
         return [
             'status'                => $response['status'],
             'message'               => $response['message'],

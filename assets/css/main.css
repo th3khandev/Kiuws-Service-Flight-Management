@@ -361,3 +361,9 @@ input[type=number] {
     display: none;
   }
 }
+
+
+input[type=checkbox].form-check-input {
+  margin-top: 0.45em;
+  vertical-align: middle;
+}

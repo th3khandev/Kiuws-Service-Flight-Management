@@ -8,10 +8,11 @@ export const getFlightsAvailable = (
   adults,
   children,
   inf,
-  tripType
+  tripType,
+  onlyDirectFlights
 ) => {
   return get(
-    `get-flight-available?origin=${origin}&destination=${destination}&depurate_date=${depurateDate}&return_date=${returnDate}&adults=${adults}&children=${children}&inf=${inf}&trip_type=${tripType}`
+    `get-flight-available?origin=${origin}&destination=${destination}&depurate_date=${depurateDate}&return_date=${returnDate}&adults=${adults}&children=${children}&inf=${inf}&trip_type=${tripType}&only_direct_flights=${onlyDirectFlights ? 1 : 0}`
   );
 };
 

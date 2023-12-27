@@ -119,6 +119,7 @@ export default {
       paymentSuccess: false,
       bookingCode: null,
       errorPaymentMessage: null,
+      onlyDirectFlights: false,
     };
   },
   methods: {
@@ -130,7 +131,8 @@ export default {
       adults,
       children,
       inf,
-      tripType
+      tripType,
+      onlyDirectFlights
     ) {
       this.originAirport = originAirport;
       this.destinationAirport = destinationAirport;
@@ -147,6 +149,7 @@ export default {
       this.bookingCode = null;
       this.errorPaymentMessage = null;
       this.tripType = tripType;
+      this.onlyDirectFlights = onlyDirectFlights;
       this.returnFlights = [];
       getFlightsAvailable(
         originAirport.code,
@@ -156,7 +159,8 @@ export default {
         adults,
         children,
         inf,
-        tripType
+        tripType,
+        onlyDirectFlights
       )
         .then((response) => response.json())
         .then((data) => {
