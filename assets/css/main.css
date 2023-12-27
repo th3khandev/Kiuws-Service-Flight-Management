@@ -364,6 +364,5 @@ input[type=number] {
 
 
 input[type=checkbox].form-check-input {
-  margin-top: 0.45em;
   vertical-align: middle;
 }

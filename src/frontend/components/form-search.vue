@@ -126,8 +126,9 @@
         :disabled="!departureDate"
       />
     </div>
+
     <!-- Amount Adults and children -->
-    <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+    <div :class="`col-12 col-sm-12 col-md-${tripType == 2 ? '12' : '6'} col-lg-${tripType == 2 ? '12' : '6'} mb-2`">
       <div class="row">
         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
           <label for="amount_adults" class="form-label">Adultos: </label>
@@ -176,7 +177,7 @@
     </div>
 
     <!-- Only direct flight -->
-    <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
       <div class="row">
         <div class="col-12 col-sm-12">
           <!-- Add checks "Solo ida" o "Ida y vuelta" -->
