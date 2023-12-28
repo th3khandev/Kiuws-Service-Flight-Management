@@ -58,7 +58,7 @@ class FlightManagementDB {
     }
 
     private function createFlightManagementAirportsTable () {
-        $sql = "CREATE TABLE `$this->flight_management_airports_table` (`id` INT(11) NULL AUTO_INCREMENT, `code` VARCHAR(5) NOT NULL, `name` VARCHAR(255) NOT NULL, `city_name` VARCHAR(255) NOT NULL, `country_name` VARCHAR(255) NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
+        $sql = "CREATE TABLE `$this->flight_management_airports_table` (`id` INT(11) NULL AUTO_INCREMENT, `code` VARCHAR(5) NOT NULL, `name` VARCHAR(255) NOT NULL, `city_name` VARCHAR(255) NOT NULL, `state_name` VARCHAR(255) NOT NULL, `country_name` VARCHAR(255) NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
         dbDelta($sql);
     }
 
