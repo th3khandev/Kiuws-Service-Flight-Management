@@ -9,6 +9,7 @@ $airportsTable->prepare_items();
 <div class="wrap">
     <h1 class="wp-heading-inline">Listado de areopuertos disponibles</h1>
     <a href="admin.php?page=flight-management-airports&action=create" class="page-title-action">Añadir nuevo</a>
+    <a href="admin.php?page=flight-management-airports&action=import" class="page-title-action" style="border-color: green; color: green;">Importar excel</a>
     <hr class="wp-header-end" />
 
     <!-- Show error o success messages -->

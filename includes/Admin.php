@@ -234,9 +234,102 @@ class Admin
         echo '</div>';
     }
 
+    private function getRowsFromExcel ($file_tmp_name) {
+        $rows = [];
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $spreadsheet = $reader->load($file_tmp_name);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $highestRow = $worksheet->getHighestRow();
+        $highestColumn = $worksheet->getHighestColumn();
+
+        for ($row = 2; $row <= $highestRow; $row++) {
+            $row_data = [];
+            for ($col = 'A'; $col <= $highestColumn; $col++) {
+                $value = $worksheet->getCell($col . $row)->getValue();
+                $row_data[] = $value;
+            }
+            $rows[] = $row_data;
+        }
+
+        return $rows;
+    }
+
+    private function import_airports ($post, $files) {
+        $file = $files['file_excel'];
+        $file_name = $file['name'];
+        $file_tmp_name = $file['tmp_name'];
+
+        $error_messages = [];
+
+        if (empty($error_messages)) {
+            $file_info = pathinfo($file_name);
+            $file_extension = $file_info['extension'];
+            $allowed_extensions = ['xlsx'];
+            if (!in_array($file_extension, $allowed_extensions)) {
+                $error_messages[] = 'El archivo debe ser un excel .xlsx';
+            }
+        }
+
+        if (!empty($error_messages)) {
+            // Si hubo un error, agrega un mensaje de error
+            foreach ($error_messages as $error_message) {
+                add_settings_error('flight-management-messages', 'error', $error_message, 'error');
+            }
+            include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airports-import.php';
+            return;
+        }
+
+        // get rows from excel
+        $rows = $this->getRowsFromExcel($file_tmp_name);
+        
+        // save rows in database
+        foreach ($rows as $row) {
+            // get code, name, city, state, country
+            $code = $row[0];
+            $name = $row[1];
+            $city = $row[2];
+            $state = $row[3];
+            $country = $row[4];
+
+            // get airport by code
+            $airport = new FlightManagementAirportModel();
+            $airport_by_code = $airport->getAirportByCode($code);
+            
+            // if exists, update
+            if ($airport_by_code) {
+                $airport->id = $airport_by_code->id;
+                $airport->code = $code;
+                $airport->name = $name;
+                $airport->city_name = $city;
+                $airport->state_name = $state;
+                $airport->country_name = $country;
+                $airport->update();
+            } else {
+                // else, create
+                $airport = new FlightManagementAirportModel();
+                $airport->code = $code;
+                $airport->name = $name;
+                $airport->city_name = $city;
+                $airport->state_name = $state;
+                $airport->country_name = $country;
+                $airport->save();
+            }
+        }
+
+        add_settings_error('flight-management-messages', 'success', 'Aeropuertos importados con éxito', 'updated');
+
+        include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airports.php';
+    }
+
     public function flight_management_airports_page () {
         $error_messages = [];
         if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) {
+            var_dump($_POST);
+            if ($_POST['action'] === 'import') {
+                $this->import_airports($_POST, $_FILES);
+                return;
+            }
+
             // validate data 
             $code = $_POST['code'];
             $name = $_POST['name'];
@@ -314,9 +407,15 @@ class Admin
                 $id = $_GET['airport_id'];
                 $airport = new FlightManagementAirportModel();
                 $airport = $airport->getAirportById($id);
-                $airport->delete();
-                add_settings_error('flight-management-messages', 'success', 'Aeropuerto eliminado con éxito', 'updated');
+                if ($airport) {
+                    $airport->delete();
+                    add_settings_error('flight-management-messages', 'success', 'Aeropuerto eliminado con éxito', 'updated');
+                }
                 include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airports.php';
+                return;
+            } else if ($_GET['action'] === 'import') {
+                $action = 'import';
+                include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airports-import.php';
                 return;
             }
 

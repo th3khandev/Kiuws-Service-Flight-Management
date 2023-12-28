@@ -81,7 +81,6 @@ class FlightManagementAirportModel extends FlightManagementDB {
     public function getAirportByCode($code) {
         $sql = "SELECT * FROM $this->table_name WHERE code = '$code'";
         $airport = $this->wpdb->get_row($sql);
-        $airport = $this->createAirportInstance($airport);
         return $airport;
     }
 
@@ -93,6 +92,9 @@ class FlightManagementAirportModel extends FlightManagementDB {
     public function getAirportById($id) {
         $sql = "SELECT * FROM $this->table_name WHERE id = $id";
         $airport = $this->wpdb->get_row($sql);
+        if (empty($airport)) {
+            return null;
+        }
         $airport = $this->createAirportInstance($airport);
         return $airport;
     }

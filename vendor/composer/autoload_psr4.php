@@ -6,9 +6,18 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'ZipStream\\' => array($vendorDir . '/maennchen/zipstream-php/src'),
+    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
+    'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src', $vendorDir . '/psr/http-factory/src'),
+    'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
+    'PhpOffice\\PhpSpreadsheet\\' => array($vendorDir . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet'),
+    'MyCLabs\\Enum\\' => array($vendorDir . '/myclabs/php-enum/src'),
+    'Matrix\\' => array($vendorDir . '/markbaker/matrix/classes/src'),
     'Kiuws_Service_Flight_Management\\Services\\' => array($baseDir . '/services'),
     'Kiuws_Service_Flight_Management\\Includes\\' => array($baseDir . '/includes'),
     'Kiuws_Service_Flight_Management\\DB\\' => array($baseDir . '/db'),
     'Kiuws_Service_Flight_Management\\Api\\' => array($baseDir . '/api'),
+    'Complex\\' => array($vendorDir . '/markbaker/complex/classes/src'),
 );

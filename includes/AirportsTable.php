@@ -91,7 +91,7 @@ class AirportsTable extends WP_List_Table {
 
         $this->_column_headers = array($this->get_columns(), array(), $this->get_sortable_columns());
 
-        $per_page = $this->get_items_per_page('reservaciones_per_page', 10);
+        $per_page = $this->get_items_per_page('airports_per_page', 10);
         $current_page = $this->get_pagenum();
         $total_items = count($data);
 
