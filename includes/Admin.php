@@ -237,7 +237,6 @@ class Admin
     public function flight_management_airports_page () {
         $error_messages = [];
         if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) {
-            var_dump($_POST);
             // validate data 
             $code = $_POST['code'];
             $name = $_POST['name'];
@@ -300,7 +299,7 @@ class Admin
             $airport_id = '';
             if ($_GET['action'] === 'create') {
                 $action = 'create';
-            } else {
+            } else if ($_GET['action'] === 'edit') {
                 $action = 'edit';
                 $id = $_GET['airport_id'];
                 $airport = new FlightManagementAirportModel();
@@ -311,6 +310,14 @@ class Admin
                 $state = $airport->state_name;
                 $country = $airport->country_name;
                 $airport_id = $airport->id;
+            } else if ($_GET['action'] === 'delete') {
+                $id = $_GET['airport_id'];
+                $airport = new FlightManagementAirportModel();
+                $airport = $airport->getAirportById($id);
+                $airport->delete();
+                add_settings_error('flight-management-messages', 'success', 'Aeropuerto eliminado con éxito', 'updated');
+                include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airports.php';
+                return;
             }
 
             include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airport-form.php';

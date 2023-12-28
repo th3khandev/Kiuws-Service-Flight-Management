@@ -155,9 +155,9 @@ class FlightManagementAirportModel extends FlightManagementDB {
      * @param int $id
      * @return int
      */
-    public function delete ($id) {
+    public function delete () {
         $where = [
-            'id' => $id,
+            'id' => $this->id,
         ];
         $where_format = [
             '%d',

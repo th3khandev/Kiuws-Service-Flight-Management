@@ -58,6 +58,7 @@ class AirportsTable extends WP_List_Table {
     public function column_actions($item) {
         $actions = [
             'view' => sprintf('<a href="admin.php?page=flight-management-airports&action=edit&airport_id=%s">Editar</a>', $item->id),
+            'delete' => sprintf('<a href="admin.php?page=flight-management-airports&action=delete&airport_id=%s">Eliminar</a>', $item->id),
         ];
         return $this->row_actions($actions);
     }
