@@ -324,7 +324,6 @@ class Admin
     public function flight_management_airports_page () {
         $error_messages = [];
         if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) {
-            var_dump($_POST);
             if ($_POST['action'] === 'import') {
                 $this->import_airports($_POST, $_FILES);
                 return;
