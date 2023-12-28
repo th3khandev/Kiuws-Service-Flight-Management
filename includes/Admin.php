@@ -2,6 +2,7 @@
 
 namespace Kiuws_Service_Flight_Management\Includes;
 
+use Kiuws_Service_Flight_Management\DB\FlightManagementAirportModel;
 use Kiuws_Service_Flight_Management\DB\FlightManagementModel;
 use Kiuws_Service_Flight_Management\DB\FlightPaymentInfoModel;
 use Kiuws_Service_Flight_Management\Services\Kiuws;
@@ -57,6 +58,15 @@ class Admin
             $capability,
             $slug . '-kiuw-parameters',
             [$this, 'flight_management_kiuw_parameters_page']
+        );
+
+        add_submenu_page(
+            $slug,
+            __('Airports', 'flight-management'),
+            __('Airports', 'flight-management'),
+            $capability,
+            $slug . '-airports',
+            [$this, 'flight_management_airports_page']
         );
     }
 
@@ -222,5 +232,73 @@ class Admin
         echo '<h2>'. $body .'</h2>';
         echo '</div>';
         echo '</div>';
+    }
+
+    public function flight_management_airports_page () {
+        $error_messages = [];
+        if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) {
+            var_dump($_POST);
+            // validate data 
+            $code = $_POST['code'];
+            $name = $_POST['name'];
+            $city = $_POST['city_name'];
+            $state = $_POST['state_name'];
+            $country = $_POST['country_name'];
+
+            if (empty($code)) {
+                $error_messages[] = 'El código es requerido';
+            }
+
+            if (empty($name)) {
+                $error_messages[] = 'El nombre es requerido';
+            }
+
+            if (empty($city)) {
+                $error_messages[] = 'La ciudad es requerida';
+            }
+
+            if (empty($state)) {
+                $error_messages[] = 'El estado es requerido';
+            }
+
+            if (empty($country)) {
+                $error_messages[] = 'El país es requerido';
+            }
+
+            if (!empty($error_messages)) {
+                // Si hubo un error, agrega un mensaje de error
+                foreach ($error_messages as $error_message) {
+                    add_settings_error('flight-management-messages', 'error', $error_message, 'error');
+                }
+                include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airport-form.php';
+                return;
+            } else {
+                // Si todo fue exitoso, agrega un mensaje de éxito
+                $airport = new FlightManagementAirportModel();
+                $airport->code = $code;
+                $airport->name = $name;
+                $airport->city_name = $city;
+                $airport->state_name = $state;
+                $airport->country_name = $country;
+                $airport->save();
+                add_settings_error('flight-management-messages', 'success', 'Aeropuerto guardado con éxito', 'updated');
+            }
+        } else if (isset($_GET['action'])) {
+            $action = '';
+            $code = '';
+            $name = '';
+            $id = '';
+            $city = '';
+            $country = '';
+            $state = '';
+            if ($_GET['action'] === 'create') {
+                $action = 'create';
+            }
+
+            include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airport-form.php';
+            return;
+        }
+
+        include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airports.php';
     }
 }
