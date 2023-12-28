@@ -126,16 +126,16 @@ class FlightManagementAirportModel extends FlightManagementDB {
      * @param FlightManagementAirportModel $airport
      * @return int
      */
-    public function update ($id, $code, $name, $city, $state, $country) {
+    public function update () {
         $data = [
-            'code' => $code,
-            'name' => $name,
-            'city_name' => $city,
-            'state_name' => $state,
-            'country_name' => $country,
+            'code' => $this->code,
+            'name' => $this->name,
+            'city_name' => $this->city_name,
+            'state_name' => $this->state_name,
+            'country_name' => $this->country_name,
         ];
         $where = [
-            'id' => $id,
+            'id' => $this->id,
         ];
         $format = [
             '%s',

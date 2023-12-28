@@ -46,6 +46,9 @@
                 <td><input type="text" name="country_name" value="<?php echo $country; ?>" required="required" /></td>
             </tr>
         </table>
+
+        <input type="hidden" name="action" value="<?php echo $action; ?>" />
+        <input type="hidden" name="airport_id" value="<?php echo $airport_id; ?>" />
         <?php submit_button('Save'); ?>
     </form>
 

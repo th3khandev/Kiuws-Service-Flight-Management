@@ -56,23 +56,15 @@ class AirportsTable extends WP_List_Table {
     }
 
     public function column_actions($item) {
-        /* $actions = [
-            'view' => sprintf('<a href="admin.php?page=flight-management&booking_id=%s">Ver</a>', $item->booking_id),
+        $actions = [
+            'view' => sprintf('<a href="admin.php?page=flight-management-airports&action=edit&airport_id=%s">Editar</a>', $item->id),
         ];
-
-        if ($item->status == FlightManagementModel::STATUS_PENDING || $item->status == FlightManagementModel::STATUS_BOOKED) {
-            $actions['delete'] = sprintf('<a href="javascript:void(0)" data-id="%s" class="cancel-booking">Cancelar</a>', $item->booking_id);
-        }
-
-        if ($item->status == FlightManagementModel::STATUS_PAID) {
-            $actions['confirm'] = sprintf('<a href="javascript:void(0)" data-id="%s" class="confirm-booking">Confirmado</a>', $item->booking_id);
-        }
-        return $this->row_actions($actions); */
+        return $this->row_actions($actions);
     }
 
     public function get_sortable_columns() {
         $sortable_columns = array(
-            'id'            => array('booking_id', false),
+            'id'            => array('id', false),
             'code'          => array('code', false),
             'name'          => array('name', false),
             'city_name'     => array('city_name', false),

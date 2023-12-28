@@ -280,7 +280,13 @@ class Admin
                 $airport->city_name = $city;
                 $airport->state_name = $state;
                 $airport->country_name = $country;
-                $airport->save();
+
+                if ($_POST['action'] === 'create') {
+                    $airport->save();
+                } else {
+                    $airport->id = $_POST['airport_id'];
+                    $airport->update();
+                }
                 add_settings_error('flight-management-messages', 'success', 'Aeropuerto guardado con éxito', 'updated');
             }
         } else if (isset($_GET['action'])) {
@@ -291,8 +297,20 @@ class Admin
             $city = '';
             $country = '';
             $state = '';
+            $airport_id = '';
             if ($_GET['action'] === 'create') {
                 $action = 'create';
+            } else {
+                $action = 'edit';
+                $id = $_GET['airport_id'];
+                $airport = new FlightManagementAirportModel();
+                $airport = $airport->getAirportById($id);
+                $code = $airport->code;
+                $name = $airport->name;
+                $city = $airport->city_name;
+                $state = $airport->state_name;
+                $country = $airport->country_name;
+                $airport_id = $airport->id;
             }
 
             include_once FLIGHT_MANAGEMENT_DIR . 'templates/admin/airport-form.php';
