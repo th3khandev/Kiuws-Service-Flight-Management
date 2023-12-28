@@ -33,10 +33,10 @@
         name="origin"
         class="form-control"
         label="name"
-        :filterable="false"
+        :filterable="true"
         :options="originAirports"
-        @search="onSearchOriginAirports"
         v-model="originAirport"
+        :filter="filterAirports"
       >
         <template slot="no-options">
           No se han encontrado aeropuertos
@@ -46,19 +46,19 @@
             <img
               src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
               width="30"
-              style="margin-right: 5px"
+              style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
             />
-            {{ option.name }} - {{ option.city }}
+            {{ option.name }} - {{ option.city_name }}
           </div>
         </template>
         <template slot="selected-option" slot-scope="option">
           <img
             src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
             width="30"
-            style="margin-right: 5px"
+            style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
           />
           <label
-            >{{ option.name }}, <small>{{ option.city }}</small></label
+            >{{ option.name }}, <small>{{ option.city_name }}</small></label
           >
         </template>
       </v-select>
@@ -70,10 +70,10 @@
         name="origin"
         class="form-control"
         label="name"
-        :filterable="false"
+        :filterable="true"
         :options="destinationAirports"
-        @search="onSearchDestinationAirports"
         v-model="destinationAirport"
+        :filter="filterAirports"
       >
         <template slot="no-options">
           No se han encontrado aeropuertos
@@ -83,19 +83,19 @@
             <img
               src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
               width="30"
-              style="margin-right: 5px"
+              style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
             />
-            {{ option.name }} - {{ option.city }}
+            {{ option.name }} - {{ option.city_name }}
           </div>
         </template>
         <template slot="selected-option" slot-scope="option">
           <img
             src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
             width="30"
-            style="margin-right: 5px"
+            style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
           />
           <label
-            >{{ option.name }}, <small>{{ option.city }}</small></label
+            >{{ option.name }}, <small>{{ option.city_name }}</small></label
           >
         </template>
       </v-select>
@@ -250,8 +250,8 @@ export default {
     vSelect,
   },
   data: () => ({
-    originAirports: [],
-    destinationAirports: [],
+    originAirports: FLIGHT_MANAGEMENT.AIRPORTS,
+    destinationAirports: FLIGHT_MANAGEMENT.AIRPORTS,
     originAirport: null,
     destinationAirport: null,
     departureDate: null,
@@ -297,6 +297,14 @@ export default {
           loading(false);
         });
     }, 300),
+    filterAirports (airports, queryText, itemText) {
+      return airports.filter((airport) => {
+        return (
+          airport.name.toLowerCase().includes(queryText.toLowerCase()) ||
+          airport.city_name.toLowerCase().includes(queryText.toLowerCase())
+        );
+      });
+    },
     validForm() {
       if (!this.originAirport) {
         this.setError("Debe seleccionar una ciudad destino");

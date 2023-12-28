@@ -36,7 +36,7 @@ class FlightManagementAirportModel extends FlightManagementDB {
     /**
      * @var string $table_name
      */
-    public $table_name;
+    private $table_name;
 
     /**
      * class construntor
@@ -69,7 +69,7 @@ class FlightManagementAirportModel extends FlightManagementDB {
     public function getAirports($orderBy = 'id', $order = 'ASC') {
         $sql = "SELECT * FROM $this->table_name ORDER BY $orderBy $order";
         $airports = $this->wpdb->get_results($sql);
-        $airports = array_map([$this, 'createAirportInstance'], $airports);
+        $airports = $airports;
         return $airports;
     }
 

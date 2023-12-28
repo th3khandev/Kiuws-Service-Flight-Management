@@ -2,6 +2,8 @@
 
 namespace Kiuws_Service_Flight_Management\Includes;
 
+use Kiuws_Service_Flight_Management;
+
 class Frontend {
     
     public function __construct()
@@ -30,9 +32,15 @@ class Frontend {
         $stripe_mode = get_option(FLIGHT_MANAGEMENT_PREFIX . 'stripe_mode');
         $stripe_public_key = get_option(FLIGHT_MANAGEMENT_PREFIX . 'stripe_' . $stripe_mode . '_public_key');
 
-        // send stripe public key to frontend
+        // get airports 
+        $airport_model = new Kiuws_Service_Flight_Management\DB\FlightManagementAirportModel();
+        $airports = $airport_model->getAirports('name', 'ASC');
+
+
+        // send data to js
         wp_localize_script('flight-management', 'FLIGHT_MANAGEMENT', [
             'STRIPE_PUBLIC_KEY' => $stripe_public_key,
+            'AIRPORTS' => $airports,
         ]);
     }
 
