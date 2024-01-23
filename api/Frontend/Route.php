@@ -204,6 +204,11 @@ class Route extends WP_REST_Controller
             
             $departure_flight_segments_validate_by_booking_class = [];
             foreach ($listResBookDesig as $value) {
+                // if airline code is 1F validate that booking class is 'T', 'P' or 'L'
+                if ($airlineCode == '1F' && !in_array(trim($value), ['T', 'P', 'L'])) {
+                    continue;
+                }
+
                 $response = $this->kiuwsService->getFlightPrice($depurate_date_time, $arrival_date_time, $flight_number, trim($value), $origin, $destination, $airlineCode, $adults, $children, $inf);
                 if ($response['status'] == 'success') {
                     // add booking code to response
