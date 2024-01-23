@@ -606,6 +606,7 @@
 // helpers
 import { getDurationText } from "../../helpers/flight";
 import { isEmailValid } from "../../helpers/functions";
+import countries from "../../constants/countries";
 
 export default {
   name: "DetailFlightReservation",
@@ -632,6 +633,7 @@ export default {
     messageErrorStripe: "",
     gettingToken: false,
     countryCodePhoneDefault: "",
+    countries,
   }),
   created() {
     const currentDate = new Date();
