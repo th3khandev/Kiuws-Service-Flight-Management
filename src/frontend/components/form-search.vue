@@ -212,31 +212,6 @@
 // components
 import vSelect from "vue-select";
 
-// services
-import { getAirportCodes } from "../../services/openFlightOrgService";
-
-const debounce = (func, wait, immediate) => {
-  let timeout;
-
-  return function executedFunction() {
-    const context = this;
-    const args = arguments;
-
-    const later = function () {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-
-    const callNow = immediate && !timeout;
-
-    clearTimeout(timeout);
-
-    timeout = setTimeout(later, wait);
-
-    if (callNow) func.apply(context, args);
-  };
-};
-
 export default {
   name: "FormSearchComponent",
   components: {
@@ -261,35 +236,6 @@ export default {
   }),
   props: ["loading", "step"],
   methods: {
-    onSearchOriginAirports(search, loading) {
-      if (search.length >= 2) {
-        loading(true);
-        this.search(search, loading, this, "origin");
-      }
-    },
-    onSearchDestinationAirports(search, loading) {
-      if (search.length >= 2) {
-        this.search(search, loading, this, "destination");
-      }
-    },
-    search: debounce(async (search, loading, vm, type) => {
-      loading(true);
-      await getAirportCodes(search)
-        .then((response) => response.json())
-        .then((data) => {
-          if (type == "origin") {
-            vm.originAirports = data.airports;
-          } else {
-            vm.destinationAirports = data.airports;
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        })
-        .finally(() => {
-          loading(false);
-        });
-    }, 300),
     filterAirports(airports, queryText, itemText) {
       return airports.filter((airport) => {
         return (
