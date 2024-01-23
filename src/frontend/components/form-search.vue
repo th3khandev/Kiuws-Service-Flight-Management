@@ -1,6 +1,6 @@
 <template>
   <div class="row" id="flight-search-form">
-    <div class="col-12 col-sm-12">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
       <!-- Add checks "Solo ida" o "Ida y vuelta" -->
       <div class="form-check form-check-inline">
         <input
@@ -26,6 +26,18 @@
           >Ida y Vuelta</label
         >
       </div>
+      <div class="form-check form-check-inline">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="only_direct_flights"
+          id="only_direct_flights"
+          v-model="onlyDirectFlights"
+        />
+        <label class="form-check-label" for="only_direct_flights"
+          >Solo vuelos directos</label
+        >
+      </div>
     </div>
     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
       <label for="origin" class="form-label">Desde: </label>
@@ -46,7 +58,7 @@
             <img
               src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
               width="30"
-              style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
+              style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px"
             />
             {{ option.name }} - {{ option.city_name }}
           </div>
@@ -55,7 +67,7 @@
           <img
             src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
             width="30"
-            style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
+            style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px"
           />
           <label
             >{{ option.name }}, <small>{{ option.city_name }}</small></label
@@ -83,7 +95,7 @@
             <img
               src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
               width="30"
-              style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
+              style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px"
             />
             {{ option.name }} - {{ option.city_name }}
           </div>
@@ -92,7 +104,7 @@
           <img
             src="/wp-content/plugins/Kiuws-Service-Flight-Management/assets/images/airplane_icon.png"
             width="30"
-            style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px;"
+            style="margin-right: 5px; margin-top: 0px; margin-bottom: 0px"
           />
           <label
             >{{ option.name }}, <small>{{ option.city_name }}</small></label
@@ -128,7 +140,9 @@
     </div>
 
     <!-- Amount Adults and children -->
-    <div :class="`col-12 col-sm-12 col-md-${tripType == 2 ? '12' : '6'} col-lg-${tripType == 2 ? '12' : '6'} mb-2`">
+    <div
+      class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
+    >
       <div class="row">
         <div class="col-12 col-sm-12 col-md-4 col-lg-4">
           <label for="amount_adults" class="form-label">Adultos: </label>
@@ -172,27 +186,6 @@
             max="9"
             step="1"
           />
-        </div>
-      </div>
-    </div>
-
-    <!-- Only direct flight -->
-    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
-      <div class="row">
-        <div class="col-12 col-sm-12">
-          <!-- Add checks "Solo ida" o "Ida y vuelta" -->
-          <div class="form-check form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="only_direct_flights"
-              id="only_direct_flights"
-              v-model="onlyDirectFlights"
-            />
-            <label class="form-check-label" for="only_direct_flights"
-              >Solo vuelos directos</label
-            >
-          </div>
         </div>
       </div>
     </div>
@@ -297,7 +290,7 @@ export default {
           loading(false);
         });
     }, 300),
-    filterAirports (airports, queryText, itemText) {
+    filterAirports(airports, queryText, itemText) {
       return airports.filter((airport) => {
         return (
           airport.name.toLowerCase().includes(queryText.toLowerCase()) ||
