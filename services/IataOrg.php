@@ -36,7 +36,23 @@ class IataOrg {
         ];
     }
 
+    private function replaceByRutacaAirline ($code) {
+        return [
+            'code'      => $code,
+            'name'      => 'Rutaca Airlines',
+            'country'   => 'Venezuela',
+            'logo'      => $this->dirAirlineLogos . '5R.png'
+        ];
+    }
+
     public function getAirlineByCode ($code) {
+        // if code is 1F replace by 5R
+        if ($code == '1F') {
+            $airline = $this->replaceByRutacaAirline($code);
+            $this->addAirlineToFileDB($airline);
+            return $airline;
+        }
+
         // open file
         $fileAirline = file_get_contents($this->airlinesDbFile);
         // decode json to array
