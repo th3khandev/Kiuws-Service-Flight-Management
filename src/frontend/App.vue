@@ -212,8 +212,8 @@ export default {
       this.errorPaymentMessage = null;
       this.flightReservation = {
         ...reservationFlightData,
-        destinationAirport: `${this.destinationAirport.country} ${this.destinationAirport.city} (${this.destinationAirport.code}), ${this.destinationAirport.name}`,
-        originAirport: `${this.originAirport.country} ${this.originAirport.city} (${this.originAirport.code}), ${this.originAirport.name}`,
+        destinationAirport: `${this.destinationAirport.country_name} ${this.destinationAirport.city_name} (${this.destinationAirport.code}), ${this.destinationAirport.name}`,
+        originAirport: `${this.originAirport.country_name} ${this.originAirport.city_name} (${this.originAirport.code}), ${this.originAirport.name}`,
         passengers: [],
       };
 

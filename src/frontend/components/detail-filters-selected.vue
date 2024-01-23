@@ -18,12 +18,12 @@
             v-if="originAirport && destinationAirport"
           >
             <label
-              >{{ originAirport.city }} <span>({{ originAirport.code }})</span>,
+              >{{ originAirport.city_name }} <span>({{ originAirport.code }})</span>,
               {{ originAirport.name }}</label
             >
             -
             <label
-              >{{ destinationAirport.city }}
+              >{{ destinationAirport.city_name }}
               <span>({{ destinationAirport.code }})</span>,
               {{ destinationAirport.name }}</label
             >
