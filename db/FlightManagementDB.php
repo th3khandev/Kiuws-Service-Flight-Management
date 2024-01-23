@@ -43,7 +43,7 @@ class FlightManagementDB {
     }
 
     private function createFlightManagementPassengersTable () {
-        $sql = "CREATE TABLE `$this->flight_management_passengers_table` (`id` INT(11) NULL AUTO_INCREMENT, `flight_id` INT(11) NOT NULL , `type` VARCHAR(5) NOT NULL, `name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `email` VARCHAR(50) NOT NULL, `gender` VARCHAR(1) NOT NULL, `birth_date` DATE NOT NULL, `document_type` VARCHAR(5) NOT NULL, `document_number` VARCHAR(50) NOT NULL, `phone_country_code` VARCHAR(5) NOT NULL, `phone_number` VARCHAR(50) NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
+        $sql = "CREATE TABLE `$this->flight_management_passengers_table` (`id` INT(11) NULL AUTO_INCREMENT, `flight_id` INT(11) NOT NULL , `type` VARCHAR(5) NOT NULL, `name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `email` VARCHAR(50) NOT NULL, `gender` VARCHAR(1) NOT NULL, `birth_date` DATE NOT NULL, `document_type` VARCHAR(5) NOT NULL, `document_number` VARCHAR(50) NOT NULL, `phone_country_code` VARCHAR(5) NOT NULL, `phone_number` VARCHAR(50) NOT NULL, `nationality_code` VARCHAR(3) NOT NULL, `nationality_name` VARCHAR(50) NOT NULL, `passport_issue_date` DATE NOT NULL, `passport_expiration_date` DATE NOT NULL, PRIMARY KEY (`id`)) $this->charset_collate;";
         dbDelta($sql);
     }
 
