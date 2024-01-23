@@ -63,6 +63,27 @@ class IataOrg {
         ];
     }
 
+    private function addAirlineToFileDB ($airline) {
+        // add airline to file
+        $fileAirline = file_get_contents($this->airlinesDbFile);
+        // decode json to array
+        $airlines = json_decode($fileAirline, true);
+
+        // validate if airline exist
+        foreach ($airlines as $airlineDB) {
+            if ($airlineDB['code'] == $airline['code']) {
+                return;
+            }
+        }
+
+        // add airline
+        $airlines[] = $airline;
+        // encode array to json
+        $fileAirline = json_encode($airlines);
+        // save file
+        file_put_contents($this->airlinesDbFile, $fileAirline);
+    }
+
     public function addAirlineToFile ($code) {
         // make GET to https://www.iata.org/PublicationDetails/Search/?currentBlock=314383
         $response = wp_remote_get('https://www.iata.org/PublicationDetails/Search/?currentBlock=314383&airline.search=' . $code);
@@ -109,16 +130,7 @@ class IataOrg {
             }
         }
         if (!$airline_not_found) {
-            // add airline to file
-            $fileAirline = file_get_contents($this->airlinesDbFile);
-            // decode json to array
-            $airlines = json_decode($fileAirline, true);
-            // add airline
-            $airlines[] = $airline;
-            // encode array to json
-            $fileAirline = json_encode($airlines);
-            // save file
-            file_put_contents($this->airlinesDbFile, $fileAirline);
+            $this->addAirlineToFileDB($airline);
         }
         return $airline;
     }
