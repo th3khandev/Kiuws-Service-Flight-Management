@@ -215,40 +215,42 @@
                             />
                           </div>
                         </div>
-                        <!-- User document type  -->
+                        <!-- User nationality -->
                         <div class="col-12 col-md-6">
                           <div class="form-group">
-                            <label :for="`documentType_${index}`">
-                              Tipo de documento
-                              <span class="text-danger">(*)</span>
+                            <label :for="`documentNumber_${index}`">
+                              País de nacimiento <span class="text-danger">(*)</span>
                             </label>
-                            <!-- Select doc type -->
+                            <!-- Input doc number -->
                             <select
                               class="form-control"
-                              :name="`documentType_${index}`"
-                              v-model="passenger.documentType"
+                              :name="`nationality_${index}`"
+                              v-model="passenger.nationality"
                               required
                             >
-                              <option value="">
-                                -- Seleccione el tipo de documento --
+                              <option value="">-- Selecione una opción --</option>
+                              <option
+                                v-for="country in countries"
+                                :value="country"
+                              >
+                                {{ country.name }}
                               </option>
-                              <option value="NI">Cédula de identidad</option>
-                              <option value="PP">PASAPORTE</option>
                             </select>
                           </div>
                         </div>
+
                         <!-- User document number -->
                         <div class="col-12 col-md-6">
                           <div class="form-group">
                             <label :for="`documentNumber_${index}`">
-                              Documento <span class="text-danger">(*)</span>
+                              Número de pasaporte <span class="text-danger">(*)</span>
                             </label>
                             <!-- Input doc number -->
                             <input
                               type="text"
                               class="form-control"
                               :name="`documentNumber_${index}`"
-                              placeholder="Número de documento"
+                              placeholder="Ingrese su número de pasaporte"
                               v-model="passenger.documentNumber"
                               required
                               minlength="5"
@@ -256,6 +258,41 @@
                             />
                           </div>
                         </div>
+
+                        <!-- User passaport issue date -->
+                        <div class="col-12 col-md-6">
+                          <div class="form-group">
+                            <label :for="`passportIssueDate_${index}`">
+                              Fecha de emisión del pasaporte <span class="text-danger">(*)</span>
+                            </label>
+                            <!-- Input doc number -->
+                            <input
+                              type="date"
+                              class="form-control"
+                              :name="`passportIssueDate_${index}`"
+                              v-model="passenger.passportIssueDate"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <!-- User passaport expiration date -->
+                        <div class="col-12 col-md-6">
+                          <div class="form-group">
+                            <label :for="`passportExpirationDate_${index}`">
+                              Fecha de vencimiento del pasaporte <span class="text-danger">(*)</span>
+                            </label>
+                            <!-- Input doc number -->
+                            <input
+                              type="date"
+                              class="form-control"
+                              :name="`passportExpirationDate_${index}`"
+                              v-model="passenger.passportExpirationDate"
+                              required
+                            />
+                          </div>
+                        </div>
+
                         <!-- User gender -->
                         <div class="col-12 col-md-6">
                           <div class="form-group">
