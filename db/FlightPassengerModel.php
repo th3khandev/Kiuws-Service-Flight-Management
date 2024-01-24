@@ -143,6 +143,10 @@ class FlightPassengerModel extends FlightManagementDB {
             '%s',
             '%s',
             '%s',
+            '%s',
+            '%s',
+            '%s',
+            '%s',
             '%s'
         ];
         $this->wpdb->insert($this->flight_management_passengers_table, $data, $format);

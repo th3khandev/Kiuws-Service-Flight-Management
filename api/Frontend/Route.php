@@ -470,14 +470,23 @@ class Route extends WP_REST_Controller
             $flight_passenger->document_number = $passenger['documentNumber'];
             $flight_passenger->phone_country_code = $passenger['phoneCountryCode'];
             $flight_passenger->phone_number = $passenger['phoneNumber'];
+            $flight_passenger->nationality_code = $passenger['nationality']['code'];
+            $flight_passenger->nationality_name = $passenger['nationality']['name'];
+            $flight_passenger->passport_issue_date = $passenger['passportIssueDate'];
+            $flight_passenger->passport_expiration_date = $passenger['passportExpirationDate'];
             $flight_passenger->save();
         }
 
-        // send email to user admin
-        $this->sendEmailToAdmin($flight, $flight_contact);
+        // get email user admin
+        $email_to = get_option(FLIGHT_MANAGEMENT_PREFIX . 'email_to');
+        $email_to = trim($email_to);
+
+        $subject_admin = 'Se ha creado una nueva reservación de vuelo desde el sitio web de Puncana.';
+        $this->sendEmailReservation($flight, $flight_contact, $email_to, $subject_admin);
 
         // send email to user
-        $this->sendEmailToUser($flight_contact->email, $flight, $flight_contact, $flight_segments);
+        $subject_user = 'Reserva de vuelo';
+        $this->sendEmailReservation($flight, $flight_contact, $flight_contact->email, $subject_user, false);
 
         return rest_ensure_response($response);
     }
@@ -552,11 +561,7 @@ class Route extends WP_REST_Controller
         ];
     }
 
-    private function sendEmailToAdmin ($flight, $flight_contact) {
-        // send email to user admin
-        $email_to = get_option(FLIGHT_MANAGEMENT_PREFIX . 'email_to');
-        $email_to = trim($email_to);
-
+    private function sendEmailReservation ($flight, $flight_contact, $email_to, $subject, $show_link_to_admin = true) {
         // get blogname
         $blogname = get_option('blogname');
 
@@ -571,6 +576,9 @@ class Route extends WP_REST_Controller
 
         // replace logo url in template
         $html_template = str_replace('{{logo}}', $logo_url, $html_template);
+
+        // replace id in template
+        $html_template = str_replace('{{id}}', $flight->booking_id, $html_template);
 
         // get url site
         $url_site = get_site_url();
@@ -606,11 +614,53 @@ class Route extends WP_REST_Controller
         $html_template = str_replace('{{contact_email}}', $flight_contact->email, $html_template);
         $html_template = str_replace('{{contact_phone_number}}', $flight_contact->phone_number, $html_template);
 
+        // add passengers data
+        $flight_passenger_model = new FlightPassengerModel();
+        $flight_passengers = $flight_passenger_model->get_passengers_by_flight_id($flight->id);
+
+        $passengers_html = '';
+        foreach ($flight_passengers as $key => $passenger) {
+            $type = 'Adulto';
+            if ($passenger->type == FlightPassengerModel::TYPE_CHILD) {
+                $type = 'Niño';
+            } else if ($passenger->type == FlightPassengerModel::TYPE_INFANT) {
+                $type = 'Infante';
+            }
+
+            $passengers_html .= '<tr>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . ($key + 1) . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $type . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->name . ' ' . $passenger->last_name . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->email . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;"> (+' . $passenger->phone_country_code .') ' . $passenger->phone_number . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->nationality_name . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->document_number . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->passport_issue_date . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->passport_expiration_date . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . ($passenger->gender == 'M' ? 'Masculino' : 'Femenino') . '</td>';
+            $passengers_html .= '<td style="padding: 10px; border: 1px solid;border-color: #d3d3d3;">' . $passenger->birth_date . '</td>';
+            $passengers_html .= '</tr>';
+        }
+
+        // add passengers html to template
+        $html_template = str_replace('{{$passengers}}', $passengers_html, $html_template);
+
         // create flight_link 
         $flight_link = get_site_url() . '/wp-admin/admin.php?page=flight-management&booking_id=' . $flight->booking_id;
         
         // replce flight_link in template html
-        $html_template = str_replace('{{flight_link}}', $flight_link, $html_template);
+        if (!$show_link_to_admin) {
+            $flight_link = '';
+            $html_template = str_replace('{{flight_link}}', $flight_link, $html_template);
+        } else {
+            $flight_link = '<h5>Para más información puede acceder al siguiente enlace: <a href="'.$flight_link.'">'.$flight_link.'</a></h5>';
+            $html_template = str_replace('{{flight_link}}', $flight_link, $html_template);
+        }
+
+        $html_template = str_replace('{{currency_code}}', $flight->currency_code, $html_template);
+        $html_template = str_replace('{{base_fare}}', $flight->base_fare, $html_template);
+        $html_template = str_replace('{{total_taxes}}', $flight->total_taxes + $flight->extra, $html_template);
+        $html_template = str_replace('{{total}}', $flight->total, $html_template);
 
         // create puncana footer image
         $puncana_footer_image = FLIGHT_MANAGEMENT_URL . 'assets/images/puncana-footer.jpg';
@@ -620,10 +670,11 @@ class Route extends WP_REST_Controller
 
 
         // set header response html not like JSON
-        // header('Content-Type: text/html; charset=UTF-8');
-
+        /* header('Content-Type: text/html; charset=UTF-8');
+        echo $html_template;
+        return; */
         // send email
-        wp_mail($email_to, 'Nueva reserva de vuelo', $html_template, [
+        wp_mail($email_to, $subject, $html_template, [
             'Content-Type: text/html; charset=UTF-8',
         ]);
     }
@@ -736,18 +787,21 @@ class Route extends WP_REST_Controller
 
     public function testEmail () {
         $flight_test = new FlightManagementModel();
-        $flight_test = $flight_test->getFlightById(1);
+        $flight_test = $flight_test->getFlightById(10);
 
         $flight_contact_test = new FlightContactModel();
         $flight_contact_test = $flight_contact_test->get_contact_by_flight_id($flight_test->id);
-        $this->sendEmailToAdmin($flight_test, $flight_contact_test);
 
-        $flight_segments = new FlightSegmentModel();
-        $flight_segments = $flight_segments->get_by_flight_id($flight_test->id);
+        // get email user admin
+        $email_to = get_option(FLIGHT_MANAGEMENT_PREFIX . 'email_to');
+        $email_to = trim($email_to);
+
+        $subject_admin = 'Se ha creado una nueva reservación de vuelo desde el sitio web de Puncana.';
+        $this->sendEmailReservation($flight_test, $flight_contact_test, $email_to, $subject_admin);
 
         // send email to user
-        $this->sendEmailToUser('anthonydeyvis32@gmail.com', $flight_test, $flight_contact_test, $flight_segments);
-
+        $subject_user = 'Reserva de vuelo';
+        $this->sendEmailReservation($flight_test, $flight_contact_test, $flight_contact_test->email, $subject_user, false);
 
         return rest_ensure_response([
             'status' => 'success',
