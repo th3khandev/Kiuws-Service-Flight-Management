@@ -946,7 +946,6 @@ export default {
 
       setTimeout(() => {
         this.stripeCardNumber.on("change", (event) => {
-          console.log("card number event", event);
           if (!event.complete) {
             const stripeError = this.messageErrorStripe.find(
               (error) => error.code == "card_number"
@@ -972,7 +971,6 @@ export default {
         });
 
         this.stripeCardExpirationDate.on("change", (event) => {
-          console.log("card expiration date event", event);
           if (!event.complete) {
             const stripeError = this.messageErrorStripe.find(
               (error) => error.code == "card_expiration_date"
@@ -1001,7 +999,6 @@ export default {
         });
 
         this.stripeCardCvcCode.on("change", (event) => {
-          console.log("card cvc code event", event);
           if (!event.complete) {
             const stripeError = this.messageErrorStripe.find(
               (error) => error.code == "card_cvc_code"
@@ -1029,7 +1026,6 @@ export default {
         });
 
         this.stripeCardPostalCode.on("change", (event) => {
-          console.log("card postal code event", event);
           if (!event.complete) {
             const stripeError = this.messageErrorStripe.find(
               (error) => error.code == "card_postal_code"
@@ -1058,19 +1054,14 @@ export default {
       }, 1000);
     },
     async getTokenCard() {
-      debugger
       this.gettingToken = true;
       const { cardName } = this.$props.flightReservation.paymentInfo;
-
-      console.log("elements", this.stripeElements);
 
       try {
         const request = {
           name: cardName,
         }
-        console.log('request >> ', request)
         const stripeResponse = await this.stripe.createToken(this.stripeCardNumber, request);
-        console.log('stripe response >> ', stripeResponse)
         if (stripeResponse.error) {
           this.stripeError = true;
           this.messageErrorStripe = this.messageErrorStripe.push({
@@ -1090,18 +1081,14 @@ export default {
         const { card } = token;
         this.$props.flightReservation.paymentInfo.cardToken = token.id;
 
-        console.log('this.$props.flightReservation.paymentInfo.cardToken >> ', this.$props.flightReservation.paymentInfo.cardToken)
-
         // complete with '*' the card number
         this.$props.flightReservation.paymentInfo.cardNumber = `************${card.last4}`;
-        console.log('this.$props.flightReservation.paymentInfo.cardNumber >> ', this.$props.flightReservation.paymentInfo.cardNumber)
 
         // get token data
         const cardToken = token.id;
         this.gettingToken = false;
         return cardToken;
       } catch (error) {
-        console.log(error);
         this.stripeError = true;
         this.messageErrorStripe.push({
           code: "card_invalid",
