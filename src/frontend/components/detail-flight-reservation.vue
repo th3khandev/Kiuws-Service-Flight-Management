@@ -177,7 +177,10 @@
                           </div>
                         </div>
                         <!-- User email -->
-                        <div class="col-12 col-md-6" v-if="passenger.type == 'adult'">
+                        <div
+                          class="col-12 col-md-6"
+                          v-if="passenger.type == 'adult'"
+                        >
                           <div class="form-group">
                             <label :for="`email_${index}`"
                               >Email <span class="text-danger">(*)</span></label
@@ -195,7 +198,10 @@
                           </div>
                         </div>
                         <!-- User phone -->
-                        <div class="col-12 col-md-6" v-if="passenger.type == 'adult'">
+                        <div
+                          class="col-12 col-md-6"
+                          v-if="passenger.type == 'adult'"
+                        >
                           <div class="form-group">
                             <label class="w-100" :for="`phone_${index}`"
                               >Número de teléfono
@@ -219,7 +225,8 @@
                         <div class="col-12 col-md-6">
                           <div class="form-group">
                             <label :for="`documentNumber_${index}`">
-                              País de nacimiento <span class="text-danger">(*)</span>
+                              País de nacimiento
+                              <span class="text-danger">(*)</span>
                             </label>
                             <!-- Input doc number -->
                             <select
@@ -228,7 +235,9 @@
                               v-model="passenger.nationality"
                               required
                             >
-                              <option value="">-- Selecione una opción --</option>
+                              <option value="">
+                                -- Selecione una opción --
+                              </option>
                               <option
                                 v-for="country in countries"
                                 :value="country"
@@ -243,7 +252,8 @@
                         <div class="col-12 col-md-6">
                           <div class="form-group">
                             <label :for="`documentNumber_${index}`">
-                              Número de pasaporte <span class="text-danger">(*)</span>
+                              Número de pasaporte
+                              <span class="text-danger">(*)</span>
                             </label>
                             <!-- Input doc number -->
                             <input
@@ -263,7 +273,8 @@
                         <div class="col-12 col-md-6">
                           <div class="form-group">
                             <label :for="`passportIssueDate_${index}`">
-                              Fecha de emisión del pasaporte <span class="text-danger">(*)</span>
+                              Fecha de emisión del pasaporte
+                              <span class="text-danger">(*)</span>
                             </label>
                             <!-- Input doc number -->
                             <input
@@ -280,7 +291,8 @@
                         <div class="col-12 col-md-6">
                           <div class="form-group">
                             <label :for="`passportExpirationDate_${index}`">
-                              Fecha de vencimiento del pasaporte <span class="text-danger">(*)</span>
+                              Fecha de vencimiento del pasaporte
+                              <span class="text-danger">(*)</span>
                             </label>
                             <!-- Input doc number -->
                             <input
@@ -445,7 +457,8 @@
           <div class="col-12 col-md-6">
             <div class="form-group">
               <label for="card_document_number"
-                >Número de identificación <span class="text-danger">(*)</span></label
+                >Número de identificación
+                <span class="text-danger">(*)</span></label
               >
               <input
                 type="text"
@@ -457,20 +470,47 @@
               />
             </div>
           </div>
-        </div>
 
-        <div class="row mt-3 mb-5">
-          <!-- Card element -->
-          <div class="col-12">
-            <label>
-              Número de tarjeta <span class="text-danger">(*)</span>
-            </label>
+          <!-- Card number -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="card_number"
+                >Número de tarjeta <span class="text-danger">(*)</span></label
+              >
+              <div id="stripe_card_number"></div>
+            </div>
           </div>
-          <div class="col-12">
-            <div id="card-element"></div>
+
+          <!-- Card expiration date -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="card_expiration_date"
+                >Fecha de expiración <span class="text-danger">(*)</span></label
+              >
+              <div id="stripe_card_expiration_date"></div>
+            </div>
+          </div>
+
+          <!-- Card cvc -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="card_cvc_code"
+                >Código CVC <span class="text-danger">(*)</span></label
+              >
+              <div id="stripe_card_cvc_code"></div>
+            </div>
+          </div>
+
+          <!-- Card cvc -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="card_postal_code"
+                >Código postal <span class="text-danger">(*)</span></label
+              >
+              <div id="stripe_card_postal_code"></div>
+            </div>
           </div>
         </div>
-
         <!-- Alert info creating reservation -->
         <div class="row" v-if="creatingReservation">
           <div class="col-12 col-md-12">
@@ -541,10 +581,14 @@
         </div>
 
         <!-- Alert error stripe -->
-        <div class="row" v-if="stripeError && messageErrorStripe">
+        <div class="row" v-if="messageErrorStripe.length > 0">
           <div class="col-12 col-md-12">
             <div class="alert alert-danger alert-dismissible">
-              <strong>Error!</strong> {{ messageErrorStripe }}
+              <ul>
+                <li v-for="stripeError in messageErrorStripe">
+                  {{ stripeError.message }}
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -559,6 +603,8 @@
                 creatingReservation ||
                 processingPayment ||
                 stripeError ||
+                messageErrorStripe.length > 0 ||
+                stripeFieldsToValidate != stripeFieldsValid.length ||
                 gettingToken
               "
             >
@@ -628,12 +674,18 @@ export default {
     currentYear: 2023,
     listYears: [],
     stripe: null,
-    cardElement: null,
-    stripeError: true,
-    messageErrorStripe: "",
+    stripeElements: null,
+    stripeError: false,
+    messageErrorStripe: [],
     gettingToken: false,
     countryCodePhoneDefault: "",
     countries,
+    stripeCardNumber: null,
+    stripeCardExpirationDate: null,
+    stripeCardCvcCode: null,
+    stripeCardPostalCode: null,
+    stripeFieldsValid: [],
+    stripeFieldsToValidate: 4,
   }),
   created() {
     const currentDate = new Date();
@@ -764,10 +816,30 @@ export default {
         }
       });
       formReservation.classList.add("was-validated");
-      return true;
+      return this.stripeFieldsToValidate == this.stripeFieldsValid.length;
     },
     async saveReservation() {
-      this.messageErrorStripe = "";
+      this.stripeError = false;
+      this.messageErrorStripe = this.messageErrorStripe.filter(
+        (error) => error.code != "card_token"
+      );
+      if (this.messageErrorStripe.length > 0) {
+        const cardInvalid = this.messageErrorStripe.find(
+          (error) => error.code == "card_invalid"
+        );
+        if (!cardInvalid) {
+          this.messageErrorStripe.push({
+            code: "card_invalid",
+            message: "Debe ingresar los datos de pago válidos.",
+          });
+          setTimeout(() => {
+            this.messageErrorStripe = this.messageErrorStripe.filter(
+              (error) => error.code != "card_invalid"
+            );
+          }, 3000);
+        }
+        return;
+      }
 
       // validate form
       if (!this.formIsValid()) {
@@ -777,13 +849,20 @@ export default {
       // get token card
       const cardToken = await this.getTokenCard();
       if (!cardToken) {
-        this.stripeError = true;
-        this.messageErrorStripe =
-          "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
+        this.messageErrorStripe.push({
+          code: "card_token",
+          message:
+            "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.",
+        });
+        setTimeout(() => {
+          this.messageErrorStripe = this.messageErrorStripe.filter(
+            (error) => error.code != "card_token"
+          );
+        }, 5000);
         return;
       }
 
-       let inputIntTel = null;
+      let inputIntTel = null;
 
       // set area country code to users
       this.flightReservation.passengers.forEach((passenger, index) => {
@@ -791,113 +870,251 @@ export default {
           (input) => input.id == `phone_${index}`
         );
         if (inputIntTel) {
-          passenger.phoneCountryCode = inputIntTel.iti.getSelectedCountryData().dialCode;
+          passenger.phoneCountryCode =
+            inputIntTel.iti.getSelectedCountryData().dialCode;
         } else {
           passenger.phoneCountryCode = this.countryCodePhoneDefault;
         }
       });
-      
+
       // update country phone to contact info
       inputIntTel = this.phoneInputs.find(
         (input) => input.id == `contact_phone`
       );
       if (inputIntTel) {
-        this.flightReservation.contactInfo.phoneCountryCode = inputIntTel.iti.getSelectedCountryData().dialCode;
+        this.flightReservation.contactInfo.phoneCountryCode =
+          inputIntTel.iti.getSelectedCountryData().dialCode;
       } else {
-        this.flightReservation.contactInfo.phoneCountryCode = this.countryCodePhoneDefault;
+        this.flightReservation.contactInfo.phoneCountryCode =
+          this.countryCodePhoneDefault;
       }
 
       // send data to backend
       this.$emit("saveReservation", this.flightReservation);
     },
-    createStripe() {
+    async createStripe() {
       this.stripe = Stripe(FLIGHT_MANAGEMENT.STRIPE_PUBLIC_KEY);
-      const elements = this.stripe.elements({
+      this.stripeElements = this.stripe.elements({
         mode: "payment",
         currency: this.$props.flightReservation.currencyCode.toLowerCase(),
-        amount: parseInt((this.$props.flightReservation.total * 100).toFixed(2)),
+        amount: parseInt(
+          (this.$props.flightReservation.total * 100).toFixed(2)
+        ),
       });
-      this.cardElement = elements.create("card", {
-        style: {
-          base: {
-            fontSize: "16px",
-          },
+      const style = {
+        base: {
+          fontSize: "1.2rem",
+          fontWeight: "400",
+          lineHeight: "1.5",
+          color: "#212529",
+          backgroundColor: "#ffffff",
+        },
+      };
+      this.stripeCardNumber = this.stripeElements.create("cardNumber", {
+        style,
+        showIcon: true,
+        iconStyle: "default",
+        classes: {
+          base: "form-control-stripe",
         },
       });
-      this.cardElement.mount("#card-element");
+      this.stripeCardNumber.mount("#stripe_card_number");
+
+      this.stripeCardExpirationDate = this.stripeElements.create("cardExpiry", {
+        style,
+        classes: {
+          base: "form-control-stripe",
+        },
+      });
+      this.stripeCardExpirationDate.mount("#stripe_card_expiration_date");
+
+      this.stripeCardCvcCode = this.stripeElements.create("cardCvc", {
+        style,
+        classes: {
+          base: "form-control-stripe",
+        },
+      });
+      this.stripeCardCvcCode.mount("#stripe_card_cvc_code");
+
+      this.stripeCardPostalCode = this.stripeElements.create("postalCode", {
+        style,
+        classes: {
+          base: "form-control-stripe",
+        },
+      });
+      this.stripeCardPostalCode.mount("#stripe_card_postal_code");
+
       setTimeout(() => {
-        this.cardElement.on("change", (event) => {
-          const { error, complete } = event;
-          if (error) {
-            this.stripeError = true;
-            const { code } = error;
-            if (code == "incomplete_zip") {
-              this.messageErrorStripe = "El código postal es requerido";
-            } else if (code == "incomplete_cvc") {
-              this.messageErrorStripe = "El código de seguridad es requerido";
-            } else if (code == "incomplete_expiry") {
-              this.messageErrorStripe = "La fecha de expiración es requerida";
-            } else if (code == "incomplete_number") {
-              this.messageErrorStripe = "El número de tarjeta es requerido";
-            } else if (code == "invalid_number") {
-              this.messageErrorStripe = "El número de tarjeta es inválido";
-            } else if (code == "invalid_expiry_year_past") {
-              this.messageErrorStripe = "La fecha de expiración es inválida";
-            } else {
-              this.messageErrorStripe =
-                "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
+        this.stripeCardNumber.on("change", (event) => {
+          console.log("card number event", event);
+          if (!event.complete) {
+            const stripeError = this.messageErrorStripe.find(
+              (error) => error.code == "card_number"
+            );
+            if (!stripeError) {
+              this.messageErrorStripe.push({
+                code: "card_number",
+                message: "El número de tarjeta es inválido",
+              });
             }
+            this.stripeFieldsValid = this.stripeFieldsValid.filter(
+              (field) => field != "card_number"
+            );
           } else {
-            if (complete) {
-              this.stripeError = false;
-              this.messageErrorStripe = "";
-            } else {
-              this.stripeError = true;
-              this.messageErrorStripe =
-                "Debe completar todos los campos de la tarjeta";
+            this.messageErrorStripe = this.messageErrorStripe.filter(
+              (error) => error.code != "card_number"
+            );
+            const inValidList = this.stripeFieldsValid.includes("card_number");
+            if (!inValidList) {
+              this.stripeFieldsValid.push("card_number");
+            }
+          }
+        });
+
+        this.stripeCardExpirationDate.on("change", (event) => {
+          console.log("card expiration date event", event);
+          if (!event.complete) {
+            const stripeError = this.messageErrorStripe.find(
+              (error) => error.code == "card_expiration_date"
+            );
+            if (!stripeError) {
+              this.messageErrorStripe.push({
+                code: "card_expiration_date",
+                message: "La fecha de expiración es inválida",
+              });
+            }
+
+            this.stripeFieldsValid = this.stripeFieldsValid.filter(
+              (field) => field != "card_expiration_date"
+            );
+          } else {
+            this.messageErrorStripe = this.messageErrorStripe.filter(
+              (error) => error.code != "card_expiration_date"
+            );
+            const inValidList = this.stripeFieldsValid.includes(
+              "card_expiration_date"
+            );
+            if (!inValidList) {
+              this.stripeFieldsValid.push("card_expiration_date");
+            }
+          }
+        });
+
+        this.stripeCardCvcCode.on("change", (event) => {
+          console.log("card cvc code event", event);
+          if (!event.complete) {
+            const stripeError = this.messageErrorStripe.find(
+              (error) => error.code == "card_cvc_code"
+            );
+            if (!stripeError) {
+              this.messageErrorStripe.push({
+                code: "card_cvc_code",
+                message: "El código de seguridad es inválido",
+              });
+            }
+
+            this.stripeFieldsValid = this.stripeFieldsValid.filter(
+              (field) => field != "card_cvc_code"
+            );
+          } else {
+            this.messageErrorStripe = this.messageErrorStripe.filter(
+              (error) => error.code != "card_cvc_code"
+            );
+            const inValidList =
+              this.stripeFieldsValid.includes("card_cvc_code");
+            if (!inValidList) {
+              this.stripeFieldsValid.push("card_cvc_code");
+            }
+          }
+        });
+
+        this.stripeCardPostalCode.on("change", (event) => {
+          console.log("card postal code event", event);
+          if (!event.complete) {
+            const stripeError = this.messageErrorStripe.find(
+              (error) => error.code == "card_postal_code"
+            );
+            if (!stripeError) {
+              this.messageErrorStripe.push({
+                code: "card_postal_code",
+                message: "El código postal es inválido",
+              });
+            }
+
+            this.stripeFieldsValid = this.stripeFieldsValid.filter(
+              (field) => field != "card_postal_code"
+            );
+          } else {
+            this.messageErrorStripe = this.messageErrorStripe.filter(
+              (error) => error.code != "card_postal_code"
+            );
+            const inValidList =
+              this.stripeFieldsValid.includes("card_postal_code");
+            if (!inValidList) {
+              this.stripeFieldsValid.push("card_postal_code");
             }
           }
         });
       }, 1000);
     },
     async getTokenCard() {
+      debugger
       this.gettingToken = true;
       const { cardName } = this.$props.flightReservation.paymentInfo;
 
-      try {
-        const stripeResponse = await this.stripe.createSource(
-          this.cardElement,
-          {
-            type: "card",
-            owner: {
-              name: cardName,
-            },
-            usage: "single_use",
-          }
-        );
+      console.log("elements", this.stripeElements);
 
+      try {
+        const request = {
+          name: cardName,
+        }
+        console.log('request >> ', request)
+        const stripeResponse = await this.stripe.createToken(this.stripeCardNumber, request);
+        console.log('stripe response >> ', stripeResponse)
         if (stripeResponse.error) {
           this.stripeError = true;
-          this.messageErrorStripe = stripeResponse.error.message;
-          return null;
+          this.messageErrorStripe = this.messageErrorStripe.push({
+            code: "card_invalid",
+            message: stripeResponse.error.message,
+          });
+          this.gettingToken = false;
+          setTimeout(() => {
+            this.messageErrorStripe = this.messageErrorStripe.filter(
+              (error) => error.code != "card_invalid"
+            );
+          }, 3000);
+          return false;
         }
 
-        const { source } = stripeResponse;
-        const { id, card } = source;
-        this.$props.flightReservation.paymentInfo.cardToken = id;
+        const { token } = stripeResponse;
+        const { card } = token;
+        this.$props.flightReservation.paymentInfo.cardToken = token.id;
+
+        console.log('this.$props.flightReservation.paymentInfo.cardToken >> ', this.$props.flightReservation.paymentInfo.cardToken)
+
         // complete with '*' the card number
         this.$props.flightReservation.paymentInfo.cardNumber = `************${card.last4}`;
+        console.log('this.$props.flightReservation.paymentInfo.cardNumber >> ', this.$props.flightReservation.paymentInfo.cardNumber)
 
         // get token data
-        const cardToken = id;
+        const cardToken = token.id;
         this.gettingToken = false;
         return cardToken;
       } catch (error) {
+        console.log(error);
         this.stripeError = true;
-        this.messageErrorStripe =
-          "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
+        this.messageErrorStripe.push({
+          code: "card_invalid",
+          message:
+            "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.",
+        });
+        setTimeout(() => {
+          this.messageErrorStripe = this.messageErrorStripe.filter(
+            (error) => error.code != "card_invalid"
+          );
+        }, 3000);
         this.gettingToken = false;
-        return null;
+        return false;
       }
     },
     async tryAgainPayment() {
@@ -906,8 +1123,16 @@ export default {
       const cardToken = await this.getTokenCard();
       if (!cardToken) {
         this.stripeError = true;
-        this.messageErrorStripe =
-          "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.";
+        this.messageErrorStripe.push({
+          code: "card_invalid",
+          message:
+            "Ha ocurrido un error al intentar procesar el pago, por favor verifique los datos e intente nuevamente.",
+        });
+        setTimeout(() => {
+          this.messageErrorStripe = this.messageErrorStripe.filter(
+            (error) => error.code != "card_invalid"
+          );
+        }, 3000);
         return;
       }
       this.$emit("proccessPayment");
@@ -947,7 +1172,9 @@ export default {
             );
             if (inputIntTel && inputIntTelPassenger) {
               // set country code
-              inputIntTel.iti.setCountry(inputIntTelPassenger.iti.getSelectedCountryData().iso2);
+              inputIntTel.iti.setCountry(
+                inputIntTelPassenger.iti.getSelectedCountryData().iso2
+              );
             }
           });
         }, 200);
