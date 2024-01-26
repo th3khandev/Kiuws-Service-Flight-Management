@@ -504,14 +504,19 @@ class Route extends WP_REST_Controller
             'email' => $params['card_email'],
             'name' => $params['card_name'],
         ]);
+        $customerSource = $stripe->customers->createSource(
+            $customer->id,
+            ['source' => $params['card_token']]
+        );
 
         $paymentData = [
             'amount'        => (int) ($params['amount'] * 100),
             'currency'      => strtolower($params['currency_code']),
             'description'   => 'Pago de reservacion de vuelo ID: ' . $params['flight_booking_id'],
             'customer'      => $customer->id,
-            'source'        => $params['card_token'],
-        ];
+            // 'source'        => $params['card_token'],
+            'source'        => $customerSource->id,
+        ];        
 
         try {
             $stripe->charges->create($paymentData);
@@ -521,7 +526,7 @@ class Route extends WP_REST_Controller
         } catch (\Stripe\Exception\RateLimitException $e) {
             wp_send_json(['success' => false, 'message' => 'Error de límite de tasa']);
         } catch (\Stripe\Exception\InvalidRequestException $e) {
-            wp_send_json(['success' => false, 'message' => 'Error de solicitud inválida']);
+            wp_send_json(['success' => false, 'message' => $e->getError()->message]);
         } catch (\Stripe\Exception\AuthenticationException $e) {
             wp_send_json(['success' => false, 'message' => 'Error de autenticación']);
         } catch (\Stripe\Exception\ApiConnectionException $e) {
