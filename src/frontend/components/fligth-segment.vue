@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="flight-segment-airline-name">
-        {{ segment.marketingAirlineName }}
+        {{ segment.marketingAirlineName }} - Vuelo Nº {{ segment.flightNumber }}
       </div>
     </div>
     <div class="segment-detail">
