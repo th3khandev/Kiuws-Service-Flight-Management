@@ -24,3 +24,51 @@
         </AirTravelerAvail>
     </TravelerInfoSummary>
 </KIU_AirPriceRQ>
+
+<?xml version="1.0"?>
+<KIU_AirPriceRQ EchoToken="1" TimeStamp="2013-01-24T19:20:43+00:00" Target="Production"
+    Version="3.0" SequenceNmbr="1" PrimaryLangID="en-us">
+    <POS>
+        <Source AgentSine="MIAT8040F" TerminalID="MIAT80400P" ISOCountry="US" ISOCurrency="USD">
+            <RequestorID Type="5" />
+            <BookingChannel Type="1" />
+        </Source>
+    </POS>
+    <AirItinerary>
+        <OriginDestinationOptions>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-02-08 10:00:00"
+                    ArrivalDateTime="2024-02-08 11:20:00" FlightNumber="1700" ResBookDesigCode="S">
+                    <DepartureAirport LocationCode="CCS" />
+                    <ArrivalAirport LocationCode="PUJ" />
+                    <MarketingAirline Code="5R" />
+                </FlightSegment>
+                <FlightSegment DepartureDateTime="2024-02-08 14:00:00"
+                    ArrivalDateTime="2024-02-08 15:30:00" FlightNumber="306" ResBookDesigCode="S">
+                    <DepartureAirport LocationCode="PUJ" />
+                    <ArrivalAirport LocationCode="MIA" />
+                    <MarketingAirline Code="1F" />
+                </FlightSegment>
+            </OriginDestinationOption>
+            <OriginDestinationOption>
+                <FlightSegment DepartureDateTime="2024-02-15 08:30:00"
+                    ArrivalDateTime="2024-02-15 12:00:00" FlightNumber="307" ResBookDesigCode="U">
+                    <DepartureAirport LocationCode="MIA" />
+                    <ArrivalAirport LocationCode="PUJ" />
+                    <MarketingAirline Code="1F" />
+                </FlightSegment>
+                <FlightSegment DepartureDateTime="2024-02-15 14:20:00"
+                    ArrivalDateTime="2024-02-15 15:40:00" FlightNumber="1701" ResBookDesigCode="M">
+                    <DepartureAirport LocationCode="PUJ" />
+                    <ArrivalAirport LocationCode="CCS" />
+                    <MarketingAirline Code="5R" />
+                </FlightSegment>
+            </OriginDestinationOption>
+        </OriginDestinationOptions>
+    </AirItinerary>
+    <TravelerInfoSummary>
+        <AirTravelerAvail>
+            <PassengerTypeQuantity Code="ADT" Quantity="1" />
+        </AirTravelerAvail>
+    </TravelerInfoSummary>
+</KIU_AirPriceRQ>
