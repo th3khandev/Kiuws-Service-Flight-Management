@@ -204,8 +204,8 @@ class Route extends WP_REST_Controller
             
             $departure_flight_segments_validate_by_booking_class = [];
             foreach ($listResBookDesig as $value) {
-                // if airline code is 1F validate that booking class is 'T', 'P' or 'L'
-                if ($origin == "MIA" && $airlineCode == '1F' && !in_array(trim($value), ['T', 'P', 'L'])) {
+                // if airline code is 1F validate that booking class is 'Q', 'M' or 'V'
+                if ($origin == "MIA" && $airlineCode == '1F' && !in_array(trim($value), ['Q', 'M', 'V'])) {
                     continue;
                 }
 
@@ -272,8 +272,8 @@ class Route extends WP_REST_Controller
             $listResBookDesig = explode(',', $resBookDesig);
             $return_flight_segments_validate_by_booking_class = [];
             foreach ($listResBookDesig as $value) {
-                // if airline code is 1F validate that booking class is 'T', 'P' or 'L'
-                if ($destination == "MIA" && $airlineCode == '1F' && !in_array(trim($value), ['T', 'P', 'L'])) {
+                // if airline code is 1F validate that booking class is 'Q', 'M' or 'V'
+                if ($destination == "MIA" && $airlineCode == '1F' && !in_array(trim($value), ['Q', 'M', 'V'])) {
                     continue;
                 }
 
