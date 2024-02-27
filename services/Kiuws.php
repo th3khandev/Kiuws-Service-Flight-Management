@@ -617,9 +617,9 @@ class Kiuws {
         }
 
         // get fee from base fare
-        $baseFare = (float) $price['baseFare'];
+        $totalFare = (float) $price['totalFare'];
         // $baseFare = $baseFare + $this->feeFixed;
-        $price['fee'] = $baseFare * ($this->fee / 100);
+        $price['fee'] = $totalFare * ($this->fee / 100);
         $price['fee'] += $this->feeFixed;
         return $price;
     }
