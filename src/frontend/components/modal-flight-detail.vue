@@ -178,8 +178,7 @@
                   >
                     <span aria-hidden="true">&times;</span>
                   </button>
-                  <strong>-</strong> No se pudo obtener el precio de uno o
-                  varios segmentos de vuelo, por favor intente nuevamente.
+                  <strong>-</strong> Parece que hubo un problema al encontrar los precios de algunos vuelos. Por favor, inténtalo de nuevo, quizás cambiando la fecha. Si sigue sin funcionar, sería mejor que te comuniques a nuestras líneas de atención: <a href="tel:3054036252" target="_blank">3054036252</a>
                 </div>
               </div>
               <div class="col-12 mt-1 mb-3" v-if="!loadingPrices">

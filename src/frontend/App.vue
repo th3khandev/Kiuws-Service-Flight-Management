@@ -174,7 +174,7 @@ export default {
             const { flights, returnFlights } = data;
             if (flights.length == 0) {
               this.$refs.flightSearchForm.setError(
-                "No se encontraron vuelos disponibles, para los datos ingresados"
+                "Parece que no hay vuelos disponibles con los datos que ingresaste. Te sugerimos revisar la información y volver a intentarlo. Y si necesitas ayuda para encontrar el vuelo perfecto, no dudes en contactarnos para recibir asistencia."
               );
             } else {
               this.flights = flights;
